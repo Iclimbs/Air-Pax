@@ -1,6 +1,7 @@
 require('dotenv').config()
 let rand = require("random-key");
 const bcrypt = require("bcrypt")
+const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator')
 const express = require("express")
 const { UserModel } = require("../model/user.model")
@@ -8,9 +9,10 @@ const userRouter = express.Router()
 
 userRouter.post("/login", async (req, res) => {
     try {
-        const { email } = req.body
-        const userExists = await UserModel.find({ email })
+        const { phoneno,password } = req.body
+        const userExists = await UserModel.find({ phoneno })
         if (userExists.length === 0) {
+            let token = jwt.sign({ foo: 'bar' }, "Authentication", { algorithm: 'RS256' });
             res.json({ status: "error", message: "No User Exists Please SignUp First" })
         } else {
 
