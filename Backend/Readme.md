@@ -29,4 +29,9 @@ body :- {
 
 # Create Password 
 
-url :- 
+url :- http://localhost:4500/api/v1/user/password
+
+Body :- {
+"password":"uttam@5599",
+"cnfpassword":"uttam@5599"
+}

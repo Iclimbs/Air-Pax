@@ -9,13 +9,19 @@ const userRouter = express.Router()
 
 userRouter.post("/login", async (req, res) => {
     try {
-        const { phoneno,password } = req.body
+        const { phoneno, password } = req.body
         const userExists = await UserModel.find({ phoneno })
         if (userExists.length === 0) {
-            let token = jwt.sign({ foo: 'bar' }, "Authentication", { algorithm: 'RS256' });
-            res.json({ status: "error", message: "No User Exists Please SignUp First" })
+            return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
         } else {
-
+            bcrypt.compare(password, userExists[0].password, (err, result) => {
+                if (result) {
+                    let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+                    res.json({ status: "success", message: "Login Successful", token: token })
+                } else {
+                    res.json({ status: "error", message: "Wrong Password Please Try Again" })
+                }
+            });
         }
     } catch (error) {
         res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
