@@ -8,18 +8,18 @@ const tripschema = mongoose.Schema({
         type: String,
         required: true,
     },
+    journeydate: {
+        type: String,
+        required: true
+    },
     busid: {
         type: mongoose.Types.ObjectId,
         required: true
     },
-    journeydate: {
-        type: String
-    },
     starttime: {
         type: Date,
         required: true
-    },
-    endtime: {
+    }, endtime: {
         type: Date,
         required: true
     },
@@ -28,10 +28,10 @@ const tripschema = mongoose.Schema({
         required: true
     },
     distance: {
-        true: String,
+        type: String,
         required: true
     },
     CreatedAt: { type: Date, default: Date.now },
 });
-const TripModel = mongoose.model("Trips", tripschema);
+const TripModel = mongoose.model("Trips", tripschema)
 module.exports = { TripModel };
