@@ -58,3 +58,50 @@ Seat Details :- {
 # Adding Bus Details :-
 
 http://localhost:4500/api/v1/bus/add
+
+Payload Sample :- 
+
+{
+"busname":"Testing Bus",
+"busno":"TEST123",
+"registrationno":"TESTING12345",
+"facilities":["Water","wifi","Special seat"],
+"seat":[
+  {
+    "seatno":"SU1",
+    "seatprice":4500,
+    "booked":true,
+    "userid":"UTTAM12345"
+}, {
+    "seatno":"SU2",
+    "seatprice":4500,
+    "booked":true,
+    "userid":"UTTAM123"
+}, {
+    "seatno":"SU3",
+    "seatprice":4500,
+    "booked":true,
+    "userid":"UTTAM1234561"
+}, {
+    "seatno":"SU4",
+    "seatprice":4500,
+    "booked":true,
+    "userid":"UTTAM1234523"
+}, {
+    "seatno":"SU5",
+    "seatprice":4500,
+    "booked":true,
+    "userid":"UTTAM12345121"
+}, {
+    "seatno":"SU6",
+    "seatprice":4500,
+    "booked":true,
+    "userid":"UTTAM123452132"
+}, {
+    "seatno":"SU7",
+    "seatprice":4500,
+    "booked":true,
+    "userid":"UTTAM12345453"
+}
+]
+}

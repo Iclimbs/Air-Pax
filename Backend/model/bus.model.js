@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 const busschema = mongoose.Schema({
-    name: {
+    busname: {
         type: String,
         required: true,
     },
-    no: {
+    busno: {
         type: String,
         required: true,
     },
@@ -13,7 +13,7 @@ const busschema = mongoose.Schema({
         required: true
     },
     facilities: {
-        type: String
+        type: Array
     },
     seat: {
         type: Object,
