@@ -35,3 +35,26 @@ Body :- {
 "password":"uttam@5599",
 "cnfpassword":"uttam@5599"
 }
+
+
+
+# Bus & Seat Design
+BusNo :- String
+BusName :- String
+BusRegistrationNo :- String
+Facilities List :- Array
+Seat Types :- ["Side Upper", "Side Lower", "Side Middle"]
+Total Seat Capacity :- 50
+Seats Available :- 25
+Seat Details :- {
+  type:-"Side Upper",
+  name:"SU1",
+  price:500,
+  booked:Boolean(T/F),
+  userid:userid
+}
+
+
+# Adding Bus Details :-
+
+http://localhost:4500/api/v1/bus/add
