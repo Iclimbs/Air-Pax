@@ -45,6 +45,9 @@ userRouter.post("/register", async (req, res) => {
                 password: null
             })
             await user.save()
+            fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user.phoneno}/${user.otp}/Airpax`)
+                .then((response) => response.json())
+                .then((json) => console.log(json));
             res.json({ status: "success", message: "User Registration Successful", redirect: "/login", token: user.signuptoken })
         }
     } catch (error) {
