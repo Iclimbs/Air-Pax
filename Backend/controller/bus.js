@@ -5,6 +5,7 @@ const busRouter = express.Router()
 
 busRouter.post("/add", async (req, res) => {
     const { busname, busno, registrationno, facilities, seat } = req.body;
+    console.log(req.body);
     try {
         const newbus = new BusModel({ busname, busno, registrationno, facilities, seat })
         await newbus.save()
