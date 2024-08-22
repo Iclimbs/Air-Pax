@@ -15,6 +15,10 @@ const busschema = mongoose.Schema({
     facilities: {
         type: Array
     },
+    active: {
+        type: Boolean,
+        default: false
+    },
     seat: {
         type: Object,
         required: true

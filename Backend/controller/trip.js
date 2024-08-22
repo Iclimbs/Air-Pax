@@ -1,4 +1,3 @@
-require('dotenv').config()
 const express = require("express")
 const { TripModel } = require("../model/trip.model")
 const tripRouter = express.Router()

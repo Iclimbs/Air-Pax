@@ -6,6 +6,6 @@ const { userRouter } = require("../controller/user");
 router
     .use("/user", userRouter)
     .use("/bus",busRouter)
-    .use("trip",tripRouter)
+    .use("/trip",tripRouter)
 
 module.exports = router;

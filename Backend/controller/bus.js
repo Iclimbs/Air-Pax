@@ -15,4 +15,16 @@ busRouter.post("/add", async (req, res) => {
     }
 })
 
+busRouter.get("/listall", async (req, res) => {
+    try {
+        const buslist = await BusModel.find({active:false})
+       console.log(buslist);
+        res.json({ status: "success", message: "Working on bus details system" })
+    } catch (error) {
+        console.log(error.message);
+        
+        res.json({ status: "error", message: "Adding Bus Process Failed" })
+
+    }
+})
 module.exports = { busRouter }

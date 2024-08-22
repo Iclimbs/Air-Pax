@@ -105,3 +105,13 @@ Payload Sample :-
 }
 ]
 }
+
+
+<!-- New -->
+
+{
+  "status": "success",
+  "message": "User Registration Successful. Please Check Your Phone For OTP",
+  "redirect": "/login",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUmFodWwgVGl3YXJpIiwiZW1haWwiOiJ1dHRhbWtyc2hhd0BpY2xpbWJzLmNvbSIsInBob25lbm8iOjc0Mjg5MTI3MTcsImV4cCI6MTcyNDMxMzMyMSwiaWF0IjoxNzI0MzA5NzIxfQ.RZgDWtQCvY827tJ8nqeEzasdmcm4hDnf7WJu1n2W-eM"
+}
