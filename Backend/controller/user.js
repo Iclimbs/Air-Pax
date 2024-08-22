@@ -24,7 +24,7 @@ userRouter.post("/login", async (req, res) => {
             });
         }
     } catch (error) {
-        res.json({ status: "error", message: error.message })
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
     }
 })
 
@@ -62,8 +62,6 @@ userRouter.post("/register", async (req, res) => {
 userRouter.post("/otp/verification", async (req, res) => {
     try {
         const { otp } = req.body
-        const {token} =  req.headers
-        const decoded = jwt.verify(token, 'Registration');
         const user = await UserModel.find({ signuptoken: req.headers.token, otp: otp })
         user[0].verified.phone = true;
         user[0].otp=null;
