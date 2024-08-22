@@ -1,10 +1,10 @@
 require('dotenv').config()
-let rand = require("random-key");
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator')
 const express = require("express")
-const { UserModel } = require("../model/user.model")
+const { UserModel } = require("../model/user.model");
+const { RegistrationAuthentication } = require('../middleware/Registration');
 const userRouter = express.Router()
 
 userRouter.post("/login", async (req, res) => {
@@ -59,7 +59,7 @@ userRouter.post("/register", async (req, res) => {
     }
 })
 
-userRouter.post("/otp/verification", async (req, res) => {
+userRouter.post("/otp/verification",RegistrationAuthentication, async (req, res) => {
     try {
         const { otp } = req.body
         const user = await UserModel.find({ signuptoken: req.headers.token, otp: otp })

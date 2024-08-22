@@ -1,7 +1,7 @@
-import React,{useState} from 'react'
+import React, { useState } from 'react'
 
 const Trip = () => {
-    const [buslist,setBuslist] = useState([])
+    const [buslist, setBuslist] = useState([])
     const handleSubmit = (e) => {
         let frm = e.target.form;
         if (!frm) return console.log("misconfigured");
@@ -48,8 +48,17 @@ const Trip = () => {
                 onSubmit={(e) => {
                     e.preventDefault();
                 }}>
-                <input type="text" name="from" placeholder='Please Enter Start Location of Bus' required />
-                <input type="text" name="to" placeholder='Please Enter End Location of Bus' required />
+                <frfs-text label="From"
+                    name="from"
+                    placeholder="Please Enter Start Location of Bus"
+                    required
+                    editable />
+                <frfs-text label="To"
+                    name="to"
+                    placeholder="Please Enter End Location of Bus"
+                    required
+                    editable />
+                    <label htmlFor="">Journey Date</label>
                 <input type="date" name="journeydate" placeholder="Please Enter Journey Date" min={new Date().toISOString().split('T')[0]} required />
                 <input type="time" name="starttime" placeholder="Please Enter Journey Start Time" required />
                 <input type="time" name="endtime" placeholder="Please Enter Journey End Time" required />

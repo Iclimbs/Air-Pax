@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 const tripschema = mongoose.Schema({
+    name:{
+        type:String,
+        required:true
+    },
     from: {
         type: String,
         required: true,
@@ -23,13 +27,17 @@ const tripschema = mongoose.Schema({
         type: Date,
         required: true
     },
-    journeytotaltime: {
+    totaltime: {
         type: Date,
         required: true
     },
     distance: {
         type: String,
         required: true
+    },
+    price:{
+        type:Number,
+        required:true
     },
     CreatedAt: { type: Date, default: Date.now },
 });

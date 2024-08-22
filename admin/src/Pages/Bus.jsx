@@ -1,9 +1,7 @@
-import React,{useState} from 'react'
+import React, { useState } from 'react'
 import Papa from "papaparse"
 const Bus = () => {
   const [seat, setSeat] = useState("")
-
-  console.log("Seat Details",seat)
   
   const handleSubmit = (e) => {
     let frm = e.target.form;
@@ -41,7 +39,7 @@ const Bus = () => {
         console.log(err);
       });
   }
-  
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0]
     Papa.parse(file, {
@@ -63,10 +61,26 @@ const Bus = () => {
           onSubmit={(e) => {
             e.preventDefault();
           }}>
-          <input type="text" name="busname" placeholder='Enter Bus Name' required={true} />
-          <input type="text" name="busno" placeholder='Enter Bus Number' required={true} />
-          <input type="text" name="registrationno" placeholder='Enter Bus Registration Number' required={true} />
-          <input type="text" name="facilities" placeholder='Enter Bus Facilities' required={true} />
+          <frfs-text label="Enter Bus Name"
+            name="busname"
+            placeholder="Please Enter Bus  Name"
+            required
+            editable />
+          <frfs-text label="Enter Bus Number"
+            name="busno"
+            placeholder="Please Enter Bus Number"
+            required
+            editable />
+          <frfs-text label="Enter Bus Registration Number"
+            name="registrationno"
+            placeholder="Please Enter Bus Registration Number"
+            required
+            editable />
+          <frfs-text label="Enter Bus Facilities"
+            name="facilities"
+            placeholder="Please Enter List of All the Facilities"
+            required
+            editable />
           <input type="file" name="seat" placeholder='Enter Bus Seat Details' onChange={handleFileUpload} required={true} />
           <button onClick={handleSubmit}>Submit Details</button>
         </form>

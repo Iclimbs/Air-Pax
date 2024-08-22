@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const busschema = mongoose.Schema({
-    busname: {
+const vehicleschema = mongoose.Schema({
+    name: {
         type: String,
         required: true,
     },
@@ -25,5 +25,5 @@ const busschema = mongoose.Schema({
     },
     CreatedAt: { type: Date, default: Date.now },
 });
-const BusModel = mongoose.model("Bus", busschema);
+const BusModel = mongoose.model("Bus", vehicleschema);
 module.exports = { BusModel };
