@@ -25,5 +25,5 @@ const vehicleschema = mongoose.Schema({
     },
     CreatedAt: { type: Date, default: Date.now },
 });
-const BusModel = mongoose.model("Bus", vehicleschema);
-module.exports = { BusModel };
+const VehicleModel = mongoose.model("Bus", vehicleschema);
+module.exports = { VehicleModel };

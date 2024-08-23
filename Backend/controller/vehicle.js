@@ -1,12 +1,12 @@
 require('dotenv').config()
 const express = require("express")
-const { BusModel } = require("../model/bus.model")
-const busRouter = express.Router()
+const { VehicleModel } = require("../model/vehicle.model")
+const vehicleRouter = express.Router()
 
-busRouter.post("/add", async (req, res) => {
+vehicleRouter.post("/add", async (req, res) => {
     const { busname, busno, registrationno, facilities, seat } = req.body;
     try {
-        const newbus = new BusModel({ busname, busno, registrationno, facilities, seat })
+        const newbus = new VehicleModel({ busname, busno, registrationno, facilities, seat })
         await newbus.save()
         res.json({ status: "success", message: "Working on bus details system" })
     } catch (error) {
@@ -15,9 +15,9 @@ busRouter.post("/add", async (req, res) => {
     }
 })
 
-busRouter.get("/listall", async (req, res) => {
+vehicleRouter.get("/listall", async (req, res) => {
     try {
-        const buslist = await BusModel.find({active:false})
+        const buslist = await VehicleModel.find({active:false})
        console.log(buslist);
         res.json({ status: "success", message: "Working on bus details system" })
     } catch (error) {
@@ -27,4 +27,4 @@ busRouter.get("/listall", async (req, res) => {
 
     }
 })
-module.exports = { busRouter }
+module.exports = { vehicleRouter }
