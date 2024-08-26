@@ -1,30 +1,75 @@
 import {
   Card,
-  CardHeader,
   CardBody,
+  CardHeader,
   Typography,
-  Avatar,
-  Chip,
-  Tooltip,
-  Progress,
+  Button,
+  Chip
 } from "@material-tailwind/react";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { authorsTableData, projectsTableData } from "@/data";
+import React from "react";
+import { vehicleTableData } from "@/data";
+import ConfirmModal from "@/widgets/modals/confirm-modal";
+import { VehicleModal } from "@/widgets/modals/vehicle-modal";
 
 export function Vehicles() {
+  const [showmodal, setShowModal] = React.useState(false)
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false)
+  const [data, setData] = React.useState([])
+  const [selectedData, setSelectedData] = React.useState([])
+
+  React.useEffect(() => {
+    fetch('http://localhost:4500/api/v1/vehicle/listall')
+      .then((response) => response.json())
+      .then(data => {
+        setData(data.data)
+      })
+      .catch(error => {
+        console.error(error);
+      })
+  }, [])
+
+  const handleModal = () => {
+    setSelectedData([])
+    setShowModal(!showmodal)
+  }
+
+  const handleSelect = (item) => {
+    setShowModal(!showmodal)
+    setSelectedData(item)
+
+  }
+
+  const handleConfirmModal = (item) => {
+    setSelectedData(item)
+    setShowConfirmModal(!showConfirmModal)
+  }
+
+  const toggleConfirmModal = () => {
+    setSelectedData([])
+    setShowConfirmModal(!showConfirmModal)
+  }
+
   return (
-    <div className="mt-12 mb-8 flex flex-col gap-12">
+    <>
+      <ConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/counter/disable/" />
+      <VehicleModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
+      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
+        <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
+      </div>
       <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between">
           <Typography variant="h6" color="white">
-            Authors Table
+            Outlets
           </Typography>
+          <Button variant="filled" color="white" className="text-sm" onClick={handleModal}>
+            Add New
+          </Button>
         </CardHeader>
         <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["author", "function", "status", "employed", ""].map((el) => (
+                {vehicleTableData.map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -40,171 +85,85 @@ export function Vehicles() {
               </tr>
             </thead>
             <tbody>
-              {authorsTableData.map(
-                ({ img, name, email, job, online, date }, key) => {
-                  const className = `py-3 px-5 ${
-                    key === authorsTableData.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
-                  }`;
+              {data && data.map(
+                (el, key) => {
+                  const className = `py-3 px-5 ${key === data.length - 1
+                    ? ""
+                    : "border-b border-blue-gray-50"
+                    }`;
 
                   return (
-                    <tr key={name}>
+                    <tr key={el.name}>
                       <td className={className}>
                         <div className="flex items-center gap-4">
-                          <Avatar src={img} alt={name} size="sm" variant="rounded" />
                           <div>
                             <Typography
                               variant="small"
                               color="blue-gray"
                               className="font-semibold"
                             >
-                              {name}
-                            </Typography>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {email}
+                              <a href={location} target="_blank" rel="noopener noreferrer">
+                                {el.name}
+                              </a>
                             </Typography>
                           </div>
                         </div>
                       </td>
                       <td className={className}>
                         <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {job[0]}
+                          {el.busno}
                         </Typography>
-                        <Typography className="text-xs font-normal text-blue-gray-500">
-                          {job[1]}
+                      </td>
+
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {el.registrationno}
                         </Typography>
                       </td>
                       <td className={className}>
                         <Chip
                           variant="gradient"
-                          color={online ? "green" : "blue-gray"}
-                          value={online ? "online" : "offline"}
+                          color={el.active ? "green" : "blue-gray"}
+                          value={el.active ? "online" : "offline"}
                           className="py-0.5 px-2 text-[11px] font-medium w-fit"
                         />
                       </td>
                       <td className={className}>
-                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {date}
-                        </Typography>
+                        {
+                          el?.facilities?.map((index, key) => (
+                            <Typography key={key} className="text-xs font-semibold text-blue-gray-600">
+                              {index}
+                            </Typography>
+                          ))
+                        }
                       </td>
                       <td className={className}>
-                        <Typography
-                          as="a"
-                          href="#"
+                        {
+                          el.assigned ? el.assigned : "None"
+                        }
+                      </td>
+                      <td className={`${className} flex w-max gap-4`}>
+                        <Button
+                          variant="text"
+                          color="blue"
+                          ripple={true}
                           className="text-xs font-semibold text-blue-gray-600"
+                          onClick={() => {
+                            handleSelect(el)
+                          }}
                         >
                           Edit
-                        </Typography>
-                      </td>
-                    </tr>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
-        </CardBody>
-      </Card>
-      <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
-          <Typography variant="h6" color="white">
-            Projects Table
-          </Typography>
-        </CardHeader>
-        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-          <table className="w-full min-w-[640px] table-auto">
-            <thead>
-              <tr>
-                {["companies", "members", "budget", "completion", ""].map(
-                  (el) => (
-                    <th
-                      key={el}
-                      className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                    >
-                      <Typography
-                        variant="small"
-                        className="text-[11px] font-bold uppercase text-blue-gray-400"
-                      >
-                        {el}
-                      </Typography>
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {projectsTableData.map(
-                ({ img, name, members, budget, completion }, key) => {
-                  const className = `py-3 px-5 ${
-                    key === projectsTableData.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
-                  }`;
-
-                  return (
-                    <tr key={name}>
-                      <td className={className}>
-                        <div className="flex items-center gap-4">
-                          <Avatar src={img} alt={name} size="sm" />
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-bold"
-                          >
-                            {name}
-                          </Typography>
-                        </div>
-                      </td>
-                      <td className={className}>
-                        {members.map(({ img, name }, key) => (
-                          <Tooltip key={name} content={name}>
-                            <Avatar
-                              src={img}
-                              alt={name}
-                              size="xs"
-                              variant="circular"
-                              className={`cursor-pointer border-2 border-white ${
-                                key === 0 ? "" : "-ml-2.5"
-                              }`}
-                            />
-                          </Tooltip>
-                        ))}
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          variant="small"
-                          className="text-xs font-medium text-blue-gray-600"
-                        >
-                          {budget}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <div className="w-10/12">
-                          <Typography
-                            variant="small"
-                            className="mb-1 block text-xs font-medium text-blue-gray-600"
-                          >
-                            {completion}%
-                          </Typography>
-                          <Progress
-                            value={completion}
-                            variant="gradient"
-                            color={completion === 100 ? "green" : "gray"}
-                            className="h-1"
-                          />
-                        </div>
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          as="a"
-                          href="#"
+                        </Button>
+                        <Button
+                          variant="text"
+                          color="red"
+                          ripple={true}
                           className="text-xs font-semibold text-blue-gray-600"
+                          onClick={() => { handleConfirmModal(el) }}
                         >
-                          <EllipsisVerticalIcon
-                            strokeWidth={2}
-                            className="h-5 w-5 text-inherit"
-                          />
-                        </Typography>
+                          Disable
+                        </Button>
+
                       </td>
                     </tr>
                   );
@@ -214,7 +173,7 @@ export function Vehicles() {
           </table>
         </CardBody>
       </Card>
-    </div>
+    </>
   );
 }
 
