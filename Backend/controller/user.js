@@ -80,7 +80,7 @@ userRouter.post("/otp/verification",RegistrationAuthentication, async (req, res)
 
 userRouter.post("/password/create", async (req, res) => {
     try {
-        const { password, cnfpassword } = req.body
+        const { password, cnfpassword } = req.body        
         if (password === cnfpassword) {
             const user = await UserModel.find({ signuptoken: req.headers.token })
             if (user.length >= 1 && user[0].verified.phone == true) {

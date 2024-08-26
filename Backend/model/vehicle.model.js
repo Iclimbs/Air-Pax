@@ -13,11 +13,16 @@ const vehicleschema = mongoose.Schema({
         required: true
     },
     facilities: {
-        type: Array
+        type: Array,
+        required: true
+    },
+    assigned: {
+        type: mongoose.Types.ObjectId,
+        default: null
     },
     active: {
         type: Boolean,
-        default: false
+        default: true
     },
     seat: {
         type: Object,
@@ -25,5 +30,5 @@ const vehicleschema = mongoose.Schema({
     },
     CreatedAt: { type: Date, default: Date.now },
 });
-const VehicleModel = mongoose.model("Bus", vehicleschema);
+const VehicleModel = mongoose.model("Vehicles", vehicleschema);
 module.exports = { VehicleModel };

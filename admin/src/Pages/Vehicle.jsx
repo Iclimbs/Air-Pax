@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Papa from "papaparse"
-const Bus = () => {
+const Vehicle = () => {
   const [seat, setSeat] = useState("")
   
   const handleSubmit = (e) => {
@@ -44,7 +44,7 @@ const Bus = () => {
     const file = e.target.files[0]
     Papa.parse(file, {
       header: true,
-      skipEmptyLines: false,
+      skipEmptyLines: true,
       complete: (results) => {
         setSeat(results.data)
       }
@@ -54,15 +54,15 @@ const Bus = () => {
   return (
     <>
       <div>
-        <h1>Bus Adding Form </h1>
+        <h1>Vehicle Adding Form </h1>
         <form method={"post"}
-          action={"/api/v1/bus/add"}
+          action={"/api/v1/vehicle/add"}
           className="contact"
           onSubmit={(e) => {
             e.preventDefault();
           }}>
           <frfs-text label="Enter Bus Name"
-            name="busname"
+            name="name"
             placeholder="Please Enter Bus  Name"
             required
             editable />
@@ -81,7 +81,7 @@ const Bus = () => {
             placeholder="Please Enter List of All the Facilities"
             required
             editable />
-          <input type="file" name="seat" placeholder='Enter Bus Seat Details' onChange={handleFileUpload} required={true} />
+          <input type="file" name="seat" onChange={handleFileUpload} required={true} />
           <button onClick={handleSubmit}>Submit Details</button>
         </form>
       </div>
@@ -89,4 +89,4 @@ const Bus = () => {
   )
 }
 
-export default Bus
+export default Vehicle

@@ -29,6 +29,17 @@ const userschema = mongoose.Schema({
       default: false
     }
   },
+  type: {
+    admin: {
+      type: Boolean,
+      default: false
+    },
+    user: {
+      type: Boolean,
+      default: true
+
+    }
+  },
   CreatedAt: { type: Date, default: Date.now },
 });
 const UserModel = mongoose.model("Users", userschema);

@@ -3,9 +3,9 @@ const { TripModel } = require("../model/trip.model")
 const tripRouter = express.Router()
 
 tripRouter.post("/add", async (req, res) => {
-    const { from, to, busid, journeydate, starttime, endtime, journeytotaltime, distance } = req.body;
+    const { from, to, busid, journeystartdate,journeyenddate, starttime, endtime, journeytotaltime, distance } = req.body;
     try {
-        const newtrip = new TripModel({ from, to, busid, journeydate, starttime, endtime, journeytotaltime, distance })
+        const newtrip = new TripModel({ from, to, busid, journeystartdate,journeyenddate, starttime, endtime, journeytotaltime, distance })
         await newtrip.save()
         res.json({ status: "success", message: "Working on Trip details system" })
     } catch (error) {

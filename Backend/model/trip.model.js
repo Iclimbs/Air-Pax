@@ -12,7 +12,11 @@ const tripschema = mongoose.Schema({
         type: String,
         required: true,
     },
-    journeydate: {
+    journeystartdate: {
+        type: String,
+        required: true
+    },
+    journeyenddate: {
         type: String,
         required: true
     },
