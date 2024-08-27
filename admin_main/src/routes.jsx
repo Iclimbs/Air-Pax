@@ -6,7 +6,7 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
-import { Home, Notifications, Counter } from "@/pages/dashboard";
+import { Home, Notifications, Counter, Trip } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import Vehicles from "./pages/dashboard/vehicles";
 
@@ -35,6 +35,12 @@ export const routes = [
         name: "vehicles",
         path: "/vehicles",
         element: <Vehicles />,
+      },
+      {
+        icon: <TableCellsIcon {...icon} />,
+        name: "trip",
+        path: "/trip",
+        element: <Trip />,
       },
       {
         icon: <InformationCircleIcon {...icon} />,

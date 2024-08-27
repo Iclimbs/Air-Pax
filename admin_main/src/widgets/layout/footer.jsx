@@ -41,13 +41,13 @@ export function Footer({ brandName, brandLink, routes }) {
 }
 
 Footer.defaultProps = {
-  brandName: "Creative Tim",
-  brandLink: "https://www.creative-tim.com",
+  brandName: "iClimb Systems India Pvt Ltd",
+  brandLink: "https://iclimbs.com/",
   routes: [
-    { name: "Creative Tim", path: "https://www.creative-tim.com" },
-    { name: "About Us", path: "https://www.creative-tim.com/presentation" },
-    { name: "Blog", path: "https://www.creative-tim.com/blog" },
-    { name: "License", path: "https://www.creative-tim.com/license" },
+    { name: "iClimb Systems India Pvt Ltd", path: "https://iclimbs.com/" },
+    { name: "About Us", path: "https://iclimbs.com/about-us" },
+    { name: "Blog", path: "https://iclimbs.com/blogs" },
+    { name: "Services", path: "https://iclimbs.com/services" },
   ],
 };
 
