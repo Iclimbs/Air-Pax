@@ -7,7 +7,9 @@
     background: #fff;
     padding: 0 20px;
     box-sizing: border-box;
-    font-size: 14px
+    font-size: 14px;
+    font-weight: 400;
+    color: black;
 }
 
 .form-control:focus {
@@ -15,11 +17,14 @@
 }
 
 label {
-    font-size: 14px;
+    font-size: 16px;
     text-transform: capitalize;
+    font-weight: bolder;
     margin-bottom: 3px;
     padding-left: 0;
-    display: block
+    display: block;
+    color: black;
+
 }
 
 .form-group:has(.form-control[required])>label:after {
@@ -44,14 +49,17 @@ ul {
 ul li {
     font-size: 14px;
     background: #fff;
+    font-weight:400;
     border: 1px solid #ccc;
     padding: 5px 20px;
-    cursor: default
+    cursor: default;
+    color: black;
+
 }
 
 ul li[selected=true] {
     background: var(--secondary);
-    color: #fff
+    color: #fff;
 }
 
 ul.open {

@@ -115,3 +115,20 @@ Payload Sample :-
   "redirect": "/login",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUmFodWwgVGl3YXJpIiwiZW1haWwiOiJ1dHRhbWtyc2hhd0BpY2xpbWJzLmNvbSIsInBob25lbm8iOjc0Mjg5MTI3MTcsImV4cCI6MTcyNDMxMzMyMSwiaWF0IjoxNzI0MzA5NzIxfQ.RZgDWtQCvY827tJ8nqeEzasdmcm4hDnf7WJu1n2W-eM"
 }
+
+
+<!-- Adding New Trip Detail's -->
+url:- http://localhost:4500/api/v1/trip/add
+Patch
+Payload 
+{
+    "name": "Goa Trip",
+    "from": "66cc55686bb729b280b57fc1",
+    "to": "66cc5a73cea1600ee1e411ac",
+    "busid": "66cd60f477c9c9b4eb7c693f",
+    "journeystartdate": "2024-08-27",
+    "journeyenddate": "2024-08-29",
+    "starttime": "06:30",
+    "endtime": "00:00",
+    "price": "8000"
+}

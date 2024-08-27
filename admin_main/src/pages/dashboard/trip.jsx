@@ -9,10 +9,10 @@ import {
 import React from "react";
 import { vehicleTableData } from "@/data";
 import ConfirmModal from "@/widgets/modals/confirm-modal";
-import { VehicleModal } from "@/widgets/modals/vehicle-modal";
+import { TripModal } from "@/widgets/modals/trip-modal";
 
 export function Trip() {
-  const [showmodal, setShowModal] = React.useState(false)
+  const [showmodal, setShowModal] = React.useState(true)
   const [showConfirmModal, setShowConfirmModal] = React.useState(false)
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
@@ -52,7 +52,7 @@ export function Trip() {
   return (
     <>
       <ConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/vehicle/disable/" />
-      <VehicleModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
+      <TripModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
