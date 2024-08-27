@@ -51,7 +51,7 @@ export function Vehicles() {
 
   return (
     <>
-      <ConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/counter/disable/" />
+      <ConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/vehicle/disable/" />
       <VehicleModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
@@ -163,7 +163,6 @@ export function Vehicles() {
                         >
                           Disable
                         </Button>
-
                       </td>
                     </tr>
                   );

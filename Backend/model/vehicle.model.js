@@ -24,8 +24,12 @@ const vehicleschema = mongoose.Schema({
         type: Boolean,
         default: true
     },
-    seat: {
-        type: Object,
+    seats: {
+        type: Number,
+        required: true
+    },
+    price: {
+        type: Number,
         required: true
     },
     CreatedAt: { type: Date, default: Date.now },

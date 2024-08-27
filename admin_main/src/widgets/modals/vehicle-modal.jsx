@@ -57,23 +57,24 @@ export function VehicleModal(props) {
             });
     }
 
-    
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0]
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        setSeat(results.data)
-      }
-    })
-  }
+
+    //   const handleFileUpload = (e) => {
+    //     const file = e.target.files[0]
+    //     Papa.parse(file, {
+    //       header: true,
+    //       skipEmptyLines: true,
+    //       complete: (results) => {
+    //         setSeat(results.data)
+    //       }
+    //     })
+    //   }
     return (
         <>
             <Dialog size="sm" open={props.showmodal} handler={props.handleModal} className="p-4">
                 <form method={props?.data.length !== 0 ? "PATCH" : "post"}
                     action={props?.data.length !== 0 ? `/api/v1/vehicle/edit/${props.data._id}` : "/api/v1/vehicle/add"}
                     className="contact"
+                    autoComplete="off"
                     onSubmit={(e) => {
                         e.preventDefault();
                     }}>
@@ -127,7 +128,8 @@ export function VehicleModal(props) {
                             />
                         </div>
                         <div className="flex gap-4">
-                            <div className="w-full">
+                            {/* Dynamic Seat Pricing OPtions */}
+                            {/* <div className="w-full">
                                 <Typography
                                     variant="small"
                                     color="blue-gray"
@@ -136,16 +138,24 @@ export function VehicleModal(props) {
                                     Upload Seat Details
                                 </Typography>
                                 <input type="file" name="seat" onChange={handleFileUpload} required={true} />
-                            </div>
-                            <div className="w-full">
-                                <frfs-tel label="Mobile"
-                                    name="phoneno"
-                                    cn='in'
+                            </div> */}
+                             <div className="w-full">
+                                <frfs-text label="Seats"
+                                    name="seats"
                                     required
                                     editable
-                                    value={props?.data.phoneno}
+                                    value={props?.data.seats}
                                 />
                             </div>
+                            <div className="w-full">
+                                <frfs-text label="Price"
+                                    name="price"
+                                    required
+                                    editable
+                                    value={props?.data.price}
+                                />
+                            </div>
+                           
                         </div>
 
                     </DialogBody>
