@@ -60,5 +60,14 @@ vehicleRouter.get("/listall", async (req, res) => {
 })
 
 
+vehicleRouter.get("/search/:id", async (req, res) => {
+    try {
+        const vehicleList = await VehicleModel.find({_id:req.params.id})
+        res.json({ status: "success", data: vehicleList })
+    } catch (error) {
+        res.json({ status: "error", message: error.message })
+    }
+})
+
 
 module.exports = { vehicleRouter }

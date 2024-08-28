@@ -7,18 +7,18 @@ import {
   Chip
 } from "@material-tailwind/react";
 import React from "react";
-import { vehicleTableData } from "@/data";
+import { tripTableData } from "@/data";
 import ConfirmModal from "@/widgets/modals/confirm-modal";
 import { TripModal } from "@/widgets/modals/trip-modal";
 
 export function Trip() {
-  const [showmodal, setShowModal] = React.useState(true)
+  const [showmodal, setShowModal] = React.useState(false)
   const [showConfirmModal, setShowConfirmModal] = React.useState(false)
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
 
   React.useEffect(() => {
-    fetch('http://localhost:4500/api/v1/vehicle/listall')
+    fetch('http://localhost:4500/api/v1/trip/listall')
       .then((response) => response.json())
       .then(data => {
         setData(data.data)
@@ -69,7 +69,7 @@ export function Trip() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {vehicleTableData.map((el) => (
+                {tripTableData.map((el) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -111,36 +111,39 @@ export function Trip() {
                       </td>
                       <td className={className}>
                         <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {el.busno}
+                          {el.busid}
                         </Typography>
                       </td>
 
                       <td className={className}>
                         <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {el.registrationno}
+                          {el.from}
                         </Typography>
                       </td>
                       <td className={className}>
-                        <Chip
-                          variant="gradient"
-                          color={el.active ? "green" : "blue-gray"}
-                          value={el.active ? "online" : "offline"}
-                          className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                        />
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {el.to}
+                        </Typography>
                       </td>
                       <td className={className}>
-                        {
-                          el?.facilities?.map((index, key) => (
-                            <Typography key={key} className="text-xs font-semibold text-blue-gray-600">
-                              {index}
-                            </Typography>
-                          ))
-                        }
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {el.journeystartdate}
+                        </Typography>
                       </td>
                       <td className={className}>
-                        {
-                          el.assigned ? el.assigned : "None"
-                        }
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {el.starttime}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {el.totalseats}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {el.availableseats}
+                        </Typography>
                       </td>
                       <td className={`${className} flex w-max gap-4`}>
                         <Button

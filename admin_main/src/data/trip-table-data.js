@@ -1,3 +1,3 @@
-export const tripTableData = ["Name", "Bus No", "Registration No", "Active", "Facilities", "Assigned","Action"];
+export const tripTableData = ["Name", "Bus Name", "From","To","Start Date","Start Time","Total Seats", "Seats Availabe","Action"];
 
 export default tripTableData;

@@ -25,18 +25,18 @@ const tripschema = mongoose.Schema({
         required: true
     },
     starttime: {
-        type: Number,
+        type: String,
         required: true
     }, endtime: {
-        type: Number,
+        type: String,
         required: true
     },
     totaltime: {
-        type: Number,
+        type: String,
         required: false
     },
     distance: {
-        type: String,
+        type: Number,
         required: true
     },
     price: {

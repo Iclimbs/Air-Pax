@@ -10,11 +10,13 @@ import {
 } from "@material-tailwind/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
-import Papa from "papaparse"
 
 
 
 export function TripModal(props) {
+
+    console.log("Single Data ", props.data);
+
     const handleSubmit = (e) => {
         let frm = e.target.form;
         if (!frm) return console.log("misconfigured");
@@ -30,6 +32,7 @@ export function TripModal(props) {
             }
             if (fld.checked) payload[fld.name] = fld.value;
         });
+        console.log("Testing Errors", errors);
         if (errors.length) {
             errors[0].focus();
             return false;
@@ -56,18 +59,6 @@ export function TripModal(props) {
                 console.log(err);
             });
     }
-
-
-    //   const handleFileUpload = (e) => {
-    //     const file = e.target.files[0]
-    //     Papa.parse(file, {
-    //       header: true,
-    //       skipEmptyLines: true,
-    //       complete: (results) => {
-    //         setSeat(results.data)
-    //       }
-    //     })
-    //   }
     return (
         <>
             <Dialog size="sm" open={props.showmodal} handler={props.handleModal} className="p-4">
@@ -106,7 +97,7 @@ export function TripModal(props) {
                         <div className="flex gap-4">
                             <div className="w-full">
                                 <frfs-select label="From"
-                                    api='http://localhost:4500/api/v1/counter/listall'
+                                    api={props?.data.from ? `http://localhost:4500/api/v1/counter/search/${props?.data.from}` : `http://localhost:4500/api/v1/counter/listall`}
                                     name="from"
                                     required
                                     editable
@@ -115,7 +106,7 @@ export function TripModal(props) {
                             </div>
                             <div className="w-full">
                                 <frfs-select label="To"
-                                    api='http://localhost:4500/api/v1/counter/listall'
+                                    api={props?.data.from ? `http://localhost:4500/api/v1/counter/search/${props?.data.from}` : `http://localhost:4500/api/v1/counter/listall`}
                                     name="to"
                                     required
                                     editable
@@ -126,9 +117,11 @@ export function TripModal(props) {
                         <div>
                             <frfs-select label="Vehicle Name"
                                 name="busid"
-                                api='http://localhost:4500/api/v1/vehicle/listall'
+                                api={props?.data.from ? `http://localhost:4500/api/v1/vehicle/search/${props?.data.busid}` : `http://localhost:4500/api/v1/vehicle/listall`}
                                 required
-                                editable />
+                                editable
+                                value={props?.data.busid}
+                            />
                         </div>
                         <div className="flex gap-4">
                             <div className="w-full">
@@ -139,7 +132,7 @@ export function TripModal(props) {
                                 >
                                     Journey Start Date
                                 </Typography>
-                                <input type="date" name="journeystartdate" min={new Date().toISOString().split('T')[0]} required />
+                                <input type="date" name="journeystartdate" min={new Date().toISOString().split('T')[0]} value={props?.data.journeystartdate} required />
                             </div>
                             <div className="w-full">
                                 <Typography
@@ -149,7 +142,7 @@ export function TripModal(props) {
                                 >
                                     Journey End Date
                                 </Typography>
-                                <input type="date" name="journeyenddate" min={new Date().toISOString().split('T')[0]} required />
+                                <input type="date" name="journeyenddate" min={new Date().toISOString().split('T')[0]} value={props?.data.journeyenddate} required />
                             </div>
                         </div>
                         <div className="flex gap-4">
@@ -161,7 +154,7 @@ export function TripModal(props) {
                                 >
                                     Journey Start Time
                                 </Typography>
-                                <input type="time" name="starttime" required />
+                                <input type="time" name="starttime" value={props?.data.starttime} required />
                             </div>
                             <div className="w-full">
                                 <Typography
@@ -171,51 +164,55 @@ export function TripModal(props) {
                                 >
                                     Journey End Time
                                 </Typography>
-                                <input type="time" name="endtime" required />
+                                <input type="time" name="endtime" value={props?.data.endtime} required />
                             </div>
                         </div>
                         <div className="flex gap-4">
-                        <div className="w-full">
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="mb-2 text-left font-medium"
-                            >
-                                Journey Total Time
-                            </Typography>
-                            <input type="text" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" name="totaltime" required />
+                            <div className="w-full">
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="mb-2 text-left font-medium"
+                                >
+                                    Journey Total Time
+                                </Typography>
+                                <input type="text" pattern="[0-9][0-9]:[0-5][0-9]" name="totaltime" value={props?.data.totaltime} required />
                             </div>
 
-                        <div className="w-full">
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="mb-2 text-left font-medium"
-                            >
-                                Ticket Prices Per Seat
-                            </Typography>
-                            <input type="number" name="price" placeholder='Please Enter Ticket Price' required />
+                            <div className="w-full">
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="mb-2 text-left font-medium"
+                                >
+                                    Ticket Prices Per Seat
+                                </Typography>
+                                <input type="number" name="price"  value={props?.data.price} required />
+                            </div>
+
                         </div>
-                        <div className="w-full">
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="mb-2 text-left font-medium"
-                            >
-                                Total Distance
-                            </Typography>
-                            <input type="number" name="distance" placeholder='Please Enter Total Distance' required />
-                        </div>
-                        </div>
-                        <div className="w-full">
-                            <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="mb-2 text-left font-medium"
-                            >
-                                Total Seats
-                            </Typography>
-                            <input type="number" name="totalseats" placeholder='Please Enter Total Distance' required />
+                        <div className="flex gap-4">
+
+                            <div className="w-full">
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="mb-2 text-left font-medium"
+                                >
+                                    Total Distance
+                                </Typography>
+                                <input type="number" name="distance" value={props?.data.distance} required />
+                            </div>
+                            <div className="w-full">
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="mb-2 text-left font-medium"
+                                >
+                                    Total Seats
+                                </Typography>
+                                <input type="number" name="totalseats" value={props?.data.totalseats} required />
+                            </div>
                         </div>
 
                     </DialogBody>
