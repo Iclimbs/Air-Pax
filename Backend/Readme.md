@@ -130,5 +130,9 @@ Payload
     "journeyenddate": "2024-08-29",
     "starttime": "06:30",
     "endtime": "00:00",
-    "price": "8000"
+    "price": "8000",
+    "seats":32,
+    "distance":4500,
+    "totalseats":32,
+    "totaltime":"30:00"
 }

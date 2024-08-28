@@ -175,6 +175,16 @@ export function TripModal(props) {
                             </div>
                         </div>
                         <div className="flex gap-4">
+                        <div className="w-full">
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="mb-2 text-left font-medium"
+                            >
+                                Journey Total Time
+                            </Typography>
+                            <input type="text" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" name="totaltime" required />
+                            </div>
 
                         <div className="w-full">
                             <Typography
@@ -196,6 +206,16 @@ export function TripModal(props) {
                             </Typography>
                             <input type="number" name="distance" placeholder='Please Enter Total Distance' required />
                         </div>
+                        </div>
+                        <div className="w-full">
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="mb-2 text-left font-medium"
+                            >
+                                Total Seats
+                            </Typography>
+                            <input type="number" name="totalseats" placeholder='Please Enter Total Distance' required />
                         </div>
 
                     </DialogBody>
