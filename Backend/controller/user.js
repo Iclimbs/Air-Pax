@@ -5,6 +5,7 @@ const otpGenerator = require('otp-generator')
 const express = require("express")
 const { UserModel } = require("../model/user.model");
 const { RegistrationAuthentication } = require('../middleware/Registration');
+const { transporter } = require('../service/transporter');
 const userRouter = express.Router()
 
 userRouter.post("/login", async (req, res) => {
@@ -20,6 +21,44 @@ userRouter.post("/login", async (req, res) => {
                     res.json({ status: "success", message: "Login Successful", token: token })
                 } else {
                     res.json({ status: "error", message: "Wrong Password Please Try Again" })
+                }
+            });
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+    }
+})
+
+
+
+userRouter.post("/forgot", async (req, res) => {
+    try {
+        const { phoneno } = req.body
+        const userExists = await UserModel.find({ phoneno })
+        if (userExists.length === 0) {
+            return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
+        } else {
+            let newotp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
+            let forgotpasswordtoken = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, "Registration");
+
+            userExists[0].otp = newotp;
+            userExists[0].forgotpasswordtoken=forgotpasswordtoken
+            await userExists[0].save()
+
+            const mailOptions = {
+                from: 'uttamkr5599@gmail.com',
+                to: `${userExists[0].email}`,
+                subject: 'Otp To Reset Password.',
+                text: `New OTP TO  Reset Password is ${newotp}`
+            };
+            // Send email
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log('Error occurred:', error);
+                    return res.json({ success: false, error: 'Failed to send email' });
+                } else {
+                    console.log('Email sent:', info.response);
+                    return res.json({ success: true, message: 'Email sent successfully' });
                 }
             });
         }
@@ -59,15 +98,15 @@ userRouter.post("/register", async (req, res) => {
     }
 })
 
-userRouter.post("/otp/verification",RegistrationAuthentication, async (req, res) => {
+userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res) => {
     try {
         const { otp } = req.body
         const user = await UserModel.find({ signuptoken: req.headers.token, otp: otp })
         user[0].verified.phone = true;
-        user[0].otp=null;
+        user[0].otp = null;
         await user[0].save()
         if (user.length >= 1) {
-            res.json({ status: "success", message: "Otp Verification Successful", token: user.signuptoken,redirect:'/createpassword' })
+            res.json({ status: "success", message: "Otp Verification Successful", token: user.signuptoken, redirect: '/createpassword' })
         } else {
             res.json({ status: "error", message: "Otp Verification Failed. Please Try After Some Time", redirect: "/signup" })
         }
@@ -80,7 +119,7 @@ userRouter.post("/otp/verification",RegistrationAuthentication, async (req, res)
 
 userRouter.post("/password/create", async (req, res) => {
     try {
-        const { password, cnfpassword } = req.body        
+        const { password, cnfpassword } = req.body
         if (password === cnfpassword) {
             const user = await UserModel.find({ signuptoken: req.headers.token })
             if (user.length >= 1 && user[0].verified.phone == true) {

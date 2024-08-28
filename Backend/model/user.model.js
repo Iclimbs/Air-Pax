@@ -19,6 +19,9 @@ const userschema = mongoose.Schema({
   signuptoken: {
     type: String
   },
+  forgotpasswordtoken: {
+    type: String
+  },
   verified: {
     email: {
       type: Boolean,

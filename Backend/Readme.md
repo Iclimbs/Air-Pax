@@ -122,17 +122,16 @@ url:- http://localhost:4500/api/v1/trip/add
 Patch
 Payload 
 {
-    "name": "Goa Trip",
-    "from": "66cc55686bb729b280b57fc1",
+    "name": "Final Testing",
+    "from": "66cc357b55bcb8e0f9246a00",
     "to": "66cc5a73cea1600ee1e411ac",
     "busid": "66cd60f477c9c9b4eb7c693f",
-    "journeystartdate": "2024-08-27",
-    "journeyenddate": "2024-08-29",
-    "starttime": "06:30",
-    "endtime": "00:00",
-    "price": "8000",
-    "seats":32,
-    "distance":4500,
-    "totalseats":32,
-    "totaltime":"30:00"
+    "journeystartdate": "2024-08-28",
+    "journeyenddate": "2024-08-30",
+    "starttime": "03:00",
+    "endtime": "15:00",
+    "totaltime": "48:00",
+    "price": "4500",
+    "distance": "2500",
+    "totalseats": "32"
 }

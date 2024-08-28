@@ -36,4 +36,17 @@ tripRouter.get("/listall", async (req, res) => {
     }
 })
 
+
+tripRouter.post("/list", async (req, res) => {
+    console.log();
+    
+    try {
+        const trips = await TripModel.find({})
+        res.json({ status: "success", data: trips })
+    } catch (error) {
+        res.json({ status: "error", message: "Get List Failed" })
+
+    }
+})
+
 module.exports = { tripRouter }
