@@ -39,14 +39,6 @@ userRouter.post("/login", async (req, res) => {
             } else {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }
-            // bcrypt.compare(password, userExists[0].password, (err, result) => {
-            //     if (result) {
-            //         let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
-            //         res.json({ status: "success", message: "Login Successful", token: token })
-            //     } else {
-            //         res.json({ status: "error", message: "Wrong Password Please Try Again" })
-            //     }
-            // });
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
@@ -69,26 +61,20 @@ userRouter.post("/forgot", async (req, res) => {
             userExists[0].forgotpasswordtoken = forgotpasswordtoken
             await userExists[0].save()
             let testing = path.join(__dirname, "../emailtemplate/forgotPassword.ejs")
-
             ejs.renderFile(testing, { link: link }, function (err, template) {
                 if (err) {
-                    console.log(err)
-                    res.json({ status: "error", message: `Error Found in Login Section` })
-
+                    res.json({ status: "error", message: err.message })
                 } else {
                     const mailOptions = {
                         from: 'uttamkr5599@gmail.com',
                         to: `${userExists[0].email}`,
                         subject: 'Otp To Reset Password.',
                         html: template
-
                     }
                     transporter.sendMail(mailOptions, (error, info) => {
                         if (error) {
-                            console.log('Error occurred:', error);
                             return res.json({ success: false, error: 'Failed to send email' });
                         } else {
-                            console.log('Email sent:', info.response);
                             return res.json({ success: true, message: 'Email sent successfully' });
                         }
                     })
@@ -163,12 +149,35 @@ userRouter.post("/password/create", async (req, res) => {
             } else {
                 res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/signup" })
             }
-
         } else {
             res.json({ status: "error", message: "Password & Confirm Password Doesn't Match" })
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Password Creation ${error.message}` })
+    }
+})
+
+
+userRouter.post("/password/change", async (req, res) => {
+    const { token, otp } = req.headers
+    try {
+        const { password, cnfpassword } = req.body
+        if (password === cnfpassword) {
+            const user = await UserModel.find({ forgotpasswordtoken:token,otp:otp })
+            if (user.length >= 1 && user[0].verified.phone == true) {
+                user[0].password = hash.sha256(password)
+                user[0].forgotpasswordtoken = null
+                user[0].otp = null
+                await user[0].save()
+                res.json({ status: "success", message: "New Password Created Please Login Now !!" })
+            } else {
+                res.json({ status: "error", message: "You Haven't Made a request to Change Password", redirect: "/signup" })
+            }
+        } else {
+            res.json({ status: "error", message: "Password & Confirm Password Doesn't Match" })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Creating New Password  ${error.message}` })
     }
 })
 
