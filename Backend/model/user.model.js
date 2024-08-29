@@ -19,6 +19,9 @@ const userschema = mongoose.Schema({
   signuptoken: {
     type: String
   },
+  forgotpasswordtoken: {
+    type: String
+  },
   verified: {
     email: {
       type: Boolean,
@@ -27,6 +30,17 @@ const userschema = mongoose.Schema({
     phone: {
       type: Boolean,
       default: false
+    }
+  },
+  type: {
+    admin: {
+      type: Boolean,
+      default: false
+    },
+    user: {
+      type: Boolean,
+      default: true
+
     }
   },
   CreatedAt: { type: Date, default: Date.now },

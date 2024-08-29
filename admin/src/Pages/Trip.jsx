@@ -1,7 +1,27 @@
-import React,{useState} from 'react'
+import React, { useState } from 'react'
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+
+import { useRef } from 'react'
+
+const center = { lat: 48.8584, lng: 2.2945 }
 
 const Trip = () => {
-    const [buslist,setBuslist] = useState([])
+
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: "AIzaSyAdlbp-63zIbSeMqFSRFmA3Fe_LsjAbEyE"
+      })
+
+    const [map, setMap] = useState(null)
+    const [directionsResponse, setDirectionsResponse] = useState(null)
+    const [distance, setDistance] = useState('')
+    const [duration, setDuration] = useState('')
+
+    /** @type React.MutableRefObject<HTMLInputElement> */
+    const originRef = useRef()
+    /** @type React.MutableRefObject<HTMLInputElement> */
+    const destiantionRef = useRef()
+
     const handleSubmit = (e) => {
         let frm = e.target.form;
         if (!frm) return console.log("misconfigured");
@@ -40,30 +60,107 @@ const Trip = () => {
         //     });
     }
 
+    async function calculateRoute() {
+        if (originRef.current.value === '' || destiantionRef.current.value === '') {
+            return
+        }
+        // eslint-disable-next-line no-undef
+        const directionsService = new google.maps.DirectionsService()
+        const results = await directionsService.route({
+            origin: originRef.current.value,
+            destination: destiantionRef.current.value,
+            // eslint-disable-next-line no-undef
+            travelMode: google.maps.TravelMode.DRIVING,
+        })
+        setDirectionsResponse(results)
+        setDistance(results.routes[0].legs[0].distance.text)
+        setDuration(results.routes[0].legs[0].duration.text)
+    }
+
+    function clearRoute() {
+        setDirectionsResponse(null)
+        setDistance('')
+        setDuration('')
+        originRef.current.value = ''
+        destiantionRef.current.value = ''
+    }
+
     return (
         <> <h1>Creating Trip For Users :- </h1>
-            <form method={"post"}
-                action={"/api/v1/bus/add"}
-                className="contact"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                }}>
-                <input type="text" name="from" placeholder='Please Enter Start Location of Bus' required />
-                <input type="text" name="to" placeholder='Please Enter End Location of Bus' required />
-                <input type="date" name="journeydate" placeholder="Please Enter Journey Date" min={new Date().toISOString().split('T')[0]} required />
-                <input type="time" name="starttime" placeholder="Please Enter Journey Start Time" required />
-                <input type="time" name="endtime" placeholder="Please Enter Journey End Time" required />
-                <input type="text" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" placeholder='Please Enter Total Journey Time in Format 05:05' name="journeytotaltime" required />
-                <input type="number" name="price" placeholder='Please Enter Ticket Price' required />
-                <select name="" id="">
-                    <option value=""></option>
-                    <option value=""></option>
-                    <option value=""></option>
-                    <option value=""></option>
-                    <option value=""></option>
-                </select>
-                <button onClick={handleSubmit}>Submit Details</button>
-            </form></>
+            <div className='flex'>
+                <form method={"post"}
+                    action={"/api/v1/trip/add"}
+                    className="contact"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                    }}>
+                    <frfs-text label='Name' name='name' required editable />
+                    <frfs-select label="Start From"
+                        name="from"
+                        api='http://localhost:4500/api/v1/counter/listall'
+                        required
+                        editable />
+                    <frfs-select label="End To"
+                        name="to"
+                        api='http://localhost:4500/api/v1/counter/listall'
+                        required
+                        editable />
+                    <frfs-select label="Vehicle Name"
+                        name="busid"
+                        api='http://localhost:4500/api/v1/vehicle/listall'
+                        required
+                        editable />
+                    <div className='flex flex-col'>
+                        <label htmlFor="">Journey Start Date</label>
+                        <input type="date" name="journeystartdate" min={new Date().toISOString().split('T')[0]} required />
+                    </div>
+                    <div className='flex flex-col'>
+                        <label htmlFor="">Journey End Date</label>
+                        <input type="date" name="journeyenddate" min={new Date().toISOString().split('T')[0]} required />
+                    </div>
+                    <div className='flex flex-col'>
+                        <label htmlFor="">Journey Start Time</label>
+                        <input type="time" name="starttime" required />
+                    </div>
+                    <div className='flex flex-col'>
+                        <label htmlFor="">Journey End Time</label>
+                        <input type="time" name="endtime" required />
+
+                    </div>
+                    <div className='flex flex-col'>
+                        <label htmlFor="">Total Journey Time Format : 05:05 </label>
+                        <input type="text" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]" name="journeytotaltime" required />
+                    </div>
+
+                    <div className='flex flex-col'>
+                        <input type="number" name="price" placeholder='Please Enter Ticket Price' required />
+
+                    </div>
+
+
+                    <button onClick={handleSubmit}>Submit Details</button>
+                </form>
+            </div>
+            <div>
+                <GoogleMap
+                    center={center}
+                    zoom={15}
+                    mapContainerStyle={{ width: '100%', height: '100%' }}
+                    options={{
+                        zoomControl: false,
+                        streetViewControl: false,
+                        mapTypeControl: false,
+                        fullscreenControl: false,
+                    }}
+                    // onLoad={map => setMap(map)}
+                >
+                    {/* <Marker position={center} />
+                    {directionsResponse && (
+                        <DirectionsRenderer directions={directionsResponse} />
+                    )} */}
+                </GoogleMap>
+            </div>
+        </>
     )
 }
 

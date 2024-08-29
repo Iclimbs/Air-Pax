@@ -1,0 +1,80 @@
+:host {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    background: rgba(0, 0, 0, .5);
+    align-items: center
+}
+
+.main {
+    max-width: 500px;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    text-align: center;
+    padding: 40px;
+    border-radius: 30px;
+    padding-bottom: 20px
+}
+
+:host([type=success]) div .main h3 {
+    color: #155724
+}
+
+:host([type=error]) div .main h3 {
+    color: #721c24
+}
+
+.main .message-body p:empty {
+    display: none
+}
+
+.main .message-body p {
+    margin: 0 !important
+}
+
+.main h3 {
+    text-transform: capitalize;
+    font-family: serif;
+    font-size: 30px;
+    margin-top: 15px
+}
+
+.main span {
+    display: flex;
+    margin: 0 auto;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 50px;
+    margin-top: -75px;
+    border-radius: 50%;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 30px
+}
+
+:host([type=success]) .main span {
+    background: #06aa06;
+    box-shadow: #06aa06 0 7px 29px 0
+}
+
+:host([type=error]) .main span {
+    background: #d40f0f;
+    box-shadow: #d40f0f 0 7px 29px 0
+}
+
+:host([type=error]) .main span:after {
+    content: "\f00d";
+    font-family: FontAwesome
+}
+
+:host([type=success]) .main span:after {
+    content: "\f00c";
+    font-family: FontAwesome
+}

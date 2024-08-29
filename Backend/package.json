@@ -12,17 +12,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.624.0",
-    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.2",
-    "otp-generator": "^4.0.1",
-    "path": "^0.12.7",
-    "random-key": "^0.3.2",
-    "twilio": "^5.2.2"
+    "nodemailer": "^6.9.14",
+    "otp-generator": "^4.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

@@ -115,3 +115,23 @@ Payload Sample :-
   "redirect": "/login",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUmFodWwgVGl3YXJpIiwiZW1haWwiOiJ1dHRhbWtyc2hhd0BpY2xpbWJzLmNvbSIsInBob25lbm8iOjc0Mjg5MTI3MTcsImV4cCI6MTcyNDMxMzMyMSwiaWF0IjoxNzI0MzA5NzIxfQ.RZgDWtQCvY827tJ8nqeEzasdmcm4hDnf7WJu1n2W-eM"
 }
+
+
+<!-- Adding New Trip Detail's -->
+url:- http://localhost:4500/api/v1/trip/add
+Patch
+Payload 
+{
+    "name": "Final Testing",
+    "from": "66cc357b55bcb8e0f9246a00",
+    "to": "66cc5a73cea1600ee1e411ac",
+    "busid": "66cd60f477c9c9b4eb7c693f",
+    "journeystartdate": "2024-08-28",
+    "journeyenddate": "2024-08-30",
+    "starttime": "03:00",
+    "endtime": "15:00",
+    "totaltime": "48:00",
+    "price": "4500",
+    "distance": "2500",
+    "totalseats": "32"
+}

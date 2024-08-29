@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 const tripschema = mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
     from: {
         type: String,
         required: true,
@@ -8,7 +12,11 @@ const tripschema = mongoose.Schema({
         type: String,
         required: true,
     },
-    journeydate: {
+    journeystartdate: {
+        type: String,
+        required: true
+    },
+    journeyenddate: {
         type: String,
         required: true
     },
@@ -17,20 +25,36 @@ const tripschema = mongoose.Schema({
         required: true
     },
     starttime: {
-        type: Date,
+        type: String,
         required: true
     }, endtime: {
-        type: Date,
-        required: true
-    },
-    journeytotaltime: {
-        type: Date,
-        required: true
-    },
-    distance: {
         type: String,
         required: true
     },
+    totaltime: {
+        type: String,
+        required: false
+    },
+    distance: {
+        type: Number,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    totalseats: {
+        type: Number,
+        required: true
+    }, bookedseats: {
+        type: Number,
+        required: true
+    },
+    availableseats: {
+        type: Number,
+        required: true
+    },
+
     CreatedAt: { type: Date, default: Date.now },
 });
 const TripModel = mongoose.model("Trips", tripschema)
