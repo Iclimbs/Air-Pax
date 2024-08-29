@@ -17,6 +17,8 @@ export function Counter() {
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
 
+  console.log("data ",data);
+  
   React.useEffect(() => {
     fetch('http://localhost:4500/api/v1/counter/listall')
       .then((response) => response.json())
@@ -102,7 +104,7 @@ export function Counter() {
                               color="blue-gray"
                               className="font-semibold"
                             >
-                              <a href={location} target="_blank" rel="noopener noreferrer">
+                              <a href={el.location} target="_blank" rel="noopener noreferrer">
                                 {el.name}
                               </a>
                             </Typography>
