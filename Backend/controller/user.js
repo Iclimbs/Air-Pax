@@ -7,6 +7,24 @@ const { UserModel } = require("../model/user.model");
 const { RegistrationAuthentication } = require('../middleware/Registration');
 const { transporter } = require('../service/transporter');
 const userRouter = express.Router()
+const ejs = require("ejs")
+const path = require('node:path');
+
+
+
+
+const crypt = require("crypto");
+const hash = {
+    sha256: (data) => {
+        return crypt.createHash("sha256").update(data).digest("hex");
+    },
+    sha512: (data) => {
+        return crypt.createHash("sha512").update(data).digest("hex");
+    },
+    md5: (data) => {
+        return crypt.createHash("md5").update(data).digest("hex");
+    },
+};
 
 userRouter.post("/login", async (req, res) => {
     try {
@@ -15,14 +33,20 @@ userRouter.post("/login", async (req, res) => {
         if (userExists.length === 0) {
             return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
         } else {
-            bcrypt.compare(password, userExists[0].password, (err, result) => {
-                if (result) {
-                    let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
-                    res.json({ status: "success", message: "Login Successful", token: token })
-                } else {
-                    res.json({ status: "error", message: "Wrong Password Please Try Again" })
-                }
-            });
+            if (hash.sha256(password) === userExists[0].password) {
+                let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+                res.json({ status: "success", message: "Login Successful", token: token })
+            } else {
+                res.json({ status: "error", message: "Wrong Password Please Try Again" })
+            }
+            // bcrypt.compare(password, userExists[0].password, (err, result) => {
+            //     if (result) {
+            //         let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+            //         res.json({ status: "success", message: "Login Successful", token: token })
+            //     } else {
+            //         res.json({ status: "error", message: "Wrong Password Please Try Again" })
+            //     }
+            // });
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
@@ -40,29 +64,40 @@ userRouter.post("/forgot", async (req, res) => {
         } else {
             let newotp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
             let forgotpasswordtoken = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, "Registration");
-
+            let link = `${process.env.domainurl}${newotp}/${forgotpasswordtoken}`
             userExists[0].otp = newotp;
-            userExists[0].forgotpasswordtoken=forgotpasswordtoken
+            userExists[0].forgotpasswordtoken = forgotpasswordtoken
             await userExists[0].save()
+            let testing = path.join(__dirname, "../emailtemplate/forgotPassword.ejs")
 
-            const mailOptions = {
-                from: 'uttamkr5599@gmail.com',
-                to: `${userExists[0].email}`,
-                subject: 'Otp To Reset Password.',
-                text: `New OTP TO  Reset Password is ${newotp}`
-            };
-            // Send email
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.log('Error occurred:', error);
-                    return res.json({ success: false, error: 'Failed to send email' });
+            ejs.renderFile(testing, { link: link }, function (err, template) {
+                if (err) {
+                    console.log(err)
+                    res.json({ status: "error", message: `Error Found in Login Section` })
+
                 } else {
-                    console.log('Email sent:', info.response);
-                    return res.json({ success: true, message: 'Email sent successfully' });
+                    const mailOptions = {
+                        from: 'uttamkr5599@gmail.com',
+                        to: `${userExists[0].email}`,
+                        subject: 'Otp To Reset Password.',
+                        html: template
+
+                    }
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            console.log('Error occurred:', error);
+                            return res.json({ success: false, error: 'Failed to send email' });
+                        } else {
+                            console.log('Email sent:', info.response);
+                            return res.json({ success: true, message: 'Email sent successfully' });
+                        }
+                    })
                 }
-            });
+            })
+
         }
-    } catch (error) {
+    }
+    catch (error) {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
     }
 })
@@ -111,7 +146,6 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
             res.json({ status: "error", message: "Otp Verification Failed. Please Try After Some Time", redirect: "/signup" })
         }
     } catch (error) {
-        console.log("registion error section", error.message);
         res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
     }
 })
@@ -123,10 +157,8 @@ userRouter.post("/password/create", async (req, res) => {
         if (password === cnfpassword) {
             const user = await UserModel.find({ signuptoken: req.headers.token })
             if (user.length >= 1 && user[0].verified.phone == true) {
-                bcrypt.hash(password, process.env.saltrounds, async (err, hash) => {
-                    user[0].password = hash;
-                    await user[0].save()
-                });
+                user[0].password = hash.sha256(password)
+                await user[0].save()
                 res.json({ status: "success", message: "New Password Created Please Login Now !!" })
             } else {
                 res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/signup" })
