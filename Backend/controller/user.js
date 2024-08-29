@@ -1,5 +1,4 @@
 require('dotenv').config()
-const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator')
 const express = require("express")
