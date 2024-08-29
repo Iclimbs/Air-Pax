@@ -10,8 +10,6 @@ const ejs = require("ejs")
 const path = require('node:path');
 
 
-
-
 const crypt = require("crypto");
 const hash = {
     sha256: (data) => {
@@ -43,8 +41,6 @@ userRouter.post("/login", async (req, res) => {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
     }
 })
-
-
 
 userRouter.post("/forgot", async (req, res) => {
     try {
@@ -86,7 +82,6 @@ userRouter.post("/forgot", async (req, res) => {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
     }
 })
-
 
 userRouter.post("/register", async (req, res) => {
     try {
@@ -135,7 +130,6 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
     }
 })
 
-
 userRouter.post("/password/create", async (req, res) => {
     try {
         const { password, cnfpassword } = req.body
@@ -156,13 +150,12 @@ userRouter.post("/password/create", async (req, res) => {
     }
 })
 
-
 userRouter.post("/password/change", async (req, res) => {
     const { token, otp } = req.headers
     try {
         const { password, cnfpassword } = req.body
         if (password === cnfpassword) {
-            const user = await UserModel.find({ forgotpasswordtoken:token,otp:otp })
+            const user = await UserModel.find({ forgotpasswordtoken: token, otp: otp })
             if (user.length >= 1 && user[0].verified.phone == true) {
                 user[0].password = hash.sha256(password)
                 user[0].forgotpasswordtoken = null
@@ -179,7 +172,5 @@ userRouter.post("/password/change", async (req, res) => {
         res.json({ status: "error", message: `Error Found in Creating New Password  ${error.message}` })
     }
 })
-
-
 
 module.exports = { userRouter }
