@@ -68,9 +68,9 @@ userRouter.post("/forgot", async (req, res) => {
                     }
                     transporter.sendMail(mailOptions, (error, info) => {
                         if (error) {
-                            return res.json({ success: false, error: 'Failed to send email' });
+                            return res.json({ status: "error", error: 'Failed to send email' });
                         } else {
-                            return res.json({ success: true, message: 'Email sent successfully' });
+                            return res.json({ status: "success", message: 'Email sent successfully' });
                         }
                     })
                 }
