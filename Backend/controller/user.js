@@ -9,7 +9,6 @@ const userRouter = express.Router()
 const ejs = require("ejs")
 const path = require('node:path');
 
-
 const crypt = require("crypto");
 const hash = {
     sha256: (data) => {
@@ -99,17 +98,21 @@ userRouter.post("/register", async (req, res) => {
                 password: null
             })
             await user.save()
-            fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user.phoneno}/${user.otp}/Airpax`)
-                .then((response) => response.json())
-                .then((data) => {
-                    data.Status === 'Success' ?
-                        res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
+            res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
 
-                        : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/login", token: user.signuptoken })
-                });
+            // fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user.phoneno}/${user.otp}/Airpax`)
+            //     .then((response) => response.json())
+            //     .then((data) => {
+            //         data.Status === 'Success' ?
+            //             res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
+
+            //             : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/login", token: user.signuptoken })
+            //     });
         }
     } catch (error) {
-        res.json({ status: "error", message: `Error Found in User Registration ${error.message}` })
+        console.log("Errod ", error);
+        console.log("Errod ", error.message);
+        res.json({ status: "error", message: `Error Found in User Registration ${error}` })
     }
 })
 
@@ -121,9 +124,9 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
         user[0].otp = null;
         await user[0].save()
         if (user.length >= 1) {
-            res.json({ status: "success", message: "Otp Verification Successful", token: user.signuptoken, redirect: '/createpassword' })
+            res.json({ status: "success", message: "Otp Verification Successful", })
         } else {
-            res.json({ status: "error", message: "Otp Verification Failed. Please Try After Some Time", redirect: "/signup" })
+            res.json({ status: "error", message: "Otp Verification Failed. Please Try After Some Time", })
         }
     } catch (error) {
         res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
@@ -138,7 +141,7 @@ userRouter.post("/password/create", async (req, res) => {
             if (user.length >= 1 && user[0].verified.phone == true) {
                 user[0].password = hash.sha256(password)
                 await user[0].save()
-                res.json({ status: "success", message: "New Password Created Please Login Now !!" })
+                res.json({ status: "success", message: "New Password Created Please Login Now !!", token: '' })
             } else {
                 res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/signup" })
             }

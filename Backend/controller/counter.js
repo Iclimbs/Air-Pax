@@ -52,9 +52,9 @@ CounterRouter.get("/listall", async (req, res) => {
 })
 
 
-CounterRouter.get("/search/:id", async (req, res) => {
+CounterRouter.get("/search/:name", async (req, res) => {
     try {
-        const counterList = await CounterModel.find({_id:req.params.id})
+        const counterList = await CounterModel.find({name:req.params.name})
         console.log("data in search app ",counterList);
         
         res.json({ status: "success", data: counterList })

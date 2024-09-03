@@ -21,7 +21,7 @@ const tripschema = mongoose.Schema({
         required: true
     },
     busid: {
-        type: mongoose.Types.ObjectId,
+        type: String,
         required: true
     },
     starttime: {

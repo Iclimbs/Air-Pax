@@ -60,9 +60,9 @@ vehicleRouter.get("/listall", async (req, res) => {
 })
 
 
-vehicleRouter.get("/search/:id", async (req, res) => {
+vehicleRouter.get("/search/:name", async (req, res) => {
     try {
-        const vehicleList = await VehicleModel.find({_id:req.params.id})
+        const vehicleList = await VehicleModel.find({name:req.params.name})
         res.json({ status: "success", data: vehicleList })
     } catch (error) {
         res.json({ status: "error", message: error.message })

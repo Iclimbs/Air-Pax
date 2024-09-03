@@ -7,7 +7,7 @@ tripRouter.post("/add", async (req, res) => {
     try {
         const newtrip = new TripModel({ name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, totaltime, price, distance, totalseats, bookedseats: 0, availableseats: totalseats })
         await newtrip.save()
-        res.json({ status: "success", message: "Working on Trip details system" })
+        res.json({ status: "success", message: "Successfully Addeded A New Trip" })
     } catch (error) {
         console.log(error.message);
         res.json({ status: "error", message: "Adding Trip Process Failed" })
@@ -15,11 +15,11 @@ tripRouter.post("/add", async (req, res) => {
     }
 })
 
-tripRouter.patch("/edit/:id",async(req,res)=>{
+tripRouter.patch("/edit/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const  trip = await TripModel.findByIdAndUpdate({ _id: id }, req.body)
-        await  trip.save()
+        const trip = await TripModel.findByIdAndUpdate({ _id: id }, req.body)
+        await trip.save()
         res.json({ status: "success", message: " Trip Details Successfully Updated !!" })
     } catch (error) {
         res.json({ status: "error", message: "Failed To Update  Trip  Details" })
@@ -29,6 +29,8 @@ tripRouter.patch("/edit/:id",async(req,res)=>{
 tripRouter.get("/listall", async (req, res) => {
     try {
         const trips = await TripModel.find({})
+        console.log("Trips ",trips);
+        
         res.json({ status: "success", data: trips })
     } catch (error) {
         res.json({ status: "error", message: "Get List Failed" })
@@ -37,12 +39,28 @@ tripRouter.get("/listall", async (req, res) => {
 })
 
 
-tripRouter.post("/list", async (req, res) => {
-    console.log();
+// tripRouter.post("/list", async (req, res) => {
+//     const { from, to, date, tickets } = req.body
+//     console.log("Body ", req.body);
+
+//     try {
+//         const trips = await TripModel.find({ from: from, to: to, journeystartdate: date, availableseats: { $gte: tickets } })
+//         res.json({ status: "success", data: trips })
+//     } catch (error) {
+//         res.json({ status: "error", message: "Get List Failed" })
+
+//     }
+// })
+
+
+
+tripRouter.get("/list", async (req, res) => {
+    const { from, to, date, tickets } = req.query
+    console.log(req.query);
     
     try {
-        const trips = await TripModel.find({})
-        res.json({ status: "success", data: trips })
+        const trips = await TripModel.find({ from: from, to: to, journeystartdate: date, availableseats: { $gte: tickets } })
+        res.json({ status: "success",data:trips })
     } catch (error) {
         res.json({ status: "error", message: "Get List Failed" })
 

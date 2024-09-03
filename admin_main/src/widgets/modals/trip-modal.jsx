@@ -14,9 +14,6 @@ import toast from "react-hot-toast";
 
 
 export function TripModal(props) {
-
-    console.log("Single Data ", props.data);
-
     const handleSubmit = (e) => {
         let frm = e.target.form;
         if (!frm) return console.log("misconfigured");
@@ -32,7 +29,6 @@ export function TripModal(props) {
             }
             if (fld.checked) payload[fld.name] = fld.value;
         });
-        console.log("Testing Errors", errors);
         if (errors.length) {
             errors[0].focus();
             return false;
@@ -56,7 +52,7 @@ export function TripModal(props) {
                 }
             })
             .catch((err) => {
-                console.log(err);
+                toast.success(data.message)
             });
     }
     return (
@@ -106,7 +102,7 @@ export function TripModal(props) {
                             </div>
                             <div className="w-full">
                                 <frfs-select label="To"
-                                    api={props?.data.from ? `http://localhost:4500/api/v1/counter/search/${props?.data.from}` : `http://localhost:4500/api/v1/counter/listall`}
+                                    api={props?.data.to ? `http://localhost:4500/api/v1/counter/search/${props?.data.to}` : `http://localhost:4500/api/v1/counter/listall`}
                                     name="to"
                                     required
                                     editable
@@ -117,7 +113,7 @@ export function TripModal(props) {
                         <div>
                             <frfs-select label="Vehicle Name"
                                 name="busid"
-                                api={props?.data.from ? `http://localhost:4500/api/v1/vehicle/search/${props?.data.busid}` : `http://localhost:4500/api/v1/vehicle/listall`}
+                                api={props?.data.busid ? `http://localhost:4500/api/v1/vehicle/search/${props?.data.busid}` : `http://localhost:4500/api/v1/vehicle/listall`}
                                 required
                                 editable
                                 value={props?.data.busid}
@@ -187,7 +183,7 @@ export function TripModal(props) {
                                 >
                                     Ticket Prices Per Seat
                                 </Typography>
-                                <input type="number" name="price"  value={props?.data.price} required />
+                                <input type="number" name="price" value={props?.data.price} required />
                             </div>
 
                         </div>

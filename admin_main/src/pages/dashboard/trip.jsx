@@ -16,6 +16,7 @@ export function Trip() {
   const [showConfirmModal, setShowConfirmModal] = React.useState(false)
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
+console.log("Data ",data);
 
   React.useEffect(() => {
     fetch('http://localhost:4500/api/v1/trip/listall')
