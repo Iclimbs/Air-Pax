@@ -1,13 +1,23 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "@material-tailwind/react";
+import { MaterialTailwindControllerProvider } from "@/context";
+import "../public/css/tailwind.css";
+import { Toaster } from "react-hot-toast";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ThemeProvider>
+        <MaterialTailwindControllerProvider>
+          <Toaster position="top-right"
+            reverseOrder={true} duration="5000" />
+          <App />
+        </MaterialTailwindControllerProvider>
+      </ThemeProvider>
     </BrowserRouter>
-  </StrictMode>,
-)
+  </React.StrictMode>
+);

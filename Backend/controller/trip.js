@@ -67,4 +67,16 @@ tripRouter.get("/list", async (req, res) => {
     }
 })
 
+
+
+tripRouter.get("/detailone/:id", async (req, res) => {
+    try {
+        const trips = await TripModel.find({_id:req.params.id})
+        res.json({ status: "success",data:trips })
+    } catch (error) {
+        res.json({ status: "error", message: "Get List Failed" })
+
+    }
+})
+
 module.exports = { tripRouter }

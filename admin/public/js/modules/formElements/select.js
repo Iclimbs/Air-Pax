@@ -643,7 +643,7 @@ export default class select extends HTMLElement {
 			case "get":
 				fetch(url)
 					.then((e) => e.json())
-					.then((r) => {
+					.then((r) => {						
 						let temp = Array.from(r.data || r);
 						let optionList = {};
 
@@ -651,6 +651,7 @@ export default class select extends HTMLElement {
 							optionList[e._id || e.id || e.code || e.name] = e.label || e.name;
 						});
 						this.#optionList = optionList;
+						
 						if (Object.keys(optionList).length == 0) {
 							this.hide();
 							this.internals.setValidity({});
@@ -780,7 +781,7 @@ export default class select extends HTMLElement {
 				let text = `${optionList[option]}`;
 				text = text.replace(/\$/g, curr);
 				let value = option;
-				return `<li  data-value='${value}'>${text}</li>`;
+				return `<li  data-value='${text}'>${text}</li>`;
 			})
 			.join("\n");
 	}
