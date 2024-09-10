@@ -22,6 +22,23 @@ const hash = {
     },
 };
 
+
+userRouter.get("/me", async (req, res) => {
+    try {
+        const {token} = req.headers
+        console.log(req.headers);
+        if (!token) {
+            return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/login" })
+        } else {
+            const decoded = jwt.verify(token, 'Authentication')
+            console.log(decoded);
+            return res.json({ status: "success", message: "Working on Login Form" })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+    }
+})
+
 userRouter.post("/login", async (req, res) => {
     try {
         const { phoneno, password } = req.body
@@ -100,14 +117,14 @@ userRouter.post("/register", async (req, res) => {
             await user.save()
             res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
 
-            // fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user.phoneno}/${user.otp}/Airpax`)
-            //     .then((response) => response.json())
-            //     .then((data) => {
-            //         data.Status === 'Success' ?
-            //             res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
+            fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user.phoneno}/${user.otp}/Airpax`)
+                .then((response) => response.json())
+                .then((data) => {
+                    data.Status === 'Success' ?
+                        res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
 
-            //             : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/login", token: user.signuptoken })
-            //     });
+                        : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/login", token: user.signuptoken })
+                });
         }
     } catch (error) {
         console.log("Errod ", error);
