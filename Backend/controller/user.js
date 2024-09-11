@@ -141,7 +141,7 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
         user[0].otp = null;
         await user[0].save()
         if (user.length >= 1) {
-            res.json({ status: "success", message: "Otp Verification Successful", })
+            res.json({ status: "success", message: "Otp Verification Successful" })
         } else {
             res.json({ status: "error", message: "Otp Verification Failed. Please Try After Some Time", })
         }

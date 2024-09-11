@@ -54,7 +54,9 @@ const tripschema = mongoose.Schema({
         type: Number,
         required: true
     },
-
+    seatsbooked: {
+        type: Array
+    },
     CreatedAt: { type: Date, default: Date.now },
 });
 const TripModel = mongoose.model("Trips", tripschema)

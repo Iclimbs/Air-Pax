@@ -1,5 +1,7 @@
 # For Client End
 
+# User Routes 
+
 # User Login Url :- 
 url :- http://localhost:4500/api/v1/user/login
 Payload :-
@@ -16,43 +18,65 @@ Response From Server :-
 }
 
 
-# User Signup Url :- 
+# User Registration Url :- 
 
 url :- http://localhost:4500/api/v1/user/register
 
-body :- {
+Payload :- {
   "name":"Uttam Kumar Shaw",
   "email":"uttamkrshaw@iclimbs.com",
   "phoneno":7209408702
 }
 
 # Response From Server
-
-{
 {
   "status": "success",
   "message": "User Registration Successful",
   "redirect": "/login",
   "token": "w7hvPq9EIGAbddGN"
-}}
+}
 
 
 # Otp Verification 
 
 url :- http://localhost:4500/api/v1/user/otp/verification
 
-body :- {
+Payload :- {
 "otp":"115767"
 }
+
+# Response From Server 
+
+{ status: "success", message: "Otp Verification Successful", }
 
 # Create Password 
 
 url :- http://localhost:4500/api/v1/user/password
 
-Body :- {
+Payload :- {
 "password":"uttam@5599",
 "cnfpassword":"uttam@5599"
 }
+Token Required
+
+# Forgot Password 
+
+url :- http://localhost:4500/api/v1/user/forgot
+
+Payload :- {
+"phoneno":9091390251
+}
+
+
+# Change Password (Only works After Forgot Password)
+
+url :- http://localhost:4500/api/v1/user/password/change
+
+Payload :- {
+"password":"uttam@5599",
+"cnfpassword":"uttam@5599"
+}
+Token & Otp  Required in Headers (these details will be received in the Mail)
 
 
 
