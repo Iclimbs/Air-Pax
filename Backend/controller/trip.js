@@ -56,7 +56,6 @@ tripRouter.get("/listall", async (req, res) => {
 
 tripRouter.get("/list", async (req, res) => {
     const { from, to, date, tickets } = req.query
-    console.log(req.query);
     
     try {
         const trips = await TripModel.find({ from: from, to: to, journeystartdate: date, availableseats: { $gte: tickets } })

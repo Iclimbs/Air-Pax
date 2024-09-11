@@ -26,7 +26,6 @@ const hash = {
 userRouter.get("/me", async (req, res) => {
     try {
         const {token} = req.headers
-        console.log(req.headers);
         if (!token) {
             return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/login" })
         } else {
