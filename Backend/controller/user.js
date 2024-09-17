@@ -2,6 +2,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator')
 const express = require("express")
+const { oauth2client } = require("../service/googleConfig");
 const { UserModel } = require("../model/user.model");
 const { RegistrationAuthentication } = require('../middleware/Registration');
 const { transporter } = require('../service/transporter');
@@ -25,7 +26,7 @@ const hash = {
 
 userRouter.get("/me", async (req, res) => {
     try {
-        const {token} = req.headers
+        const { token } = req.headers
         if (!token) {
             return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/login" })
         } else {
@@ -114,8 +115,6 @@ userRouter.post("/register", async (req, res) => {
                 password: null
             })
             await user.save()
-            res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
-
             fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user.phoneno}/${user.otp}/Airpax`)
                 .then((response) => response.json())
                 .then((data) => {
@@ -126,8 +125,6 @@ userRouter.post("/register", async (req, res) => {
                 });
         }
     } catch (error) {
-        console.log("Errod ", error);
-        console.log("Errod ", error.message);
         res.json({ status: "error", message: `Error Found in User Registration ${error}` })
     }
 })
@@ -191,5 +188,31 @@ userRouter.post("/password/change", async (req, res) => {
         res.json({ status: "error", message: `Error Found in Creating New Password  ${error.message}` })
     }
 })
+
+// Login With Google 
+
+
+userRouter.post("/login/google", async (req, res) => {
+    try {
+        const { code } = req.query;
+        const googleRes = await oauth2client.getToken(code);
+        oauth2client.setCredentials(googleRes.tokens);
+
+        const response = await fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
+        const result = await response.json()
+        const { email, name, picture } = result.data;
+
+        let user = await UserModel.findOne({ email });
+        if (!user) {
+            user = new UserModel({ name, email });
+            await user.save()
+        }
+        return res.json({ status: "success", message: `User Detail's Successfully Saved in Server ` })
+
+    } catch (error) {
+      return  res.json({ status: "error", message: `Error Found in User Registration ${error}` })
+    }
+})
+
 
 module.exports = { userRouter }
