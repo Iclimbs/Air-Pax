@@ -31,7 +31,6 @@ userRouter.get("/me", async (req, res) => {
             return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/login" })
         } else {
             const decoded = jwt.verify(token, 'Authentication')
-            console.log(decoded);
             return res.json({ status: "success", message: "Working on Login Form" })
         }
     } catch (error) {
