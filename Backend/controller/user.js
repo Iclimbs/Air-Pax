@@ -31,7 +31,7 @@ userRouter.get("/me", async (req, res) => {
             return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/login" })
         } else {
             const decoded = jwt.verify(token, 'Authentication')
-            return res.json({ status: "success", message: "Working on Login Form" })
+            return res.json({ status: "success", message: "Getting User Details", user: decoded })
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
@@ -61,6 +61,9 @@ userRouter.post("/forgot", async (req, res) => {
     try {
         const { phoneno } = req.body
         const userExists = await UserModel.find({ phoneno })
+        console.log("user exists ",userExists);
+        console.log("paylod ",req.body);
+        
         if (userExists.length === 0) {
             return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
         } else {
@@ -70,13 +73,13 @@ userRouter.post("/forgot", async (req, res) => {
             userExists[0].otp = newotp;
             userExists[0].forgotpasswordtoken = forgotpasswordtoken
             await userExists[0].save()
-            let testing = path.join(__dirname, "../emailtemplate/forgotPassword.ejs")
-            ejs.renderFile(testing, { link: link }, function (err, template) {
+            let forgotPasswordtemplate = path.join(__dirname, "../emailtemplate/forgotPassword.ejs")
+            ejs.renderFile(forgotPasswordtemplate, { link: link }, function (err, template) {
                 if (err) {
                     res.json({ status: "error", message: err.message })
                 } else {
                     const mailOptions = {
-                        from: 'uttamkr5599@gmail.com',
+                        from: process.env.emailuser,
                         to: `${userExists[0].email}`,
                         subject: 'Otp To Reset Password.',
                         html: template
@@ -85,7 +88,7 @@ userRouter.post("/forgot", async (req, res) => {
                         if (error) {
                             return res.json({ status: "error", error: 'Failed to send email' });
                         } else {
-                            return res.json({ status: "success", message: 'Email sent successfully' });
+                            return res.json({ status: "success", message: 'Please Check Your Email ' });
                         }
                     })
                 }
@@ -153,7 +156,7 @@ userRouter.post("/password/create", async (req, res) => {
             if (user.length >= 1 && user[0].verified.phone == true) {
                 user[0].password = hash.sha256(password)
                 await user[0].save()
-                res.json({ status: "success", message: "New Password Created Please Login Now !!", token: '' })
+                res.json({ status: "success", message: "New Password Created Please Login Now !!" })
             } else {
                 res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/signup" })
             }
@@ -176,7 +179,7 @@ userRouter.post("/password/change", async (req, res) => {
                 user[0].forgotpasswordtoken = null
                 user[0].otp = null
                 await user[0].save()
-                res.json({ status: "success", message: "New Password Created Please Login Now !!" })
+                res.json({ status: "success", message: "Password Changed Successfully Please Login Now !!" })
             } else {
                 res.json({ status: "error", message: "You Haven't Made a request to Change Password", redirect: "/signup" })
             }
@@ -209,7 +212,7 @@ userRouter.post("/login/google", async (req, res) => {
         return res.json({ status: "success", message: `User Detail's Successfully Saved in Server ` })
 
     } catch (error) {
-      return  res.json({ status: "error", message: `Error Found in User Registration ${error}` })
+        return res.json({ status: "error", message: `Error Found in User Registration ${error}` })
     }
 })
 
