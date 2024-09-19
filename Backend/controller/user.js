@@ -61,9 +61,7 @@ userRouter.post("/forgot", async (req, res) => {
     try {
         const { phoneno } = req.body
         const userExists = await UserModel.find({ phoneno })
-        console.log("user exists ",userExists);
-        console.log("paylod ",req.body);
-        
+
         if (userExists.length === 0) {
             return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
         } else {
@@ -191,22 +189,21 @@ userRouter.post("/password/change", async (req, res) => {
     }
 })
 
-// Login With Google 
+// Register With Google 
 
 
-userRouter.post("/login/google", async (req, res) => {
+userRouter.get("/register/google", async (req, res) => {
     try {
         const { code } = req.query;
         const googleRes = await oauth2client.getToken(code);
         oauth2client.setCredentials(googleRes.tokens);
-
-        const response = await fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
-        const result = await response.json()
-        const { email, name, picture } = result.data;
+        const googleresponse = await fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
+        const result = await googleresponse.json()
+        const { email, name, picture } = result;
 
         let user = await UserModel.findOne({ email });
         if (!user) {
-            user = new UserModel({ name, email });
+            user = new UserModel({ name, email, picture, verified: { email: true } });
             await user.save()
         }
         return res.json({ status: "success", message: `User Detail's Successfully Saved in Server ` })
@@ -217,4 +214,28 @@ userRouter.post("/login/google", async (req, res) => {
 })
 
 
+
+
+userRouter.get("/login/google", async (req, res) => {
+    try {
+        const { code } = req.query;
+        const googleRes = await oauth2client.getToken(code);
+        oauth2client.setCredentials(googleRes.tokens);
+        const googleresponse = await fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
+        const result = await googleresponse.json()
+        const { email, name, picture } = result;
+
+        let user = await UserModel.findOne({ email, verified: { email: true } });
+        if (user) {
+            let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+            res.json({ status: "success", message: "Login Successful", token: token })
+            return res.json({ status: "success", message: `User Detail's Successfully Saved in Server ` })
+        }
+
+        
+
+    } catch (error) {
+        return res.json({ status: "error", message: `Error Found in User Registration ${error}` })
+    }
+})
 module.exports = { userRouter }

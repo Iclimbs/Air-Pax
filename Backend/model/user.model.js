@@ -32,6 +32,9 @@ const userschema = mongoose.Schema({
       default: false
     }
   },
+  picture: {
+    type: String
+  },
   type: {
     admin: {
       type: Boolean,
