@@ -213,9 +213,6 @@ userRouter.get("/register/google", async (req, res) => {
     }
 })
 
-
-
-
 userRouter.get("/login/google", async (req, res) => {
     try {
         const { code } = req.query;
@@ -231,9 +228,6 @@ userRouter.get("/login/google", async (req, res) => {
             res.json({ status: "success", message: "Login Successful", token: token })
             return res.json({ status: "success", message: `User Detail's Successfully Saved in Server ` })
         }
-
-        
-
     } catch (error) {
         return res.json({ status: "error", message: `Error Found in User Registration ${error}` })
     }
