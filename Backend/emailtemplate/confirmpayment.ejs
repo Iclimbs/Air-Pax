@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Confirmation Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2a9d8f;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .details-table th, .details-table td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .details-table th {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <h2>Payment Confirmed – Your Trip Details</h2>
+        <p>Dear <strong>[Customer's First Name]</strong>,</p>
+        <p>We are excited to inform you that your payment has been successfully processed! Please find the details of your upcoming trip below. If you have any questions, feel free to reach out to our support team.</p>
+
+        <h3>Trip Details:</h3>
+        <table class="details-table">
+            <tr>
+                <th>Destination</th>
+                <td>[Destination Name]</td>
+            </tr>
+            <tr>
+                <th>Departure Date</th>
+                <td>[Departure Date]</td>
+            </tr>
+            <tr>
+                <th>Return Date</th>
+                <td>[Return Date]</td>
+            </tr>
+            <tr>
+                <th>Departure City</th>
+                <td>[Departure City]</td>
+            </tr>
+            <tr>
+                <th>Flight Number</th>
+                <td>[Flight Number]</td>
+            </tr>
+            <tr>
+                <th>Hotel Name</th>
+                <td>[Hotel Name]</td>
+            </tr>
+        </table>
+
+        <h3>Important Information:</h3>
+        <table class="details-table">
+            <tr>
+                <th>PNR Number</th>
+                <td><strong>[PNR Number]</strong></td>
+            </tr>
+            <tr>
+                <th>Check-in Time</th>
+                <td>[Check-in Time]</td>
+            </tr>
+        </table>
+
+        <h3>Additional Services:</h3>
+        <table class="details-table">
+            <tr>
+                <th>Baggage Allowance</th>
+                <td>[Baggage Allowance]</td>
+            </tr>
+            <tr>
+                <th>Meal Preferences</th>
+                <td>[Meal Preferences]</td>
+            </tr>
+            <tr>
+                <th>Special Requests</th>
+                <td>[Special Requests]</td>
+            </tr>
+        </table>
+
+        <p>If you need any further assistance, please feel free to contact us at <a href="mailto:[Support Email]">[Support Email]</a> or call us at [Support Phone Number]. You can also visit our website <a href="[Website URL]">[Website URL]</a> for more information.</p>
+
+        <p>We wish you a pleasant and enjoyable trip!</p>
+
+        <p>Best regards,</p>
+        <p><strong>[Your Company Name]</strong></p>
+
+        <div class="footer">
+            <p>[Your Company Address]</p>
+            <p>Email: <a href="mailto:[Support Email]">[Support Email]</a> | Phone: [Support Phone Number]</p>
+            <p><a href="[Website URL]">[Website URL]</a></p>
+        </div>
+    </div>
+
+</body>
+</html>
