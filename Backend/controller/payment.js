@@ -13,7 +13,7 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
 
     }
     const seat = await SeatModel.updateMany(filter, update);
-    return res.json({ status: "success", message: "Testing Success !!" })
+    return res.json({ status: "success", message: "Ticket Booking Successful !!" })
 })
 
 
@@ -25,6 +25,6 @@ PaymentRouter.get("/failure/:pnr", async (req, res) => {
     const seat = await SeatModel.deleteMany(filter);
     console.log(seat);
     
-    res.json({ status: "success", message: "New Counter Added !!" })
+    res.json({ status: "success", message: "Ticket Booking Failed !!" })
 })
 module.exports = { PaymentRouter }
