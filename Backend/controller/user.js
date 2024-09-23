@@ -203,8 +203,6 @@ userRouter.get("/register/google", async (req, res) => {
         const { email, name, picture } = result;
 
         let user = await UserModel.findOne({ email });
-        console.log("User ", user);
-
         if (!user) {
             user = new UserModel({ name, email, picture, verified: { email: true } });
             await user.save()
