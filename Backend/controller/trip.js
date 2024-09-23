@@ -53,10 +53,10 @@ tripRouter.get("/listall", async (req, res) => {
 
 
 tripRouter.get("/list", async (req, res) => {
-    const { from, to, date, tickets } = req.query
+    const { from, to, date } = req.query
     
     try {
-        const trips = await TripModel.find({ from: from, to: to, journeystartdate: date, availableseats: { $gte: tickets } })
+        const trips = await TripModel.find({ from: from, to: to, journeystartdate: date})
         res.json({ status: "success",data:trips })
     } catch (error) {
         res.json({ status: "error", message: "Get List Failed" })

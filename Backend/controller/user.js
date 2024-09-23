@@ -154,7 +154,8 @@ userRouter.post("/password/create", async (req, res) => {
             if (user.length >= 1 && user[0].verified.phone == true) {
                 user[0].password = hash.sha256(password)
                 await user[0].save()
-                res.json({ status: "success", message: "New Password Created Please Login Now !!" })
+                let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+                res.json({ status: "success", message: "Login Successful", token: token })
             } else {
                 res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/signup" })
             }
@@ -202,34 +203,20 @@ userRouter.get("/register/google", async (req, res) => {
         const { email, name, picture } = result;
 
         let user = await UserModel.findOne({ email });
+        console.log("User ", user);
+
         if (!user) {
             user = new UserModel({ name, email, picture, verified: { email: true } });
             await user.save()
-        }
-        return res.json({ status: "success", message: `User Detail's Successfully Saved in Server ` })
-
-    } catch (error) {
-        return res.json({ status: "error", message: `Error Found in User Registration ${error}` })
-    }
-})
-
-userRouter.get("/login/google", async (req, res) => {
-    try {
-        const { code } = req.query;
-        const googleRes = await oauth2client.getToken(code);
-        oauth2client.setCredentials(googleRes.tokens);
-        const googleresponse = await fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
-        const result = await googleresponse.json()
-        const { email, name, picture } = result;
-
-        let user = await UserModel.findOne({ email, verified: { email: true } });
-        if (user) {
-            let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
-            res.json({ status: "success", message: "Login Successful", token: token })
-            return res.json({ status: "success", message: `User Detail's Successfully Saved in Server ` })
+            let token = jwt.sign({ name: user.name, email: user.email, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+            return res.json({ status: "success", message: "Registration Successful", token: token })
+        } else {
+            let token = jwt.sign({ name: user.name, email: user.email, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+            return res.json({ status: "success", message: "Login Successful", token: token })
         }
     } catch (error) {
         return res.json({ status: "error", message: `Error Found in User Registration ${error}` })
     }
 })
+
 module.exports = { userRouter }
