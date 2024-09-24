@@ -18,17 +18,13 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails.phoneno,
-            lockExpires: Date.now() + 10 * 60 * 1000, // Lock for 10 minutes
+            lockExpires: Date.now() + 20 * 60 * 1000, // Lock for 20 minutes
             pnr:ticketpnr,
             details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender }
         })
     }
     const trip = await TripModel.find({ _id: tripId })
     let bookedseats = trip[0].seatsbooked;
-
-    console.log("seat ", seats);
-    console.log("booked seats ", bookedseats);
-    console.log(bookedseats.includes(...seats));
     let alreadyexist = false;
     let alreadyexistseats = []; //check the list of Seat's whose seats are already booked. 
 
@@ -38,7 +34,6 @@ SeatRouter.post("/selectedseats", async (req, res) => {
             alreadyexist = true;
         }
     }
-
     if (alreadyexist) {
         return res.json({ status: "error", message: "Some Seat's Are Already Booked Please Select Any Other Seat", seats: alreadyexistseats })
     } else {
@@ -46,21 +41,8 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         trip[0].seatsbooked = new_seatsbooked
         await trip[0].save();
         const result = await SeatModel.insertMany(seatdetails);
-        return res.json({ status: "success", message: "New Counter Added !!" })
+        return res.json({ status: "success",pnr:ticketpnr })
     }
-    // console.log("Already booked seats ", bookedseats);
-
-
-    // console.log("seat ", seats);
-
-    // console.log("any seat booked ", bookedseats.includes(...seats));
-
-    // res.json({ status: "success", message: "New Counter Added !!" })
 })
 
-
-SeatRouter.get("/selectedseats", async (req, res) => {
-    const { } = req.body
-    res.json({ status: "success", message: "New Counter Added !!" })
-})
 module.exports = { SeatRouter }
