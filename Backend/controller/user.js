@@ -46,7 +46,9 @@ userRouter.post("/login", async (req, res) => {
             return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
         } else {
             if (hash.sha256(password) === userExists[0].password) {
-                let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+                let token = jwt.sign({
+                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
+                }, "Authentication")
                 res.json({ status: "success", message: "Login Successful", token: token })
             } else {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
@@ -154,7 +156,9 @@ userRouter.post("/password/create", async (req, res) => {
             if (user.length >= 1 && user[0].verified.phone == true) {
                 user[0].password = hash.sha256(password)
                 await user[0].save()
-                let token = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, "Authentication")
+                let token = jwt.sign({
+                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
+                }, "Authentication")
                 res.json({ status: "success", message: "Login Successful", token: token })
             } else {
                 res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/signup" })
