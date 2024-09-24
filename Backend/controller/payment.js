@@ -29,7 +29,9 @@ PaymentRouter.get("/failure/:pnr", async (req, res) => {
     }
     const trip = await TripModel.find({ _id: tripid })
     const bookedseats = trip[0].seatsbooked.filter(item => !removeseats.includes(item)); // bookedseats will contain the list of those seats whose payment is completed
-    trip[0].seatsbooked=bookedseats
+    trip[0].seatsbooked = bookedseats
+    trip[0].bookedseats = trip[0].bookedseats - removeseats.length
+    trip[0].availableseats = trip[0].availableseats + removeseats.length
     await trip[0].save()
     const seat = await SeatModel.deleteMany(filter);
     res.json({ status: "success", message: "Ticket Booking Failed !!" })

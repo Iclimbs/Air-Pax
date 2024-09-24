@@ -12,14 +12,14 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         useLetters: true,
         useNumbers: true
     });
-        let seats = [] // All the Seats Passenger Detail's For Which User is Applying to Book 
+    let seats = [] // All the Seats Passenger Detail's For Which User is Applying to Book 
     let seatdetails = [] // All the Details of the Passenger's 
     for (let index = 0; index < passengerdetails.length; index++) {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
-            seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails.phoneno,
+            seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
             lockExpires: Date.now() + 20 * 60 * 1000, // Lock for 20 minutes
-            pnr:ticketpnr,
+            pnr: ticketpnr,
             details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender }
         })
     }
@@ -39,9 +39,11 @@ SeatRouter.post("/selectedseats", async (req, res) => {
     } else {
         let new_seatsbooked = bookedseats.concat(seats)
         trip[0].seatsbooked = new_seatsbooked
+        trip[0].availableseats = trip[0].availableseats - seats.length
+        trip[0].bookedseats = new_seatsbooked.length
         await trip[0].save();
         const result = await SeatModel.insertMany(seatdetails);
-        return res.json({ status: "success",pnr:ticketpnr })
+        return res.json({ status: "success", pnr: ticketpnr })
     }
 })
 
