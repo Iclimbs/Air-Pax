@@ -2,11 +2,12 @@ require('dotenv').config()
 const express = require("express")
 const generateUniqueId = require('generate-unique-id');
 const { SeatModel } = require("../model/seat.model")
-const { TripModel } = require("../model/trip.model")
+const { TripModel } = require("../model/trip.model");
+const { PaymentModel } = require('../model/payment.model');
 const SeatRouter = express.Router()
 
 SeatRouter.post("/selectedseats", async (req, res) => {
-    const { userdetails, passengerdetails, tripId } = req.body
+    const { userdetails, passengerdetails, tripId,amount} = req.body
     const ticketpnr = generateUniqueId({
         length: 10,
         useLetters: true,
@@ -42,6 +43,8 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         trip[0].availableseats = trip[0].availableseats - seats.length
         trip[0].bookedseats = new_seatsbooked.length
         await trip[0].save();
+        const paymentdetails =  new PaymentModel({pnr:ticketpnr,userid:userdetails._id,amount:amount})
+        await paymentdetails.save()
         const result = await SeatModel.insertMany(seatdetails);
         return res.json({ status: "success", pnr: ticketpnr })
     }

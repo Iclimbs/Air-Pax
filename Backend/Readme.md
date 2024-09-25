@@ -484,3 +484,37 @@ bookingRefId;"RandomRefID"
 
 
  {"PrimaryUser":{"Name":"sdas sads","Email":"adwq@gmail.com","PhoneNo":7898789878},"PassengerDetails":[{"Fname":"sdas","Lname":"sads","Gender":"Female","Age":22,"PhoneNo":7898789878,"Email":"adwq@gmail.com","Country":"1","SeatNo":"5B"},{"Fname":"addsd","Lname":"sads","Gender":"Male","Age":44,"PhoneNo":7876787657,"Email":"adwsq@gmail.com","Country":"1","SeatNo":"6B"}],"TripId":"66f1198ba1d4b90b144cd946","BookingRefId":"TH638628903213","Amount":3171.84}
+
+
+
+
+ /Aprpax Payload
+
+
+ {
+    "userdetails": {
+        "_id": "66e821d29d9f7df8028a09af",
+        "name": "Uttam Kumar Shaw",
+        "email": "uttamkrshaw@iclimbs.com",
+        "phoneno": 917209408702,
+        "exp": 1727301136,
+        "iat": 1727297536
+    },
+    "passengerdetails": [
+        {
+            "fname": "Abhinay",
+            "lname": "Kumar",
+            "age": "25",
+            "gender": "Male",
+            "seatno": "6D"
+        },
+        {
+            "fname": "Rahul",
+            "lname": "Kumar",
+            "age": "25",
+            "gender": "Male",
+            "seatno": "7D"
+        }
+    ],
+    "tripId": "66f11995a1d4b90b144cd947"
+}

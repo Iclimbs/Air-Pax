@@ -1,8 +1,8 @@
 require('dotenv').config()
 const express = require("express")
-const generateUniqueId = require('generate-unique-id');
 const { SeatModel } = require("../model/seat.model")
-const { TripModel } = require("../model/trip.model")
+const { TripModel } = require("../model/trip.model");
+const { PaymentModel } = require('../model/payment.model');
 
 const PaymentRouter = express.Router()
 
@@ -13,6 +13,10 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
         $set: { isBooked: true }, // set status field
     }
     const seat = await SeatModel.updateMany(filter, update);
+    const paymentdetails = await PaymentModel.find({pnr:pnr})
+    paymentdetails[0].paymentstatus.pending=false;
+    paymentdetails[0].paymentstatus.complete=true;
+    await paymentdetails[0].save()
     return res.json({ status: "success", message: "Ticket Booking Successful !!" })
 })
 
@@ -34,6 +38,10 @@ PaymentRouter.get("/failure/:pnr", async (req, res) => {
     trip[0].availableseats = trip[0].availableseats + removeseats.length
     await trip[0].save()
     const seat = await SeatModel.deleteMany(filter);
+    const paymentdetails = await PaymentModel.find({pnr:pnr})
+    paymentdetails[0].paymentstatus.pending=false;
+    paymentdetails[0].paymentstatus.failure=true;
+    await paymentdetails[0].save()
     res.json({ status: "success", message: "Ticket Booking Failed !!" })
 })
 module.exports = { PaymentRouter }
