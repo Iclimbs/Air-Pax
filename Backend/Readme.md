@@ -420,3 +420,67 @@ Payload
 Testing Login Id & Password
 phoneno-9091390251
 password- testing
+
+# GMR Data Model
+
+public class PassengerModel
+ {
+     public string fname { get; set; }
+     public string lname { get; set; }
+     public string Gender { get; set; }
+     public int Age { get; set; }
+     public string PhoneNumber { get; set; }
+     public string Email { get; set; }
+     public string Country { get; set; }
+     public string SeatNo { get; set; }
+ }
+ public class PrimaryUserModel
+ {
+     public string Name { get; set; }
+     public string Email { get; set; }
+     public string PhoneNumber { get; set; }
+ }
+
+ public class BookingModel
+ {
+     public PrimaryUserModel PrimaryUser { get; set; }
+     public List<PassengerModel> Passengers { get; set; }
+     public string TripId { get; set; }
+     public string BookingRefId { get; set; }
+ }
+
+ {
+primaryuser:{
+    name:"Uttam Kumar",
+    email:"uttamkr5599@gmail.com",
+    phoneno:7209408702
+},
+passengerdetails:[
+{
+    fname:"Abhinay",
+    lname:"Kumar",
+    gender:"Male",
+    Age:25,
+    phoneno:9091390251,
+    email:"abhinay@gmail.com",
+    country:"India",
+    seatno:"1A"
+},
+{
+    fname:"Rahul",
+    lname:"Kumar",
+    gender:"Male",
+    Age:25,
+    phoneno:9091390252,
+    email:"rahul@gmail.com",
+    country:"India",
+    seatno:"1B"
+},
+tripId:"RandomID",
+bookingRefId;"RandomRefID"
+]
+ }
+
+
+
+ {"PrimaryUser":{"Name":"sdas sads","Email":"adwq@gmail.com","PhoneNo":7898789878},"PassengerDetails":[{"Fname":"sdas","Lname":"sads","Gender":"Female","Age":22,"PhoneNo":7898789878,"Email":"adwq@gmail.com","Country":"1","SeatNo":"5B"},{"Fname":"addsd","Lname":"sads","Gender":"Male","Age":44,"PhoneNo":7876787657,"Email":"adwsq@gmail.com","Country":"1","SeatNo":"6B"}],"TripId":"66f1198ba1d4b90b144cd946","BookingRefId":"TH638628903213","Amount":3171.84}
