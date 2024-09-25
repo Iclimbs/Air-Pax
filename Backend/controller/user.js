@@ -156,7 +156,7 @@ userRouter.post("/password/create", async (req, res) => {
                 user[0].password = hash.sha256(password)
                 await user[0].save()
                 let token = jwt.sign({
-                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
+                    _id: user[0]._id, name: user[0].name, email: user[0].email, phoneno: user[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 }, "Authentication")
                 res.json({ status: "success", message: "Login Successful", token: token, redirect: "/" })
             } else {
