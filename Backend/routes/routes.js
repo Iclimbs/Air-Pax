@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { CounterRouter } = require("../controller/counter");
+const { OtherPaymentRouter } = require("../controller/otherpayment");
 const { OtherSeatRouter } = require("../controller/otherseat");
 const { PaymentRouter } = require("../controller/payment");
 const { SeatRouter } = require("../controller/seat");
@@ -17,6 +18,7 @@ router
     .use("/seat",SeatRouter)
     .use("/payment",PaymentRouter)
     .use("/new/seat/",OtherSeatRouter)
+    .use("/new/payment",OtherPaymentRouter)
 
 
 module.exports = router;
