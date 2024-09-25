@@ -14,6 +14,8 @@ const otheruserschema = mongoose.Schema({
   passengerdetails: Array,
   tripId: String,
   bookingRefId: String,
+  amount:Number,
+  pnr:String,
   CreatedAt: { type: Date, default: Date.now },
 });
 const OtherUserModel = mongoose.model("GMR", otheruserschema);
