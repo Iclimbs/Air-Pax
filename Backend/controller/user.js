@@ -28,7 +28,7 @@ userRouter.get("/me", async (req, res) => {
     try {
         const { token } = req.headers
         if (!token) {
-            return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/login" })
+            return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/user/login" })
         } else {
             const decoded = jwt.verify(token, 'Authentication')
             return res.json({ status: "success", message: "Getting User Details", user: decoded })
@@ -43,7 +43,7 @@ userRouter.post("/login", async (req, res) => {
         const { phoneno, password } = req.body
         const userExists = await UserModel.find({ phoneno })
         if (userExists.length === 0) {
-            return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
+            return res.json({ status: "error", message: "No User Exists Please SignUp First", redirect: "/user/register" })
         } else {
             if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
@@ -65,7 +65,7 @@ userRouter.post("/forgot", async (req, res) => {
         const userExists = await UserModel.find({ phoneno })
 
         if (userExists.length === 0) {
-            return res.json({ status: "success", message: "No User Exists Please SignUp First", redirect: "/signup" })
+            return res.json({ status: "error", message: "No User Exists Please SignUp First", redirect: "/user/register" })
         } else {
             let newotp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
             let forgotpasswordtoken = jwt.sign({ name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 15) }, "Registration");
@@ -88,7 +88,7 @@ userRouter.post("/forgot", async (req, res) => {
                         if (error) {
                             return res.json({ status: "error", error: 'Failed to send email' });
                         } else {
-                            return res.json({ status: "success", message: 'Please Check Your Email ' });
+                            return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
                         }
                     })
                 }
@@ -106,7 +106,7 @@ userRouter.post("/register", async (req, res) => {
         const { name, email, phoneno } = req.body
         const userExists = await UserModel.find({ phoneno })
         if (userExists.length >= 1) {
-            res.json({ status: "error", message: "User Already Exists with this Phone Number. Please Try another Phone No", redirect: "/login" })
+            res.json({ status: "error", message: "User Already Exists with this Phone Number. Please Try another Phone No", redirect: "/user/login" })
         } else {
             const user = new UserModel({
                 name,
@@ -121,9 +121,8 @@ userRouter.post("/register", async (req, res) => {
                 .then((response) => response.json())
                 .then((data) => {
                     data.Status === 'Success' ?
-                        res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/login", token: user.signuptoken })
-
-                        : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/login", token: user.signuptoken })
+                        res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/user/login", token: user.signuptoken })
+                        : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/user/login", token: user.signuptoken })
                 });
         }
     } catch (error) {
@@ -139,7 +138,7 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
         user[0].otp = null;
         await user[0].save()
         if (user.length >= 1) {
-            res.json({ status: "success", message: "Otp Verification Successful" })
+            res.json({ status: "success", message: "Otp Verification Successful", redirect: "/create-password" })
         } else {
             res.json({ status: "error", message: "Otp Verification Failed. Please Try After Some Time", })
         }
@@ -159,9 +158,9 @@ userRouter.post("/password/create", async (req, res) => {
                 let token = jwt.sign({
                     _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 }, "Authentication")
-                res.json({ status: "success", message: "Login Successful", token: token })
+                res.json({ status: "success", message: "Login Successful", token: token, redirect: "/" })
             } else {
-                res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/signup" })
+                res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/" })
             }
         } else {
             res.json({ status: "error", message: "Password & Confirm Password Doesn't Match" })
@@ -184,7 +183,7 @@ userRouter.post("/password/change", async (req, res) => {
                 await user[0].save()
                 res.json({ status: "success", message: "Password Changed Successfully Please Login Now !!" })
             } else {
-                res.json({ status: "error", message: "You Haven't Made a request to Change Password", redirect: "/signup" })
+                res.json({ status: "error", message: "You Haven't Made a request to Change Password", redirect: "/user/login" })
             }
         } else {
             res.json({ status: "error", message: "Password & Confirm Password Doesn't Match" })
