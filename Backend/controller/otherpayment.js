@@ -1,15 +1,17 @@
 require('dotenv').config()
 const express = require("express")
-const generateUniqueId = require('generate-unique-id');
+const ejs = require("ejs")
+const path = require('node:path');
+const { transporter } = require('../service/transporter');
 const { SeatModel } = require("../model/seat.model")
 const { TripModel } = require("../model/trip.model");
 const { PaymentModel } = require('../model/payment.model');
+const { OtherUserModel } = require('../model/Other.seat.model');
 
 const OtherPaymentRouter = express.Router()
 
 OtherPaymentRouter.get("/success", async (req, res) => {
     const { pnr, ref, method } = req.query
-    // Fix Seats, payment, gmrs
     const filter = { pnr: pnr };
     const update = {
         $set: { isBooked: true }, // set status field
@@ -21,7 +23,28 @@ OtherPaymentRouter.get("/success", async (req, res) => {
         paymentdetails[0].paymentstatus.pending = false
     paymentdetails[0].paymentstatus.complete = true
     await paymentdetails[0].save()
-    return res.json({ status: "success", message: "Ticket Booking Successful !!" })
+    const userdetails = await OtherUserModel.find({ pnr: pnr })
+    const tripdetails = await TripModel.find({ _id: userdetails[0].tripId })
+    let Gmrconfirmpayment = path.join(__dirname, "../emailtemplate/gmrconfirmpayment.ejs")
+    ejs.renderFile(Gmrconfirmpayment, { user: userdetails[0].primaryuser, seat: userdetails[0].passengerdetails, trip: tripdetails[0], pnr: userdetails[0].pnr, amount: userdetails[0].amount }, function (err, template) {
+        if (err) {
+            res.json({ status: "error", message: err.message })
+        } else {
+            const mailOptions = {
+                from: process.env.emailuser,
+                to: `${userdetails[0].primaryuser.email}`,
+                subject: `Booking Confirmation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+                html: template
+            }
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return res.json({ status: "error", error: 'Failed to send email' });
+                } else {
+                    return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+                }
+            })
+        }
+    })
 })
 
 
@@ -35,9 +58,6 @@ OtherPaymentRouter.get("/failure/", async (req, res) => {
         removeseats.push(lockedseats[index].seatNumber)
         tripid = lockedseats[index].tripId
     }
-    console.log("lockedseats", lockedseats);
-    console.log("Trip id ", tripid);
-    console.log("Remove Seats ", removeseats);
     const trip = await TripModel.find({ _id: tripid })
     const bookedseats = trip[0].seatsbooked.filter(item => !removeseats.includes(item)); // bookedseats will contain the list of those seats whose payment is completed
     trip[0].seatsbooked = bookedseats
@@ -47,8 +67,8 @@ OtherPaymentRouter.get("/failure/", async (req, res) => {
     const seat = await SeatModel.deleteMany(filter);
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
     paymentdetails[0].refno = ref,
-    paymentdetails[0].method = method,
-    paymentdetails[0].paymentstatus.pending = false
+        paymentdetails[0].method = method,
+        paymentdetails[0].paymentstatus.pending = false
     paymentdetails[0].paymentstatus.failure = true
     await paymentdetails[0].save()
     res.json({ status: "success", message: "Ticket Booking Failed !!" })

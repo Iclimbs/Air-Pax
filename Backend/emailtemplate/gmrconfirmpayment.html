@@ -58,6 +58,11 @@
             color: black;
             margin-top: 20px;
         }
+
+        .footer table {
+            text-align: center;
+
+        }
     </style>
 </head>
 
@@ -116,13 +121,13 @@
             <tr>
                 <th>PNR Number</th>
                 <td><strong>
-                        <%= payment.pnr %>
+                        <%= pnr %>
                     </strong></td>
             </tr>
             <tr>
                 <th>Total Amount</th>
                 <td>
-                    <%= payment.amount %>
+                    <%= amount %>
                 </td>
             </tr>
         </table>
@@ -133,31 +138,49 @@
                 <tr>
                     <th>First Name</th>
                     <td>
-                        <%=seat.details.fname %>
+                        <%=seat.Fname %>
                     </td>
                 </tr>
                 <tr>
                     <th>Last Name</th>
                     <td>
-                        <%=seat.details.lname %>
+                        <%=seat.Lname %>
                     </td>
                 </tr>
                 <tr>
                     <th>Age</th>
                     <td>
-                        <%=seat.details.age %>
+                        <%=seat.Age %>
                     </td>
                 </tr>
                 <tr>
                     <th>Gender</th>
                     <td>
-                        <%=seat.details.gender %>
+                        <%=seat.Gender %>
                     </td>
                 </tr>
                 <tr>
                     <th>Seat No</th>
                     <td>
-                        <%=seat.seatNumber %>
+                        <%=seat.SeatNo %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Phone No</th>
+                    <td>
+                        <%=seat.PhoneNo %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Email No</th>
+                    <td>
+                        <%=seat.Email %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Country</th>
+                    <td>
+                        <%=seat.Country %>
                     </td>
                 </tr>
             </table>
