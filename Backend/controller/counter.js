@@ -28,7 +28,6 @@ CounterRouter.patch("/edit/:id", async (req, res) => {
 
 CounterRouter.patch("/disable/:id", async (req, res) => {
     const { id } = req.params
-    console.log("Disable id", id);
     try {
         const counter = await CounterModel.findById({ _id: id })
         counter.status.enabled = !counter.status.enabled;

@@ -5,14 +5,12 @@ const vehicleRouter = express.Router()
 
 vehicleRouter.post("/add", async (req, res) => {
     const { name, busno, registrationno, facilities, seats, price } = req.body;
-    console.log("Body ",req.body);
     
     try {
         const newvehicle = new VehicleModel({ name, busno, registrationno, facilities: facilities.split(","), seats, price })
         await newvehicle.save()
         res.json({ status: "success", message: "New Vehicle Added !!" })
     } catch (error) {
-        console.log(error.message);
         res.json({ status: "error", message: "Failed To Add New Vehicle" })
     }
 })
@@ -40,7 +38,6 @@ vehicleRouter.patch("/disable/:id", async (req, res) => {
         await vehicle.save()
         res.json({ status: "success", message: "Vehicle Condition Updated Successfully !!" })
     } catch (error) {
-        console.log(error.message);
         res.json({ status: "error", message: "Failed To Update Vehicle Condition Details" })
     }
 })

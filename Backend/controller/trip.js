@@ -9,7 +9,6 @@ tripRouter.post("/add", async (req, res) => {
         await newtrip.save()
         res.json({ status: "success", message: "Successfully Addeded A New Trip" })
     } catch (error) {
-        console.log(error.message);
         res.json({ status: "error", message: "Adding Trip Process Failed" })
 
     }
