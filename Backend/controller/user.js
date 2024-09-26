@@ -45,12 +45,17 @@ userRouter.post("/login", async (req, res) => {
         if (userExists.length === 0) {
             return res.json({ status: "error", message: "No User Exists Please SignUp First", redirect: "/user/register" })
         } else {
-            if (hash.sha256(password) === userExists[0].password) {
+            if (userExists[0].verified.phone == false) {
+                res.json({ status: "error", message: "Please Verify Your Phone No First ", token: userExists[0].signuptoken, redirect: "/user/otp-verification" })
+
+            } else if (userExists[0].password == null) {
+                res.json({ status: "error", message: "Please Create A Password Before Login", token: userExists[0].signuptoken, redirect: "/user/create-password" })
+            } else if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
                     _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 }, "Authentication")
-                res.json({ status: "success", message: "Login Successful", token: token })
-            } else {
+                res.json({ status: "success", message: "Login Successful", token: token})
+            } else if (hash.sha256(password) != userExists[0].password) {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }
         }
@@ -140,7 +145,7 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
         if (user.length >= 1) {
             res.json({ status: "success", message: "Otp Verification Successful", redirect: "/create-password" })
         } else {
-            res.json({ status: "error", message: "Otp Verification Failed. Please Try After Some Time", })
+            res.json({ status: "error", message: "Otp Verification Failed. Please Try Again", })
         }
     } catch (error) {
         res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
@@ -156,11 +161,11 @@ userRouter.post("/password/create", async (req, res) => {
                 user[0].password = hash.sha256(password)
                 await user[0].save()
                 let token = jwt.sign({
-                    _id: user[0]._id, name: user[0].name, email: user[0].email, phoneno: user[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
+                    _id: user[0]?._id, name: user[0]?.name, email: user[0]?.email, phoneno: user[0]?.phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 }, "Authentication")
                 res.json({ status: "success", message: "Login Successful", token: token, redirect: "/" })
             } else {
-                res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/" })
+                res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/user/otp-verification" })
             }
         } else {
             res.json({ status: "error", message: "Password & Confirm Password Doesn't Match" })
@@ -204,8 +209,9 @@ userRouter.get("/register/google", async (req, res) => {
         const googleresponse = await fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
         const result = await googleresponse.json()
         const { email, name, picture } = result;
-
         let user = await UserModel.findOne({ email });
+        console.log("USer google login ", user);
+
         if (!user) {
             user = new UserModel({ name, email, picture, verified: { email: true } });
             await user.save()
