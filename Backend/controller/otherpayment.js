@@ -10,7 +10,7 @@ const { OtherUserModel } = require('../model/Other.seat.model');
 
 const OtherPaymentRouter = express.Router()
 
-OtherPaymentRouter.get("/success", async (req, res) => {
+OtherPaymentRouter.get("/success/", async (req, res) => {
     const { pnr, ref, method } = req.query
     const filter = { pnr: pnr };
     const update = {
