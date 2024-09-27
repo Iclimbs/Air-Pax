@@ -29,9 +29,8 @@ PaymentGateway.post("/initiate-payment", async (req, res) => {
         billing_zip: 122015,
         billing_country: 'India',
     };
-
     const encryptedData = encrypt(JSON.stringify(data), workingKey);
-
+    console.log(encryptedData);
     res.json({
         encryptedData: encryptedData,
         accessCode: accessCode,
