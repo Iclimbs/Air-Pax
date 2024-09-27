@@ -17,8 +17,8 @@ PaymentGateway.post("/initiate-payment", async (req, res) => {
         order_id: 'testing',
         amount: 1,
         currency: 'INR',
-        redirect_url: 'https://air-pax.onrender.com/api/v1/gateway/payment-status', // Your payment status route
-        cancel_url: 'https://air-pax.onrender.com/api/v1/gateway/payment-cancel',
+        redirect_url: 'https://airpax.co/api/v1/gateway/payment-status', // Your payment status route
+        cancel_url: 'https://airpax.co/api/v1/gateway/payment-cancel',
         language: 'EN',
         billing_name: 'uttam',
         billing_email: 'uttamkrshaw@iclimbs.com',
