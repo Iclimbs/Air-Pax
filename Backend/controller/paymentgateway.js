@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require("express")
 const PaymentGateway = express.Router()
-
+const {encrypt, decrypt} = require("../payment/ccavenue")
 
 const merchantId = process.env.MID;
 const accessCode = process.env.access_code;
