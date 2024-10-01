@@ -6,9 +6,11 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
+import { IoTicketOutline } from "react-icons/io5";
 import { Home, Notifications, Counter, Trip } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import Vehicles from "./pages/dashboard/vehicles";
+import TicketBooking from "./pages/dashboard/ticketBooking";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -41,6 +43,12 @@ export const routes = [
         name: "trip",
         path: "/trip",
         element: <Trip />,
+      },
+      {
+        icon: <IoTicketOutline  {...icon} />,
+        name: "Ticket Booking",
+        path: "/ticket-booking",
+        element: <TicketBooking/>,
       },
       {
         icon: <InformationCircleIcon {...icon} />,
