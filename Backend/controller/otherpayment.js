@@ -54,6 +54,7 @@ OtherPaymentRouter.get("/failure/", async (req, res) => {
     const lockedseats = await SeatModel.find(filter) // contains list of all the seats which are currently locked with the particula Pnr ID. 
     let removeseats = [] // list of seat's which need's to be removed whose payment is not yet completed 
     let tripid = "" // Trip ID this consists the id of the Trip From which the unbooked seats will be Removed
+
     for (let index = 0; index < lockedseats.length; index++) {
         removeseats.push(lockedseats[index].seatNumber)
         tripid = lockedseats[index].tripId
