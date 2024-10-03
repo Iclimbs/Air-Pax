@@ -85,7 +85,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
 
         //Initializing Vector and then convert in base64 string
         let ivBase64 = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]).toString('base64');
-        let body = `tid=${data.tid}&merchant_id=${data.merchant_id}&order_id=${data.order_id}&amount=${data.total_amount}&currency=INR&redirect_url=${process.env.success_url}${data.order_id}&cancel_url=${process.env.failure_url}${data.order_id}&language=EN`
+        let body = `tid=${data.tid}&merchant_id=${data.merchant_id}&order_id=${data.order_id}&amount=${data.total_amount}&currency=INR&redirect_url=${process.env.success_url}&cancel_url=${process.env.failure_url}${data.order_id}&language=EN`
 
         let encryptedData = ccav.encrypt(body, keyBase64, ivBase64);
 
