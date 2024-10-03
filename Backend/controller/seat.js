@@ -45,31 +45,48 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         trip[0].seatsbooked = new_seatsbooked
         trip[0].availableseats = trip[0].availableseats - seats.length
         trip[0].bookedseats = new_seatsbooked.length
-        await trip[0].save();
-        const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: amount })
-        await paymentdetails.save()
-        const result = await SeatModel.insertMany(seatdetails);
+        try {
+            await trip[0].save();
+        } catch (error) {
+            console.log(error.message);
+            return res.json({ status: "error", message: "Failed To Lock Seats in The Trip" })
+        }
+        try {
+            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: amount })
+            await paymentdetails.save()
+
+        } catch (error) {
+            console.log(error.message);
+            return res.json({ status: "error", message: "Failed To Added Payment Details" })
+
+        }
+        try {
+            const result = await SeatModel.insertMany(seatdetails);
+        } catch (error) {
+            console.log(error.message);
+            return res.json({ status: "error", message: "Failed To Added Seat Details" })
+        }
         const data = {
-            tid : new Date().getTime(),
-            merchant_id: "1734948",
-            order_id: "123654789",
+            tid: new Date().getTime(),
+            merchant_id: process.env.MID,
+            order_id: ticketpnr,
             currency: "INR",
-            amount: "120",
-            redirect_url: "http://localhost:5173/payment/success",
-            cancel_url: "http://localhost:5173/payment/cancel",
+            total_amount: amount,
+            redirect_url: process.env.success_url,
+            cancel_url: process.env.failure_url,
             language: "EN"
         };
 
-        const code = "ATKQ05LI96BY04QKYB";
-        const workingKey = "474EDB6F843BA3C2D56DB27412290038";
-        const ccavenueUrl = "https://test.ccavenue.com/transaction/transaction.do?command=initiateTransaction";
-
+        const code = process.env.access_code;
+        const workingKey = process.env.Working_key;
+        const ccavenueUrl = process.env.url;
         let md5 = crypto.createHash('md5').update(workingKey).digest();
         let keyBase64 = Buffer.from(md5).toString('base64');
 
         //Initializing Vector and then convert in base64 string
         let ivBase64 = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]).toString('base64');
-        let body = `tid=${data.tid}&merchant_id=1734948&order_id=123654789&amount=6000.00&currency=INR&redirect_url=http%3A%2F%2Flocalhost%3A3000%success&cancel_url=http%3A%2F%2Flocalhost%3A3000%failure&language=EN`
+        let body = `tid=${data.tid}&merchant_id=${data.merchant_id}&order_id=${data.order_id}&amount=${data.total_amount}&currency=INR&redirect_url=${process.env.success_url}${data.order_id}&cancel_url=${process.env.failure_url}${data.order_id}&language=EN`
+
         let encryptedData = ccav.encrypt(body, keyBase64, ivBase64);
 
         return res.json({
