@@ -3,6 +3,7 @@ const express = require("express")
 const PaymentGateway = express.Router()
 const ccav = require("../payment/ccavutil")
 const qs = require('querystring');
+const crypto = require('node:crypto');
 
 
 const merchantId = process.env.MID;
@@ -17,9 +18,9 @@ PaymentGateway.post("/payment-status", async (req, res) => {
 
     //Initializing Vector and then convert in base64 string
     let ivBase64 = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]).toString('base64');
-    let ccavEncResponse = encResp;
-    let ccavPOST = qs.parse(ccavEncResponse);
-    let encryption = cca
+    // let ccavEncResponse = encResp;
+    // let ccavPOST = qs.parse(ccavEncResponse);
+    // let encryption = ccavPOST.encResp
     req.on('data', function (data) {
         ccavEncResponse += data;
         ccavPOST = qs.parse(ccavEncResponse);
