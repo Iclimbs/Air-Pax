@@ -5,11 +5,7 @@ const ccav = require("../payment/ccavutil")
 const qs = require('querystring');
 const crypto = require('node:crypto');
 
-
-const merchantId = process.env.MID;
-const accessCode = process.env.access_code;
 const workingKey = process.env.Working_key; // Replace with your CCAvenue working key
-const ccavenueUrl = 'https://test.ccavenue.com/transaction/transaction.do?command=initiateTransaction';
 
 PaymentGateway.post("/payment-status", async (req, res) => {
     const { encResp, orderNo, accessCode } = req.body
@@ -27,18 +23,7 @@ PaymentGateway.post("/payment-status", async (req, res) => {
         ccavResponse = ccav.decrypt(encryption, keyBase64, ivBase64);
     });
 
-    // req.on('end', function () {
-    //     let pData = '';
-    //     pData = '<table border=1 cellspacing=2 cellpadding=2><tr><td>'
-    //     pData = pData + ccavResponse.replace(/=/gi, '</td><td>')
-    //     pData = pData.replace(/&/gi, '</td></tr><tr><td>')
-    //     pData = pData + '</td></tr></table>'
-    //     htmlcode = '< html ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Response Handler</title></head><body><center><font size="4" color="blue"><b>Response Page</b></font><br>' + pData + '</center><br></body><script>let element = document.getElementById("cell-1"); function redirectToPage() {window.location.href=`https://airpax.co/payment/success${element.innerText}`}window.onload = redirectToPage;</script></html>';
-    // 	res.writeHeader(200, { "Content-Type": "text/html" });
-    // 	res.write(htmlcode);
-    // 	res.end();
-    // });
-    request.on('end', function () {
+    req.on('end', function () {
         let pData = '';
         let idCounter = 1;  // Initialize an id counter
         pData = '<table border=1 cellspacing=2 cellpadding=2><tr><td>'
@@ -49,10 +34,10 @@ PaymentGateway.post("/payment-status", async (req, res) => {
             return `</td></tr><tr><td id="cell-${idCounter}" data-unique-code="CODE-${idCounter++}">`;
         });
         pData = pData + '</td></tr></table>';
-        htmlcode = '< html ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Response Handler</title></head><body><center><font size="4" color="blue"><b>Response Page</b></font><br>' + pData + '</center><br></body><script>let element = document.getElementById("cell-1"); function redirectToPage() {window.location.href=`https://airpax.co/payment/success/${element.innerText}`}window.onload = redirectToPage;</script></html>';
-        response.writeHeader(200, { "Content-Type": "text/html" });
-        response.write(htmlcode);
-        response.end();
+        htmlcode = '< html ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Response Handler</title></head><body><center><font size="4" color="blue"><b>Response Page</b></font><br>' + pData + '</center><br></body><script>let status = document.getElementById("cell-4"); let element = document.getElementById("cell-1"); function redirectToPage() {window.location.href=`https://airpax.co/payment/${status.innerText}/${element.innerText}`}window.onload = redirectToPage;</script></html>';
+        res.writeHeader(200, { "Content-Type": "text/html" });
+        res.write(htmlcode);
+        res.end();
     });
 })
 module.exports = { PaymentGateway }
