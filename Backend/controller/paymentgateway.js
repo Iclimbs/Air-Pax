@@ -1,75 +1,44 @@
 require('dotenv').config()
 const express = require("express")
 const PaymentGateway = express.Router()
+const ccav = require("../payment/ccavutil")
+const qs = require('querystring');
+
 
 const merchantId = process.env.MID;
 const accessCode = process.env.access_code;
 const workingKey = process.env.Working_key; // Replace with your CCAvenue working key
 const ccavenueUrl = 'https://test.ccavenue.com/transaction/transaction.do?command=initiateTransaction';
 
-
-// PaymentGateway.post("/initiate-payment", async (req, res) => {
-//     const data = {
-//         merchant_id: merchantId,
-//         order_id: 'testing',
-//         amount: 1,
-//         currency: 'INR',
-//         redirect_url: 'https://airpax.co/api/v1/gateway/payment-status', // Your payment status route
-//         cancel_url: 'https://airpax.co/api/v1/gateway/payment-cancel',
-//         language: 'EN',
-//         billing_name: 'uttam',
-//         billing_email: 'uttamkrshaw@iclimbs.com',
-//         billing_tel: 9091390251,
-//         billing_address: '269',
-//         billing_city: 'Gurugram',
-//         billing_state: 'Haryana',
-//         billing_zip: 122015,
-//         billing_country: 'India',
-//     };
-//     const encryptedData = encrypt(JSON.stringify(data), workingKey);
-
-//     // res.json({
-//     //     encryptedData: encryptedData,
-//     //     accessCode: accessCode,
-//     //     ccavenueUrl: ccavenueUrl,
-//     // });
-
-//     formbody = '<form id="nonseamless" method="post" name="redirect" action="https://test.ccavenue.com/transaction/transaction.do?command=initiateTransaction"/> <input type="hidden" id="encRequest" name="encRequest" value="' + encryptedData + '"><input type="hidden" name="access_code" id="access_code" value="' + accessCode + '"><script language="javascript">document.redirect.submit();</script></form>';
-// })
-
-// const initiatePayment = (props) => {
-//     const orderData = {
-//         merchant_id: merchantId,
-//         order_id: props.pnr,
-//         currency: "INR",
-//         amount: props.amount,
-//         redirect_url: "http://localhost:3000/payment/success",
-//         cancel_url: "http://localhost:3000/payment/cancel",
-//         language: "EN"
-//     };
-
-//     const encryptedData = encrypt(querystring.stringify(orderData), workingKey);
-//     return res.json({
-//         status: "success", data: {
-//             encryptedData,
-//             accessCode,
-//             ccavenueUrl
-//         }
-//     });
-// }
-
 PaymentGateway.post("/payment-status", async (req, res) => {
-    const { encResp } = req.body;  // CCAvenue sends encrypted response in 'encResp'
-    const decryptedData = decrypt(encResp, workingKey);
+    const { encResp, orderNo, accessCode } = req.body
+    let md5 = crypto.createHash('md5').update(workingKey).digest();
+    let keyBase64 = Buffer.from(md5).toString('base64');
 
-    // Process the decrypted data
-    const paymentStatus = JSON.parse(decryptedData);
+    //Initializing Vector and then convert in base64 string
+    let ivBase64 = Buffer.from([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]).toString('base64');
+    let ccavEncResponse = encResp;
+    let ccavPOST = qs.parse(ccavEncResponse);
+    let encryption = cca
+    req.on('data', function (data) {
+        ccavEncResponse += data;
+        ccavPOST = qs.parse(ccavEncResponse);
+        var encryption = ccavPOST.encResp;
+        ccavResponse = ccav.decrypt(encryption, keyBase64, ivBase64);
+    });
 
-    if (paymentStatus.order_status === 'Success') {
-        res.send('Payment Success!');
-    } else {
-        res.send('Payment Failed or Canceled');
-    }
+    req.on('end', function () {
+		var pData = '';
+		pData = '<table border=1 cellspacing=2 cellpadding=2><tr><td>'
+		pData = pData + ccavResponse.replace(/=/gi, '</td><td>')
+		pData = pData.replace(/&/gi, '</td></tr><tr><td>')
+		pData = pData + '</td></tr></table>'
+		htmlcode = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Response Handler</title></head><body><center><font size="4" color="blue"><b>Response Page</b></font><br>' + pData + '</center><br></body></html>';
+		response.writeHeader(200, { "Content-Type": "text/html" });
+		response.write(htmlcode);
+		response.end();
+	});
+
 })
 module.exports = { PaymentGateway }
 
