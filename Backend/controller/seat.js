@@ -73,7 +73,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
             currency: "INR",
             total_amount: amount,
             redirect_url: process.env.success_url,
-            cancel_url: process.env.failure_url,
+            cancel_url: `https://airpax.co/payment/failure/${ticketpnr}`,
             language: "EN"
         };
 
