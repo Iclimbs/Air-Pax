@@ -7,7 +7,7 @@ import {
   RectangleStackIcon,
 } from "@heroicons/react/24/solid";
 import { IoTicketOutline } from "react-icons/io5";
-import { Home, Notifications, Counter, Trip } from "@/pages/dashboard";
+import { Home, Notifications, Counter, Trip,Food } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import Vehicles from "./pages/dashboard/vehicles";
 import TicketBooking from "./pages/dashboard/ticketBooking";
@@ -25,6 +25,12 @@ export const routes = [
         name: "dashboard",
         path: "/home",
         element: <Home />,
+      },
+      {
+        icon: <UserCircleIcon {...icon} />,
+        name: "Food",
+        path: "/food",
+        element: <Food />,
       },
       {
         icon: <UserCircleIcon {...icon} />,

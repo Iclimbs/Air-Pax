@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { CounterRouter } = require("../controller/counter");
+const { FoodRouter } = require("../controller/food");
 const { OtherPaymentRouter } = require("../controller/otherpayment");
 const { OtherSeatRouter } = require("../controller/otherseat");
 const { PaymentRouter } = require("../controller/payment");
@@ -19,6 +20,7 @@ router
     .use("/seat",SeatRouter)
     .use("/payment",PaymentRouter)
     .use("/gateway",PaymentGateway)
+    .use("/food",FoodRouter)
     .use("/new/seat/",OtherSeatRouter)
     .use("/new/payment",OtherPaymentRouter)
 

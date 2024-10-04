@@ -47,14 +47,13 @@ userRouter.post("/login", async (req, res) => {
         } else {
             if (userExists[0].verified.phone == false) {
                 res.json({ status: "error", message: "Please Verify Your Phone No First ", token: userExists[0].signuptoken, redirect: "/user/otp-verification" })
-
             } else if (userExists[0].password == null) {
                 res.json({ status: "error", message: "Please Create A Password Before Login", token: userExists[0].signuptoken, redirect: "/user/create-password" })
             } else if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
                     _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 }, "Authentication")
-                res.json({ status: "success", message: "Login Successful", token: token})
+                res.json({ status: "success", message: "Login Successful", token: token })
             } else if (hash.sha256(password) != userExists[0].password) {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }
@@ -126,7 +125,7 @@ userRouter.post("/register", async (req, res) => {
                 .then((response) => response.json())
                 .then((data) => {
                     data.Status === 'Success' ?
-                        res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/user/login", token: user.signuptoken })
+                        res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/user/otp-verification", token: user.signuptoken })
                         : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/user/login", token: user.signuptoken })
                 });
         }
@@ -136,14 +135,15 @@ userRouter.post("/register", async (req, res) => {
 })
 
 userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res) => {
+    const signuptoken = req.headers.authorization.split(" ")[1]
     try {
         const { otp } = req.body
-        const user = await UserModel.find({ signuptoken: req.headers.token, otp: otp })
+        const user = await UserModel.find({ signuptoken: signuptoken, otp: otp })
         user[0].verified.phone = true;
         user[0].otp = null;
         await user[0].save()
         if (user.length >= 1) {
-            res.json({ status: "success", message: "Otp Verification Successful", redirect: "/create-password" })
+            res.json({ status: "success", message: "Otp Verification Successful", redirect: "/user/create-password" })
         } else {
             res.json({ status: "error", message: "Otp Verification Failed. Please Try Again", })
         }
@@ -152,13 +152,33 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
     }
 })
 
-userRouter.post("/password/create", async (req, res) => {
+
+userRouter.get("/otp/resend", RegistrationAuthentication, async (req, res) => {
+    const signuptoken = req.headers.authorization.split(" ")[1]
+    try {
+        const user = await UserModel.find({ signuptoken: signuptoken })
+        fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user[0].phoneno}/${user[0].otp}/Airpax`)
+            .then((response) => response.json())
+            .then((data) => {
+                data.Status === 'Success' ?
+                    res.json({ status: "success", message: "Please Check Your Phone For OTP" })
+                    : res.json({ status: "error", message: "Failed to Send OTP. PLease Try again Aftersome Time" })
+            });
+    } catch (error) {
+        res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
+    }
+})
+
+
+userRouter.post("/password/create", RegistrationAuthentication, async (req, res) => {
+    const signuptoken = req.headers.authorization.split(" ")[1]
     try {
         const { password, cnfpassword } = req.body
         if (password === cnfpassword) {
-            const user = await UserModel.find({ signuptoken: req.headers.token })
+            const user = await UserModel.find({ signuptoken: signuptoken })
             if (user.length >= 1 && user[0].verified.phone == true) {
                 user[0].password = hash.sha256(password)
+                user[0].signuptoken = null
                 await user[0].save()
                 let token = jwt.sign({
                     _id: user[0]?._id, name: user[0]?.name, email: user[0]?.email, phoneno: user[0]?.phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)

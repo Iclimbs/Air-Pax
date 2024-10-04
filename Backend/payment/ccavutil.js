@@ -1,9 +1,6 @@
 const crypto = require('crypto')
 function getAlgorithm(keyBase64) {
     const key = Buffer.from(keyBase64, 'base64');
-    // console.log("key ",key);
-    // console.log("key ",key.length);
-    // console.log("base ",keyBase64);
     switch (key.length) {
         case 16:
             return 'aes-128-cbc';

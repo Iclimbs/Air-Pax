@@ -48,7 +48,6 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         try {
             await trip[0].save();
         } catch (error) {
-            console.log(error.message);
             return res.json({ status: "error", message: "Failed To Lock Seats in The Trip" })
         }
         try {
@@ -56,14 +55,12 @@ SeatRouter.post("/selectedseats", async (req, res) => {
             await paymentdetails.save()
 
         } catch (error) {
-            console.log(error.message);
             return res.json({ status: "error", message: "Failed To Added Payment Details" })
 
         }
         try {
             const result = await SeatModel.insertMany(seatdetails);
         } catch (error) {
-            console.log(error.message);
             return res.json({ status: "error", message: "Failed To Added Seat Details" })
         }
         const data = {

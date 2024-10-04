@@ -9,3 +9,5 @@ export * from "@/data/authors-table-data";
 export * from "@/data/outlet-table-data.js";
 export * from "@/data/vehicle-table-data.js";
 export * from "@/data/trip-table-data.js";
+export * from "@/data/food-table-data.js";
+

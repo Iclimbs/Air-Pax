@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const RegistrationAuthentication = (req, res, next) => {
-    const token = req.headers.token
+    const token = req.headers.authorization.split(" ")[1]
     if (token) {
         try {
             const decoded = jwt.verify(token, 'Registration')
