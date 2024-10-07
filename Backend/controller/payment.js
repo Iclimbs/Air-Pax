@@ -70,6 +70,8 @@ PaymentRouter.get("/failure/:pnr", async (req, res) => {
     await paymentdetails[0].save()
     res.json({ status: "success", message: "Ticket Booking Failed !!" })
 })
+
+
 module.exports = { PaymentRouter }
 
 // py73gwlx8d

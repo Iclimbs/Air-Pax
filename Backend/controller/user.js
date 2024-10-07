@@ -5,11 +5,12 @@ const express = require("express")
 const { oauth2client } = require("../service/googleConfig");
 const { UserModel } = require("../model/user.model");
 const { RegistrationAuthentication } = require('../middleware/Registration');
+const { UserAuthentication } = require('../middleware/Authentication');
+const { AdminAuthentication } = require('../middleware/Authorization');
 const { transporter } = require('../service/transporter');
 const userRouter = express.Router()
 const ejs = require("ejs")
 const path = require('node:path');
-
 const crypt = require("crypto");
 const hash = {
     sha256: (data) => {
@@ -23,8 +24,42 @@ const hash = {
     },
 };
 
+userRouter.get("/me", UserAuthentication, async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    try {
+        if (!token) {
+            return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/user/login" })
+        } else {
+            const decoded = jwt.verify(token, 'Authentication')
+            return res.json({ status: "success", message: "Getting User Details", user: decoded })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+    }
+})
 
-userRouter.get("/me", async (req, res) => {
+
+userRouter.get("/listall", async (req, res) => {
+    try {
+        const user = await UserModel.find({}, { password: 0, otp: 0, signuptoken: 0, forgotpasswordtoken: 0 })
+        res.json({ status: "success", data: user })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get User List" })
+
+    }
+})
+
+
+userRouter.get("/detailone/:id", async (req, res) => {
+    try {
+        const user = await UserModel.find({ _id: req.params.id }, { password: 0, otp: 0, signuptoken: 0, forgotpasswordtoken: 0 })
+        res.json({ status: "success", data: user })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed to get User Detail's" })
+    }
+})
+
+userRouter.post("/me/update", async (req, res) => {
     try {
         const { token } = req.headers
         if (!token) {
@@ -76,7 +111,11 @@ userRouter.post("/forgot", async (req, res) => {
             let link = `${process.env.domainurl}${newotp}/${forgotpasswordtoken}`
             userExists[0].otp = newotp;
             userExists[0].forgotpasswordtoken = forgotpasswordtoken
-            await userExists[0].save()
+            try {
+                await userExists[0].save()
+            } catch (error) {
+                return res.json({ status: "error", message: "Failed To Save User New OTP", redirect: "/" })
+            }
             let forgotPasswordtemplate = path.join(__dirname, "../emailtemplate/forgotPassword.ejs")
             ejs.renderFile(forgotPasswordtemplate, { link: link }, function (err, template) {
                 if (err) {
@@ -90,7 +129,7 @@ userRouter.post("/forgot", async (req, res) => {
                     }
                     transporter.sendMail(mailOptions, (error, info) => {
                         if (error) {
-                            return res.json({ status: "error", error: 'Failed to send email' });
+                            return res.json({ status: "error", message: 'Failed to send email', redirect: "/" });
                         } else {
                             return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
                         }
@@ -152,7 +191,6 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
     }
 })
 
-
 userRouter.get("/otp/resend", RegistrationAuthentication, async (req, res) => {
     const signuptoken = req.headers.authorization.split(" ")[1]
     try {
@@ -168,7 +206,6 @@ userRouter.get("/otp/resend", RegistrationAuthentication, async (req, res) => {
         res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
     }
 })
-
 
 userRouter.post("/password/create", RegistrationAuthentication, async (req, res) => {
     const signuptoken = req.headers.authorization.split(" ")[1]
@@ -196,7 +233,8 @@ userRouter.post("/password/create", RegistrationAuthentication, async (req, res)
 })
 
 userRouter.post("/password/change", async (req, res) => {
-    const { token, otp } = req.headers
+    const { otp } = req.headers
+    const token = req.headers.authorization.split(" ")[1]
     try {
         const { password, cnfpassword } = req.body
         if (password === cnfpassword) {
@@ -206,7 +244,7 @@ userRouter.post("/password/change", async (req, res) => {
                 user[0].forgotpasswordtoken = null
                 user[0].otp = null
                 await user[0].save()
-                res.json({ status: "success", message: "Password Changed Successfully Please Login Now !!" })
+                res.json({ status: "success", message: "Password Changed Successfully Please Login Now !!", redirect: "/user/login" })
             } else {
                 res.json({ status: "error", message: "You Haven't Made a request to Change Password", redirect: "/user/login" })
             }
@@ -218,8 +256,8 @@ userRouter.post("/password/change", async (req, res) => {
     }
 })
 
-// Register With Google 
 
+// Register With Google 
 
 userRouter.get("/register/google", async (req, res) => {
     try {
@@ -245,5 +283,4 @@ userRouter.get("/register/google", async (req, res) => {
         return res.json({ status: "error", message: `Error Found in User Registration ${error}` })
     }
 })
-
 module.exports = { userRouter }
