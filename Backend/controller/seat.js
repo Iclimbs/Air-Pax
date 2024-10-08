@@ -7,6 +7,7 @@ const { PaymentModel } = require('../model/payment.model');
 const SeatRouter = express.Router();
 const ccav = require("../payment/ccavutil")
 const crypto = require('node:crypto');
+const jwt = require('jsonwebtoken')
 
 
 SeatRouter.post("/selectedseats", async (req, res) => {
@@ -97,5 +98,52 @@ SeatRouter.post("/selectedseats", async (req, res) => {
     }
 })
 
+// Get List of All the Seat's Booked Till Now Only For Admin
+SeatRouter.get("/listall", async (req, res) => {
+    try {
+        const seatlist = await SeatModel.find({})
+        res.json({ status: "success", data: seatlist })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get Booked Ticket List" })
+    }
+})
+
+// Get List of All the Incoming Seat Bookings From that particular period of TIme Only For the User
+SeatRouter.get("/list/booked/incoming", async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    const decoded = jwt.verify(token, 'Authentication')
+    try {
+        const seatlist = await SeatModel.find({ isBooked: true, bookedby: decoded._id }, {})
+        res.json({ status: "success", data: seatlist })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get Booked Ticket List" })
+    }
+})
+
+// Get List of All the Seat's Booked Till Now By the User
+SeatRouter.get("/list/booked/history", async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    const decoded = jwt.verify(token, 'Authentication')
+    try {
+        const seatlist = await SeatModel.find({ isBooked: true, bookedby: decoded._id }, { isBooked: 0, isLocked: 0, lockExpires: 0, bookedby: 0 })
+        res.json({ status: "success", data: seatlist })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get Booked Ticket List" })
+
+    }
+})
+
+
+
+// Get List of All the Detail's Of a particular Seat's Booked By the User
+SeatRouter.get("/list/booked/:id", async (req, res) => {
+    try {
+        const seatlist = await SeatModel.find({})
+        res.json({ status: "success", data: seatlist })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get Booked Ticket List" })
+
+    }
+})
 
 module.exports = { SeatRouter }
