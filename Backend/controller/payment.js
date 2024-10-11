@@ -73,5 +73,3 @@ PaymentRouter.get("/failure/:pnr", async (req, res) => {
 
 
 module.exports = { PaymentRouter }
-
-// py73gwlx8d

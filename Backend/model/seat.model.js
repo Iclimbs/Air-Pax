@@ -1,4 +1,32 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+
+const SubseatSchema = new Schema({
+    fname: { type: String },
+    lname: { type: String },
+    age: { type: Number },
+    gender: { type: String },
+    seatNo: { type: String },
+    status: { type: String, default: "Pending" },
+    amount: { type: Number },
+    food: [
+        {
+            name: {
+                type: String
+            },
+            price: {
+                type: Number
+            },
+            quantity: {
+                type: Number
+            }
+        }
+
+    ]
+})
+
+
 const seatSchema = mongoose.Schema({
     seatNumber: { type: String, required: true },
     isBooked: { type: Boolean, default: false },
@@ -12,12 +40,7 @@ const seatSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    details: {
-        fname: String,
-        lname: String,
-        age: Number,
-        gender: String
-    },
+    details: [SubseatSchema],
     pnr: String,
     CreatedAt: { type: Date, default: Date.now },
 });

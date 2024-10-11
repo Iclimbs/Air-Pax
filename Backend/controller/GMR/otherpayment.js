@@ -2,11 +2,11 @@ require('dotenv').config()
 const express = require("express")
 const ejs = require("ejs")
 const path = require('node:path');
-const { transporter } = require('../service/transporter');
-const { SeatModel } = require("../model/seat.model")
-const { TripModel } = require("../model/trip.model");
-const { PaymentModel } = require('../model/payment.model');
-const { OtherUserModel } = require('../model/Other.seat.model');
+const { transporter } = require('../../service/transporter');
+const { SeatModel } = require("../../model/seat.model")
+const { TripModel } = require("../../model/trip.model");
+const { PaymentModel } = require('../../model/payment.model');
+const { OtherUserModel } = require('../../model/Other.seat.model');
 
 const OtherPaymentRouter = express.Router()
 
@@ -25,7 +25,7 @@ OtherPaymentRouter.get("/success/", async (req, res) => {
     await paymentdetails[0].save()
     const userdetails = await OtherUserModel.find({ pnr: pnr })
     const tripdetails = await TripModel.find({ _id: userdetails[0].tripId })
-    let Gmrconfirmpayment = path.join(__dirname, "../emailtemplate/gmrconfirmpayment.ejs")
+    let Gmrconfirmpayment = path.join(__dirname, "../../emailtemplate/gmrconfirmpayment.ejs")
     ejs.renderFile(Gmrconfirmpayment, { user: userdetails[0].primaryuser, seat: userdetails[0].passengerdetails, trip: tripdetails[0], pnr: userdetails[0].pnr, amount: userdetails[0].amount }, function (err, template) {
         if (err) {
             res.json({ status: "error", message: err.message })

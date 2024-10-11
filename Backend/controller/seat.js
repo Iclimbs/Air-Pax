@@ -23,7 +23,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
-            lockExpires: Date.now() + 20 * 60 * 1000, // Lock for 20 minutes
+            lockExpires: Date.now() + 15 * 60 * 1000, // Lock for 20 minutes
             pnr: ticketpnr,
             details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender }
         })
@@ -54,7 +54,6 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         try {
             const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: amount })
             await paymentdetails.save()
-
         } catch (error) {
             return res.json({ status: "error", message: "Failed To Added Payment Details" })
 

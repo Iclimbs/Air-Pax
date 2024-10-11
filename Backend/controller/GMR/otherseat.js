@@ -1,10 +1,10 @@
 require('dotenv').config()
 const express = require("express")
 const generateUniqueId = require('generate-unique-id');
-const { SeatModel } = require("../model/seat.model")
-const { TripModel } = require("../model/trip.model")
-const { OtherUserModel } = require("../model/Other.seat.model");
-const { PaymentModel } = require('../model/payment.model');
+const { SeatModel } = require("../../model/seat.model")
+const { TripModel } = require("../../model/trip.model")
+const { OtherUserModel } = require("../../model/Other.seat.model");
+const { PaymentModel } = require('../../model/payment.model');
 const OtherSeatRouter = express.Router()
 
 OtherSeatRouter.post("/selectedseats", async (req, res) => {
@@ -48,7 +48,13 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
             amount: Amount,
             pnr: ticketpnr
         })
-        await newticket.save()
+        try {
+            await newticket.save()
+        } catch (error) {
+            console.log(error);
+            res.json({ status: "error", message: `Failed To Save Details ${error.message}` })
+
+        }
         let new_seatsbooked = bookedseats.concat(seats)
         trip[0].seatsbooked = new_seatsbooked
         trip[0].availableseats = trip[0].availableseats - seats.length
@@ -60,7 +66,12 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
             userid: PrimaryUser.PhoneNo,
             amount: Amount,
         })
-        await payment.save()
+        try {
+            await payment.save()
+        } catch (error) {
+            res.json({ status: "error", message: `Failed To Save Details ${error.message}` })
+
+        }
         return res.json({ status: "success", pnr: ticketpnr })
     }
 })

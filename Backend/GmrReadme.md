@@ -33,7 +33,7 @@ New Seat Booking Gmr :- http://localhost:4500/api/v1/new/seat/selectedseats
       "SeatNo": "2B"
     }
   ],
-  "TripId": "66f11995a1d4b90b144cd947",
+  "TripId": "6700e3e708ce3ed7c91b5824",
   "BookingRefId": "TH638628903213",
   "Amount": 3171.84
 }

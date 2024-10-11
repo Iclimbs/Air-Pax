@@ -1,11 +1,13 @@
 const router = require("express").Router();
 const { CounterRouter } = require("../controller/counter");
 const { FoodRouter } = require("../controller/food");
-const { OtherPaymentRouter } = require("../controller/otherpayment");
-const { OtherSeatRouter } = require("../controller/otherseat");
+const { OtherPaymentRouter } = require("../controller/GMR/otherpayment");
+const { OtherSeatRouter } = require("../controller/GMR/otherseat");
 const { PaymentRouter } = require("../controller/payment");
 const { PaymentGateway } = require("../controller/paymentgateway");
+const { PnrRouter } = require("../controller/pnr");
 const { SeatRouter } = require("../controller/seat");
+const { TicketRouter } = require("../controller/ticket");
 const { tripRouter } = require("../controller/trip");
 const { userRouter } = require("../controller/user");
 const { validateRouter } = require("../controller/validate");
@@ -23,6 +25,9 @@ router
     .use("/food",FoodRouter)
     .use("/new/seat/",OtherSeatRouter)
     .use("/new/payment",OtherPaymentRouter)
+    .use("/pnr",PnrRouter)
+    .use("/ticket",TicketRouter)
+
 
 
 module.exports = router;

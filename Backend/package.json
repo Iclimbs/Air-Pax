@@ -23,6 +23,8 @@
     "mongoose": "^8.5.2",
     "nodemailer": "^6.9.14",
     "otp-generator": "^4.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "ws": "^8.18.0"
   },
   "devDependencies": {
