@@ -32,6 +32,8 @@ const seatSchema = mongoose.Schema({
     isBooked: { type: Boolean, default: false },
     isLocked: { type: Boolean, default: false },
     lockExpires: Date,
+    pnr: String,
+    totalamount:Number,
     tripId: {
         type: String,
         required: true
@@ -40,8 +42,7 @@ const seatSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    details: [SubseatSchema],
-    pnr: String,
+    details: SubseatSchema,
     CreatedAt: { type: Date, default: Date.now },
 });
 const SeatModel = mongoose.model("Seats", seatSchema)

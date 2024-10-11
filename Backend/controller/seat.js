@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken')
 
 
 SeatRouter.post("/selectedseats", async (req, res) => {
-    const { userdetails, passengerdetails, tripId, amount } = req.body
+    const { userdetails, passengerdetails, tripId, totalamount } = req.body
     const ticketpnr = generateUniqueId({
         length: 10,
         useLetters: true,
@@ -23,9 +23,9 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
-            lockExpires: Date.now() + 15 * 60 * 1000, // Lock for 20 minutes
+            lockExpires: Date.now() + 15 * 60 * 1000, // Lock for 15 minutes
             pnr: ticketpnr,
-            details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender }
+            details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].amount }
         })
     }
     const trip = await TripModel.find({ _id: tripId })
@@ -52,7 +52,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
             return res.json({ status: "error", message: "Failed To Lock Seats in The Trip" })
         }
         try {
-            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: amount })
+            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: totalamount })
             await paymentdetails.save()
         } catch (error) {
             return res.json({ status: "error", message: "Failed To Added Payment Details" })
@@ -68,7 +68,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
             merchant_id: process.env.MID,
             order_id: ticketpnr,
             currency: "INR",
-            total_amount: amount,
+            total_amount: totalamount,
             redirect_url: process.env.success_url,
             cancel_url: `https://airpax.co/payment/failure/${ticketpnr}`,
             language: "EN"
