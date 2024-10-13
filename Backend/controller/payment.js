@@ -13,20 +13,54 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     const { pnr } = req.params
     const filter = { pnr: pnr };
     const update = {
-        $set: { isBooked: true }, // set status field
+        $set: { isBooked: true, expireAt: null, "details.status": "Success" }
+    } // set status field
+    // Step 1 Getting The list of all the seat's with this PNR & Updating their status
+    try {
+        const seat = await SeatModel.updateMany(filter, update);
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Seat Status ${error.message}` })
     }
-    const seat = await SeatModel.updateMany(filter, update);
+    // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
-    paymentdetails[0].paymentstatus.pending = false;
-    paymentdetails[0].paymentstatus.complete = true;
-    await paymentdetails[0].save()
-    const seatdetails = await SeatModel.find({ pnr: pnr })
+    paymentdetails[0].paymentstatus = "Success"
+    try {
+        await paymentdetails[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Payment  Status ${error.message}` })
+    }
+    const seatdetails = await SeatModel.find({ pnr: pnr, expireAt: null, isBooked: true, isLocked: true, "details.status": "Success" })
+    // console.log("seatdetails ", seatdetails);
+
+    // bookedseat contain the list of all the Seats booked with this pnr
+    let bookedseats = []
+
+    for (let index = 0; index < seatdetails.length; index++) {
+        bookedseats.push(seatdetails[index].seatNumber)
+    }
+
+    // Getting User Detail's 
     let userid = seatdetails[0].bookedby;
+    // Getting Trip Detail's
     let tripid = seatdetails[0].tripId;
+
     const userdetails = await UserModel.find({ _id: userid })
     const tripdetails = await TripModel.find({ _id: tripid })
+    // Storing the Existing List of Seats which are booked
+    let newbookedseats = bookedseats.concat(tripdetails[0].seatsbooked)
+
+    try {
+        tripdetails[0].seatsbooked = newbookedseats;
+        tripdetails[0].bookedseats = newbookedseats.length;
+        tripdetails[0].availableseats = tripdetails[0].totalseats - newbookedseats.length
+        await tripdetails[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
+    }
+
+
     let confirmpayment = path.join(__dirname, "../emailtemplate/confirmpayment.ejs")
-    ejs.renderFile(confirmpayment, { user: userdetails[0], seat: seatdetails, trip: tripdetails[0],payment:paymentdetails[0]}, function (err, template) {
+    ejs.renderFile(confirmpayment, { user: userdetails[0], seat: seatdetails, trip: tripdetails[0], payment: paymentdetails[0] }, function (err, template) {
         if (err) {
             res.json({ status: "error", message: err.message })
         } else {
@@ -44,29 +78,29 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
                 }
             })
         }
-    })})
+    })
+})
 
 
 PaymentRouter.get("/failure/:pnr", async (req, res) => {
     const { pnr } = req.params
-    const filter = { pnr: pnr, isBooked: false };
-    const lockedseats = await SeatModel.find(filter) // contains list of all the seats which are currently locked with the particula Pnr ID. 
-    let removeseats = [] // list of seat's which need's to be removed whose payment is not yet completed 
-    let tripid = "" // Trip ID this consists the id of the Trip From which the unbooked seats will be Removed
-    for (let index = 0; index < lockedseats.length; index++) {
-        removeseats.push(lockedseats[index].seatNumber)
-        tripid = lockedseats[index].tripId
-    }
-    const trip = await TripModel.find({ _id: tripid })
-    const bookedseats = trip[0].seatsbooked.filter(item => !removeseats.includes(item)); // bookedseats will contain the list of those seats whose payment is completed
-    trip[0].seatsbooked = bookedseats
-    trip[0].bookedseats = trip[0].bookedseats - removeseats.length
-    trip[0].availableseats = trip[0].availableseats + removeseats.length
-    await trip[0].save()
-    const seat = await SeatModel.deleteMany(filter);
+    // const filter = { pnr: pnr, isBooked: false };
+    // const lockedseats = await SeatModel.find(filter) // contains list of all the seats which are currently locked with the particula Pnr ID. 
+    // let removeseats = [] // list of seat's which need's to be removed whose payment is not yet completed 
+    // let tripid = "" // Trip ID this consists the id of the Trip From which the unbooked seats will be Removed
+    // for (let index = 0; index < lockedseats.length; index++) {
+    //     removeseats.push(lockedseats[index].seatNumber)
+    //     tripid = lockedseats[index].tripId
+    // }
+    // const trip = await TripModel.find({ _id: tripid })
+    // const bookedseats = trip[0].seatsbooked.filter(item => !removeseats.includes(item)); // bookedseats will contain the list of those seats whose payment is completed
+    // trip[0].seatsbooked = bookedseats
+    // trip[0].bookedseats = trip[0].bookedseats - removeseats.length
+    // trip[0].availableseats = trip[0].availableseats + removeseats.length
+    // await trip[0].save()
+    // const seat = await SeatModel.deleteMany(filter);
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
-    paymentdetails[0].paymentstatus.pending = false;
-    paymentdetails[0].paymentstatus.failure = true;
+    paymentdetails[0].paymentstatus = "Failed";
     await paymentdetails[0].save()
     res.json({ status: "success", message: "Ticket Booking Failed !!" })
 })

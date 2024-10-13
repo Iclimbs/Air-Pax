@@ -1,5 +1,6 @@
 const express = require("express")
-const { TripModel } = require("../model/trip.model")
+const { TripModel } = require("../model/trip.model");
+const { SeatModel } = require("../model/seat.model");
 const tripRouter = express.Router()
 
 tripRouter.post("/add", async (req, res) => {
@@ -10,7 +11,6 @@ tripRouter.post("/add", async (req, res) => {
         res.json({ status: "success", message: "Successfully Addeded A New Trip" })
     } catch (error) {
         res.json({ status: "error", message: "Adding Trip Process Failed" })
-
     }
 })
 
@@ -66,9 +66,23 @@ tripRouter.get("/list", async (req, res) => {
 tripRouter.get("/detailone/:id", async (req, res) => {
     try {
         const trips = await TripModel.find({ _id: req.params.id })
-        res.json({ status: "success", data: trips })
+        const seats = await SeatModel.find({ tripId: req.params.id })
+        // Seat's Which are already booked & Payment is completed
+        let bookedseats = trips[0].seatsbooked;
+        // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
+        let lockedseats = [];
+        for (let index = 0; index < seats.length; index++) {
+            if (bookedseats.includes(seats[index].seatNumber) === false) {
+                lockedseats.push(seats[index].seatNumber)
+            }
+        }
+        let currentseat = bookedseats.concat(lockedseats)
+        trips[0].seatsbooked = currentseat
+        trips[0].bookedseats = currentseat.length;
+        trips[0].availableseats = trips[0].totalseats - currentseat.length
+        res.json({ status: "success", data: trips})
     } catch (error) {
-        res.json({ status: "error", message: "Get List Failed" })
+        res.json({ status: "error", message: `Get List Failed ${error.message}` })
 
     }
 })

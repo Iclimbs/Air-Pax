@@ -12,56 +12,63 @@ const jwt = require('jsonwebtoken')
 
 SeatRouter.post("/selectedseats", async (req, res) => {
     const { userdetails, passengerdetails, tripId, totalamount } = req.body
+    // Generating Random Ticket PNR
     const ticketpnr = generateUniqueId({
         length: 10,
         useLetters: true,
         useNumbers: true
     });
-    let seats = [] // All the Seats Passenger Detail's For Which User is Applying to Book 
-    let seatdetails = [] // All the Details of the Passenger's 
+    let seats = [] // All the Seat Number's for which the using is trying to book ticket. 
+    let seatdetails = [] // All the Details of the Passenger's for which seat's are going to be booked.
+    // For Loop To Add All the Passenger Detail's in the Seatdetail's Array which can be Added in the Seat Model || Seats Collection 
     for (let index = 0; index < passengerdetails.length; index++) {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
-            lockExpires: Date.now() + 15 * 60 * 1000, // Lock for 15 minutes
+            expireAt: Date.now() + 5 * 60 * 1000, // Lock for 5 minutes
             pnr: ticketpnr,
-            details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].amount }
+            details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].food }
         })
     }
-    const trip = await TripModel.find({ _id: tripId })
-    let bookedseats = trip[0].seatsbooked;
-    let alreadyexist = false;
-    let alreadyexistseats = []; //check the list of Seat's whose seats are already booked. 
+    // Getting List of All The Seat's which are locked (Seat's Can Be Temporary locked for that person untill the payment is complete or the condition which seat is permanently locked after the payment is completed) 
+    const temporarylockedseats = await SeatModel.find({ tripId: tripId }, { seatNumber: 1, _id: 0 })
 
+    // Step 1 Checking If the User is trying to book those seat's which are already booked & Payment is completed.
+
+    // Getting the list of all the seat's which are already booked.
+    let lockedseats = []
+    // Setting a default condition to check if the seat which the user is trying to book has already been booked or not.
+    let alreadyexist = false;
+    // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
+    let alreadyexistseats = [];
+    // For Loop to get the list of all the seats which are currently locked!!
+
+    for (let index = 0; index < temporarylockedseats.length; index++) {
+        lockedseats.push(temporarylockedseats[index].seatNumber)
+    }
+
+    // Testing For Commpon Seat Number's in LokedSeats & Alreadyexistseats
     for (let index = 0; index < seats.length; index++) {
-        if (bookedseats.includes(seats[index])) {
+        if (lockedseats.includes(seats[index])) {
             alreadyexistseats.push(seats[index])
             alreadyexist = true;
         }
     }
+
+    // res.json({ status: "success" })
     if (alreadyexist) {
         return res.json({ status: "error", message: "Some Seat's Are Already Booked Please Select Any Other Seat", seats: alreadyexistseats })
     } else {
-        let new_seatsbooked = bookedseats.concat(seats)
-        trip[0].seatsbooked = new_seatsbooked
-        trip[0].availableseats = trip[0].availableseats - seats.length
-        trip[0].bookedseats = new_seatsbooked.length
-        try {
-            await trip[0].save();
-        } catch (error) {
-            return res.json({ status: "error", message: "Failed To Lock Seats in The Trip" })
-        }
         try {
             const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: totalamount })
             await paymentdetails.save()
         } catch (error) {
-            return res.json({ status: "error", message: "Failed To Added Payment Details" })
-
+            return res.json({ status: "error", message: `Failed To Added Payment Details ${error.message}` })
         }
         try {
             const result = await SeatModel.insertMany(seatdetails);
         } catch (error) {
-            return res.json({ status: "error", message: "Failed To Added Seat Details" })
+            return res.json({ status: "error", message: `Failed To Added Seat Details ${error.message}`, data: seatdetails })
         }
         const data = {
             tid: new Date().getTime(),

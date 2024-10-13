@@ -4,22 +4,8 @@ const PaymentSchema = mongoose.Schema({
     userid: String,
     amount: Number,
     paymentstatus: {
-        pending: {
-            type: Boolean,
-            default: true
-        },
-        complete: {
-            type: Boolean,
-            default: false
-        },
-        failure:{
-            type:Boolean,
-            default:false
-        },
-        refund:{
-            type:Boolean,
-            default:false
-        }
+        type:String,
+        default:"Pending"
     },
     refundamount:Number,
     refno:String,

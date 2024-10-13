@@ -31,9 +31,13 @@ const seatSchema = mongoose.Schema({
     seatNumber: { type: String, required: true },
     isBooked: { type: Boolean, default: false },
     isLocked: { type: Boolean, default: false },
-    lockExpires: Date,
+    expireAt: {
+        type: Date,
+        default: null, // This will be populated only if `shouldExpire` is true
+        index: { expires: '0' } // TTL index based on this field; expires if not null
+    },
     pnr: String,
-    totalamount:Number,
+    totalamount: Number,
     tripId: {
         type: String,
         required: true
