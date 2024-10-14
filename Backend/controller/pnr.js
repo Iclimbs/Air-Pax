@@ -2,7 +2,6 @@ const express = require("express")
 const { TripModel } = require("../model/trip.model");
 const { OtherUserModel } = require('../model/Other.seat.model');
 const { SeatModel } = require("../model/seat.model");
-const { UserModel } = require("../model/user.model");
 const PnrRouter = express.Router()
 
 PnrRouter.get("/:pnr", async (req, res) => {
@@ -16,10 +15,7 @@ PnrRouter.get("/:pnr", async (req, res) => {
     if (ticketdetails.length == 0) {
         return res.json({ status: "error", message: "No Ticket Detail's Found Related to this Pnr" })
     }
-    // Adding Necessary details to detail's object.
-    const userdetails = UserModel.find({ _id: ticketdetails[0].bookedby })
-    
-    details.userdetails = userdetails[0];
+   
     details.passengerdetails = ticketdetails[0].details;
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
     if (tripdetails.length == 0) {

@@ -4,7 +4,11 @@ const { OtherUserModel } = require('../model/Other.seat.model');
 const { PaymentModel } = require("../model/payment.model");
 const ejs = require("ejs")
 const path = require('node:path');
+const { SeatModel } = require("../model/seat.model");
 const TicketRouter = express.Router()
+const jwt = require('jsonwebtoken');
+const { BookingModel } = require("../model/booking.model");
+
 
 TicketRouter.post("/gmr/cancel", async (req, res) => {
     const { tripId, bookingRefId, pnr, cancelticket } = req.body;
@@ -69,10 +73,10 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
         } catch (error) {
             res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
         }
-    let user = ticketdetails[0].primaryuser;
-    let seat = ticketdetails[0].passengerdetails;
-console.log("seat ",seat);
-console.log("user ",user);
+        let user = ticketdetails[0].primaryuser;
+        let seat = ticketdetails[0].passengerdetails;
+        console.log("seat ", seat);
+        console.log("user ", user);
 
 
         // let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")
@@ -101,5 +105,54 @@ console.log("user ",user);
 
 
 })
+
+
+
+
+
+
+// Get the List of Upcoming Tickets For the User
+
+TicketRouter.get("/history", async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    try {
+        if (!token) {
+            return res.json({ status: "error", message: "Please Login to Access User Upcoming Trip Detail's", redirect: "/user/login" })
+        } else {
+            const decoded = jwt.verify(token, 'Authentication')
+            const upcomingtrips = await BookingModel.find({ userid: decoded._id})
+
+            return res.json({ status: "success", message: "Getting User Details", user: upcomingtrips })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+    }
+})
+
+TicketRouter.get("/upcoming", async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    try {
+        if (!token) {
+            return res.json({ status: "error", message: "Please Login to Access User Upcoming Trip Detail's", redirect: "/user/login" })
+        } else {
+            const dateObj = new Date();
+            const month = dateObj.getUTCMonth() + 1; // months from 1-12
+            const day = dateObj.getUTCDate();
+            const year = dateObj.getUTCFullYear();
+
+            const newDate = year + "-" + month + "-" + day;
+            const decoded = jwt.verify(token, 'Authentication')
+
+            const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, userid: decoded._id })
+
+            return res.json({ status: "success",data:upcomingtrips })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+    }
+})
+
+
+
 
 module.exports = { TicketRouter }
