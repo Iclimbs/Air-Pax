@@ -65,20 +65,33 @@ tripRouter.get("/list", async (req, res) => {
 
 tripRouter.get("/list/schedule", async (req, res) => {
     try {
+        // Creating Date To Filter Data on the Basis of Date 
+
         const currentdate = new Date();
+        // Creating Current Date
+
         const currentmonth = currentdate.getUTCMonth() + 1; // months from 1-12
         const currentday = currentdate.getUTCDate();
         const currentyear = currentdate.getUTCFullYear();
         const currentDate = currentyear + "-" + currentmonth + "-" + currentday;
+
+        // Creating TIme
+        const hour = currentdate.getHours();
+        const minutes = currentdate.getMinutes();
+        const currenttime = hour + ":" + minutes
+
+        // Creating End Date
         const enddate = new Date(new Date().setDate(new Date().getDate() + 7))
         const endmonth = enddate.getUTCMonth() + 1; // months from 1-12
         const endday = enddate.getUTCDate();
         const endyear = enddate.getUTCFullYear();
         const endDate = endyear + "-" + endmonth + "-" + endday;
 
-        const trips = await TripModel.find({ journeystartdate: { $lte: endDate,$gte:currentDate } })
+        const trips = await TripModel.find({ journeystartdate: { $lte: endDate, $gte: currentDate },starttime: { $gt: currenttime } })
         return res.json({ status: "success", data: trips })
     } catch (error) {
+        console.log(error.message);
+        
         res.json({ status: "error", message: "Get List Failed" })
 
     }
