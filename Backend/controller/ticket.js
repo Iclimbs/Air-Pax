@@ -126,7 +126,7 @@ TicketRouter.get("/history", async (req, res) => {
             const newDate = year + "-" + month + "-" + day;
 
             const decoded = jwt.verify(token, 'Authentication')
-            const upcomingtrips = await BookingModel.find({ journeystartdate: { $lt: newDate },userid: decoded._id })
+            const upcomingtrips = await BookingModel.find({ journeystartdate: { $lt: newDate }, userid: decoded._id })
             return res.json({ status: "success", data: upcomingtrips })
         }
     } catch (error) {
