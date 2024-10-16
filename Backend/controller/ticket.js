@@ -125,13 +125,8 @@ TicketRouter.get("/history", async (req, res) => {
             const year = dateObj.getUTCFullYear();
             const newDate = year + "-" + month + "-" + day;
 
-            // Creating TIme
-            const hour = dateObj.getHours();
-            const minutes = dateObj.getMinutes();
-            const currenttime = hour + ":" + minutes
-
             const decoded = jwt.verify(token, 'Authentication')
-            const upcomingtrips = await BookingModel.find({ journeystartdate: { $lte: newDate }, starttime: { $lte: currenttime }, userid: decoded._id })
+            const upcomingtrips = await BookingModel.find({ journeystartdate: { $lt: newDate },userid: decoded._id })
             return res.json({ status: "success", data: upcomingtrips })
         }
     } catch (error) {
