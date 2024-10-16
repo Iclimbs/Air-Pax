@@ -84,8 +84,10 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
             }
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
+                    console.log("Error in Sending Mail ",error.message);
                     return res.json({ status: "error", message: 'Failed to send email' });
                 } else {
+                    console.log("Email Sent ",info);
                     return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
                 }
             })
