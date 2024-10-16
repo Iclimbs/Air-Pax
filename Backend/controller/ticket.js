@@ -75,31 +75,30 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
         }
         let user = ticketdetails[0].primaryuser;
         let seat = ticketdetails[0].passengerdetails;
-        console.log("seat ", seat);
-        console.log("user ", user);
+        // console.log("seat ", seat);
+        // console.log("user ", user);
 
-
-        // let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")
-        // ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, seat: seatdetails, trip: tripdetails[0], payment: paymentdetails[0] }, function (err, template) {
-        //     if (err) {
-        //         res.json({ status: "error", message: err.message })
-        //     } else {
-        //         const mailOptions = {
-        //             from: process.env.emailuser,
-        //             to: `${userExists[0].email}`,
-        //             subject: 'Otp To Reset Password.',
-        //             html: template
-        //         }
-        //         transporter.sendMail(mailOptions, (error, info) => {
-        //             if (error) {
-        //                 console.log(error);
-        //                 return res.json({ status: "error", message: 'Failed to send email', redirect: "/" });
-        //             } else {
-        //                 return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
-        //             }
-        //         })
-        //     }
-        // })
+        let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")
+        ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, seat: seatdetails, trip: tripdetails[0], payment: paymentdetails[0] }, function (err, template) {
+            if (err) {
+                res.json({ status: "error", message: err.message })
+            } else {
+                const mailOptions = {
+                    from: process.env.emailuser,
+                    to: `${userExists[0].email}`,
+                    subject: 'Otp To Reset Password.',
+                    html: template
+                }
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        return res.json({ status: "error", message: 'Failed to send email', redirect: "/" });
+                    } else {
+                        return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+                    }
+                })
+            }
+        })
 
     }
 
@@ -119,13 +118,17 @@ TicketRouter.get("/history", async (req, res) => {
         if (!token) {
             return res.json({ status: "error", message: "Please Login to Access User Upcoming Trip Detail's", redirect: "/user/login" })
         } else {
+            const dateObj = new Date();
+            const month = dateObj.getUTCMonth() + 1; // months from 1-12
+            const day = dateObj.getUTCDate();
+            const year = dateObj.getUTCFullYear();
+            const newDate = year + "-" + month + "-" + day;
             const decoded = jwt.verify(token, 'Authentication')
-            const upcomingtrips = await BookingModel.find({ userid: decoded._id})
-
-            return res.json({ status: "success", message: "Getting User Details", user: upcomingtrips })
+            const upcomingtrips = await BookingModel.find({ journeystartdate: { $lte: newDate }, userid: decoded._id })
+            return res.json({ status: "success",data:upcomingtrips })
         }
     } catch (error) {
-        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+        res.json({ status: "error", message: `Error Found in Trip History Details ${error.message}` })
     }
 })
 
@@ -139,16 +142,13 @@ TicketRouter.get("/upcoming", async (req, res) => {
             const month = dateObj.getUTCMonth() + 1; // months from 1-12
             const day = dateObj.getUTCDate();
             const year = dateObj.getUTCFullYear();
-
             const newDate = year + "-" + month + "-" + day;
             const decoded = jwt.verify(token, 'Authentication')
-
             const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, userid: decoded._id })
-
             return res.json({ status: "success",data:upcomingtrips })
         }
     } catch (error) {
-        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+        res.json({ status: "error", message: `Error Found in Upcoming Trip Details ${error.message}` })
     }
 })
 

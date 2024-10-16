@@ -63,6 +63,23 @@ tripRouter.get("/list", async (req, res) => {
 
 
 
+tripRouter.get("/list/today", async (req, res) => {
+    try {
+        const dateObj = new Date();
+        const month = dateObj.getUTCMonth() + 1; // months from 1-12
+        const day = dateObj.getUTCDate();
+        const year = dateObj.getUTCFullYear();
+        const newDate = year + "-" + month + "-" + day;
+        const trips = await TripModel.find({ journeystartdate: newDate })
+        return res.json({ status: "success", data: trips })
+    } catch (error) {
+        res.json({ status: "error", message: "Get List Failed" })
+
+    }
+})
+
+
+
 tripRouter.get("/detailone/:id", async (req, res) => {
     try {
         const trips = await TripModel.find({ _id: req.params.id })
@@ -80,7 +97,7 @@ tripRouter.get("/detailone/:id", async (req, res) => {
         trips[0].seatsbooked = currentseat
         trips[0].bookedseats = currentseat.length;
         trips[0].availableseats = trips[0].totalseats - currentseat.length
-        res.json({ status: "success", data: trips})
+        res.json({ status: "success", data: trips })
     } catch (error) {
         res.json({ status: "error", message: `Get List Failed ${error.message}` })
 
