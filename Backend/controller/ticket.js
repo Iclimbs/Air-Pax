@@ -8,6 +8,7 @@ const { SeatModel } = require("../model/seat.model");
 const TicketRouter = express.Router()
 const jwt = require('jsonwebtoken');
 const { BookingModel } = require("../model/booking.model");
+const { UserAuthentication } = require("../middleware/Authentication");
 
 
 TicketRouter.post("/gmr/cancel", async (req, res) => {
@@ -163,6 +164,25 @@ TicketRouter.get("/upcoming", async (req, res) => {
 })
 
 
+TicketRouter.get("/detailone/:id", UserAuthentication, async (req, res) => {
+    const { id } = req.params
+
+    const booking = await BookingModel.find({ _id: id })
+    const bookedpassengerdetails = [];
+    const seat = await SeatModel.find({ pnr: booking[0].pnr })
+    for (let index = 0; index < seat.length; index++) {
+        bookedpassengerdetails.push(seat[index].details)
+    }
+    booking[0].seats = bookedpassengerdetails
+    console.log(bookedpassengerdetails);
+
+    res.json({ status: "success", data: booking[0] })
+})
+
+TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
+    const { pnr, bookingid, seats } = req.body
+    // seats should be an array ob object where each object will contain id & seatNo
+})
 
 
 module.exports = { TicketRouter }
