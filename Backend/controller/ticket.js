@@ -183,7 +183,7 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     if (!bookingdetails) {
         return res.json({ status: "error", message: "No Booking Detail's Found" })
     }
-console.log("bookign details",bookingdetails);
+    console.log("bookign details", bookingdetails);
 
     let bookingstatus = "Cancelled"
     for (let index = 0; index < seats.length; index++) {
@@ -287,7 +287,7 @@ console.log("bookign details",bookingdetails);
     // res.json({ status: "success" })
 
     let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
-    ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount:  paymentdetails[0].refundamount,pnr:pnr }, function (err, template) {
+    ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr }, function (err, template) {
         if (err) {
             res.json({ status: "error", message: err.message })
         } else {
