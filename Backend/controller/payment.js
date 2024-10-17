@@ -14,7 +14,7 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     const { pnr } = req.params
     const filter = { pnr: pnr };
     const update = {
-        $set: { isBooked: true, expireAt: null, "details.status": "Success" }
+        $set: { isBooked: true, expireAt: null, "details.status": "Completed" }
     } // set status field
     // Step 1 Getting The list of all the seat's with this PNR & Updating their status
     try {
@@ -24,14 +24,14 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     }
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
-    paymentdetails[0].paymentstatus = "Success"
+    paymentdetails[0].paymentstatus = "Completed"
     try {
         await paymentdetails[0].save()
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update Payment  Status ${error.message}` })
     }
     const seatdetails = await SeatModel.find({ pnr: pnr, expireAt: null, isBooked: true, isLocked: true, "details.status": "Completed" })
-    // console.log("seatdetails ", seatdetails);
+    console.log("seatdetails ", seatdetails);
 
     // bookedseat contain the list of all the Seats booked with this pnr
     let bookedseats = []

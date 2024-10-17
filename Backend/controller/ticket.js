@@ -9,6 +9,9 @@ const TicketRouter = express.Router()
 const jwt = require('jsonwebtoken');
 const { BookingModel } = require("../model/booking.model");
 const { UserAuthentication } = require("../middleware/Authentication");
+const { UserModel } = require("../model/user.model");
+const { transporter } = require('../service/transporter');
+
 
 
 TicketRouter.post("/gmr/cancel", async (req, res) => {
@@ -180,6 +183,7 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     if (!bookingdetails) {
         return res.json({ status: "error", message: "No Booking Detail's Found" })
     }
+console.log("bookign details",bookingdetails);
 
     let bookingstatus = "Cancelled"
     for (let index = 0; index < seats.length; index++) {
@@ -199,17 +203,19 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
 
 
     // Update Seat Details 
-    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Success" })
+    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Completed" })
 
     // Getting Total Amount Paid By the User For Booking Tickets Which he want to cancel right now 
     let totalamount = 0;
     let bulkwriteseat = [];
     let seatstoberemoved = [];
+    let cancelledSeats = [];
     for (let index = 0; index < seatdetails.length; index++) {
         for (let i = 0; i < seats.length; i++) {
             if ((seatdetails[index].id == seats[i].id) && (seatdetails[index].seatNumber == seats[i].seatNumber)) {
                 totalamount += seatdetails[index].details.amount;
                 seatstoberemoved.push(seats[i].seatNumber)
+                cancelledSeats.push(seatdetails[index])
                 bulkwriteseat.push({
                     updateOne: {
                         filter: { pnr: pnr, _id: seats[i].id },         // condition to match first document
@@ -220,15 +226,15 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
 
         }
     }
-    console.log("remove seat  ", seatstoberemoved);
+    // console.log("remove seat  ", seatstoberemoved);
 
-    console.log("bulkwrite ", bulkwriteseat);
+    // console.log("bulkwrite ", bulkwriteseat);
 
 
     try {
         await SeatModel.bulkWrite(bulkwriteseat)
     } catch (error) {
-        console.log(error);
+        // console.log(error);
 
         res.json({ status: "error", message: "Bulk Update Seat Process Failed " })
     }
@@ -273,7 +279,35 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
             res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
         }
     }
-    res.json({ status: "success" })
+
+    const userdetails = await UserModel.find({ _id: bookingdetails[0].userid })
+    console.log("userdetals ", userdetails[0]);
+    console.log("cancelledSeats ", cancelledSeats)
+
+    // res.json({ status: "success" })
+
+    let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
+    ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount:  paymentdetails[0].refundamount,pnr:pnr }, function (err, template) {
+        if (err) {
+            res.json({ status: "error", message: err.message })
+        } else {
+            const mailOptions = {
+                from: process.env.emailuser,
+                to: `${userdetails[0].email}`,
+                subject: `Booking Confirmation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+                html: template
+            }
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log("Error in Sending Mail ", error.message);
+                    return res.json({ status: "error", message: 'Failed to send email' });
+                } else {
+                    console.log("Email Sent ", info);
+                    return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+                }
+            })
+        }
+    })
     // seats should be an array ob object where each object will contain id & seatNo
 })
 
