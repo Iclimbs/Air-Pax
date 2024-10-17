@@ -168,7 +168,7 @@ TicketRouter.get("/detailone/:id", UserAuthentication, async (req, res) => {
     const { id } = req.params
 
     const booking = await BookingModel.find({ _id: id })
-    const seat = await SeatModel.find({ pnr: booking[0].pnr }, { _id: 1, seatNumber: 1 })
+    const seat = await SeatModel.find({ pnr: booking[0].pnr }, { _id: 1, seatNumber: 1, details: 1 })
     booking[0].seats = seat
     res.json({ status: "success", data: booking[0] })
 })
