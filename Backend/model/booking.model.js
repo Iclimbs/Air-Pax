@@ -39,21 +39,25 @@ const bookingSchema = mongoose.Schema({
         type: Number,
         required: true
     },
-    pnr:{
-        type:String,
-        required:true
+    pnr: {
+        type: String,
+        required: true
     },
-    seats:{
-        type:Array,
-        required:true
+    seats: {
+        type: Array,
+        required: true
     },
-    userid:{
-        type:String,
-        required:true
+    userid: {
+        type: String,
+        required: true
     },
-    tripId:{
-        type:String,
-        required:true
+    tripId: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        default: "Confirmed"
     },
     CreatedAt: { type: Date, default: Date.now },
 });

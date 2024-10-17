@@ -3,9 +3,7 @@ const UserAuthentication = (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1]
     if (token) {
         try {
-            const decoded = jwt.verify(token, 'Authentication')
-            console.log(decoded);
-            
+            const decoded = jwt.verify(token, 'Authentication')            
             next()
         } catch (error) {
             res.json({ status: "error", message: "Authentication Token Expired. Please Login Again", redirect: "/user/login" })

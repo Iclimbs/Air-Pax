@@ -168,19 +168,112 @@ TicketRouter.get("/detailone/:id", UserAuthentication, async (req, res) => {
     const { id } = req.params
 
     const booking = await BookingModel.find({ _id: id })
-    const bookedpassengerdetails = [];
-    const seat = await SeatModel.find({ pnr: booking[0].pnr })
-    for (let index = 0; index < seat.length; index++) {
-        bookedpassengerdetails.push(seat[index].details)
-    }
-    booking[0].seats = bookedpassengerdetails
-    console.log(bookedpassengerdetails);
-
+    const seat = await SeatModel.find({ pnr: booking[0].pnr }, { _id: 1, seatNumber: 1 })
+    booking[0].seats = seat
     res.json({ status: "success", data: booking[0] })
 })
 
 TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
-    const { pnr, bookingid, seats } = req.body
+    const { pnr, bookingId, seats } = req.body
+    const bookingdetails = await BookingModel.find({ _id: bookingId, pnr: pnr })
+    // Update Booking Details
+    if (!bookingdetails) {
+        return res.json({ status: "error", message: "No Booking Detail's Found" })
+    }
+
+    let bookingstatus = "Cancelled"
+    for (let index = 0; index < seats.length; index++) {
+        if (!bookingdetails[0].seats.includes(seats[index].seatNumber)) {
+            bookingstatus = "Confirmed"
+        }
+    }
+
+    try {
+        bookingdetails[0].status = bookingstatus
+        await bookingdetails[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
+    }
+
+    // Update Payment Details 
+
+
+    // Update Seat Details 
+    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Success" })
+
+    // Getting Total Amount Paid By the User For Booking Tickets Which he want to cancel right now 
+    let totalamount = 0;
+    let bulkwriteseat = [];
+    let seatstoberemoved = [];
+    for (let index = 0; index < seatdetails.length; index++) {
+        for (let i = 0; i < seats.length; i++) {
+            if ((seatdetails[index].id == seats[i].id) && (seatdetails[index].seatNumber == seats[i].seatNumber)) {
+                totalamount += seatdetails[index].details.amount;
+                seatstoberemoved.push(seats[i].seatNumber)
+                bulkwriteseat.push({
+                    updateOne: {
+                        filter: { pnr: pnr, _id: seats[i].id },         // condition to match first document
+                        update: { $set: { "details.status": "Refunded" } }
+                    }
+                })
+            }
+
+        }
+    }
+    console.log("remove seat  ", seatstoberemoved);
+
+    console.log("bulkwrite ", bulkwriteseat);
+
+
+    try {
+        await SeatModel.bulkWrite(bulkwriteseat)
+    } catch (error) {
+        console.log(error);
+
+        res.json({ status: "error", message: "Bulk Update Seat Process Failed " })
+    }
+
+    // Generating Refund Amount Based on The Time Of Cancellation
+
+
+    const tripdetails = await TripModel.find({ _id: bookingdetails[0].tripId })
+    const currentDateTime = new Date();
+    const journeytime = new Date(`${tripdetails[0].journeystartdate}T${tripdetails[0].starttime}:00`)
+    let bookedseats = tripdetails[0].seatsbooked;
+    let newseats = bookedseats.filter(seat => !seatstoberemoved.includes(seat));
+    tripdetails[0].bookedseats = newseats.length;
+    tripdetails[0].availableseats = tripdetails[0].totalseats - newseats.length
+    tripdetails[0].seatsbooked = newseats;
+    try {
+        await tripdetails[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: "Ticket Cancellation Process Failed " })
+    }
+
+    // Getting Payment Details of the Pnr To Change detail's like staus & refund amount 
+    const paymentdetails = await PaymentModel.find({ pnr: pnr })
+    if (paymentdetails[0].paymentstatus === "Failed") {
+        return res.json({ status: "error", message: "Ticket Cancellation Process Failed !! Payment is Not Confirmed For This Pnr" })
+    } else {
+        let refundamount = 0;
+        const timeDifferenceMs = journeytime - currentDateTime
+        const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+
+        if (timeDifferenceHours > 48) {
+
+            refundamount = Math.floor((ticketcost * cancelticketno) * 0.9)
+        } else if (timeDifferenceHours > 24) {
+            refundamount = Math.floor((ticketcost * cancelticketno) * 0.5)
+        }
+        try {
+            paymentdetails[0].refundamount = refundamount;
+            paymentdetails[0].paymentstatus = "Refunded";
+            await paymentdetails[0].save()
+        } catch (error) {
+            res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
+        }
+    }
+    res.json({ status: "success" })
     // seats should be an array ob object where each object will contain id & seatNo
 })
 

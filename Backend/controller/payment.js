@@ -30,7 +30,7 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update Payment  Status ${error.message}` })
     }
-    const seatdetails = await SeatModel.find({ pnr: pnr, expireAt: null, isBooked: true, isLocked: true, "details.status": "Success" })
+    const seatdetails = await SeatModel.find({ pnr: pnr, expireAt: null, isBooked: true, isLocked: true, "details.status": "Completed" })
     // console.log("seatdetails ", seatdetails);
 
     // bookedseat contain the list of all the Seats booked with this pnr
