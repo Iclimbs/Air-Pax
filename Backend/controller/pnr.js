@@ -10,12 +10,12 @@ PnrRouter.get("/:pnr", async (req, res) => {
     let details = {};
     // Getting the list of Seats Booked 
     const ticketdetails = await SeatModel.find({ pnr: pnr }, { _id: 0, CreatedAt: 0 })
-    
+
     // Sending No Ticket Detail's Found Message To User
     if (ticketdetails.length == 0) {
         return res.json({ status: "error", message: "No Ticket Detail's Found Related to this Pnr" })
     }
-   
+
     details.passengerdetails = ticketdetails[0].details;
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
     if (tripdetails.length == 0) {
@@ -58,7 +58,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     details.endtime = tripdetails[0].endtime;
     details.totaltime = tripdetails[0].totaltime;
     details.distance = tripdetails[0].distance;
-    res.json({ status: "success", message: "Pnr Details Testing", details: details })
+    res.json({ status: "success", message: "Pnr Detail's", details: details })
 })
 
 
