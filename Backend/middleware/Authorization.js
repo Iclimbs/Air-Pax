@@ -1,12 +1,16 @@
 const jwt = require('jsonwebtoken')
 const AdminAuthentication = (req, res, next) => {
-    const token = req.headers.authorization.split(" ")[1]
-    if (token) {
+    if (req.headers.authorization) {
         try {
-            const decoded = jwt.verify(token, 'Authentication')
-            next()
+            const token = req.headers.authorization.split(" ")[1]
+            const decoded = jwt.verify(token, 'Authorization')
+            if (decoded.admin) {
+                next()
+            } else {
+                res.json({ status: "error", message: "Admin Permission's Not Found In Your Account" })
+            }
         } catch (error) {
-            res.json({ status: "error", message: "Authentication Token Expired. Please Login Again", redirect: "/user/login" })
+            res.json({ status: "error", message: "Token Expired. Please Login Again" })
         }
     } else {
         res.json({ status: "error", message: "No Token Found in Headers." })

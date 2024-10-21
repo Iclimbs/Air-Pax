@@ -14,6 +14,36 @@ tripRouter.post("/add", async (req, res) => {
     }
 })
 
+tripRouter.post("/add/bulk", async (req, res) => {
+    const { name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, distance, totaltime, price, totalseats, time } = req.body;
+    // Bulk Data Which Will be Stored in Data Base
+    const data = [];
+
+    // Convert startDate to a Date object for initial value
+    let journeyStartDate = new Date(journeystartdate);
+    let journeyEndDate = new Date(journeyenddate);
+
+    // Loop to add 30 consecutive days
+    for (let i = 0; i < time; i++) {
+        // Format and store the current date in the dates array
+        data.push({
+            name, from, to, busid, journeystartdate: journeyStartDate.toISOString().split('T')[0], journeyenddate: journeyEndDate.toISOString().split('T')[0], starttime, endtime, distance, totaltime, price, bookedseats: 0, availableseats: totalseats, totalseats
+        })
+        // // Move to the next day
+        journeyStartDate.setDate(journeyStartDate.getDate() + 1);
+        journeyEndDate.setDate(journeyEndDate.getDate() + 1);
+    }
+
+    try {
+        await TripModel.insertMany(data)
+        res.json({ status: "success", message: "Successfully Addeded Trip's in Bulk", })
+    } catch (error) {
+        res.json({ status: "error", message: `Adding Trip Process Failed ${error.message}` })
+    }
+})
+
+
+
 tripRouter.patch("/edit/:id", async (req, res) => {
     const { id } = req.params
     try {
@@ -34,22 +64,6 @@ tripRouter.get("/listall", async (req, res) => {
     }
 })
 
-
-// tripRouter.post("/list", async (req, res) => {
-//     const { from, to, date, tickets } = req.body
-//     console.log("Body ", req.body);
-
-//     try {
-//         const trips = await TripModel.find({ from: from, to: to, journeystartdate: date, availableseats: { $gte: tickets } })
-//         res.json({ status: "success", data: trips })
-//     } catch (error) {
-//         res.json({ status: "error", message: "Get List Failed" })
-
-//     }
-// })
-
-
-
 tripRouter.get("/list", async (req, res) => {
     const { from, to, date } = req.query
     try {
@@ -57,7 +71,6 @@ tripRouter.get("/list", async (req, res) => {
         res.json({ status: "success", data: trips })
     } catch (error) {
         res.json({ status: "error", message: "Get List Failed" })
-
     }
 })
 
@@ -87,11 +100,11 @@ tripRouter.get("/list/schedule", async (req, res) => {
         const endyear = enddate.getUTCFullYear();
         const endDate = endyear + "-" + endmonth + "-" + endday;
 
-        const trips = await TripModel.find({ journeystartdate: { $lte: endDate, $gte: currentDate },starttime: { $gt: currenttime } })
+        const trips = await TripModel.find({ journeystartdate: { $lte: endDate, $gte: currentDate }, starttime: { $gt: currenttime } })
         return res.json({ status: "success", data: trips })
     } catch (error) {
         console.log(error.message);
-        
+
         res.json({ status: "error", message: "Get List Failed" })
 
     }

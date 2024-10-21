@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken')
 const UserAuthentication = (req, res, next) => {
-    const token = req.headers.authorization.split(" ")[1]
-    if (token) {
+    if (req.headers.authorization) {
         try {
-            const decoded = jwt.verify(token, 'Authentication')            
+            const token = req.headers.authorization.split(" ")[1]
+            const decoded = jwt.verify(token, 'Authentication')
             next()
         } catch (error) {
             res.json({ status: "error", message: "Authentication Token Expired. Please Login Again", redirect: "/user/login" })

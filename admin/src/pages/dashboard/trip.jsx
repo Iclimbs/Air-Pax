@@ -4,19 +4,20 @@ import {
   CardHeader,
   Typography,
   Button,
-  Chip
 } from "@material-tailwind/react";
 import React from "react";
 import { tripTableData } from "@/data";
 import ConfirmModal from "@/widgets/modals/confirm-modal";
 import { TripModal } from "@/widgets/modals/trip-modal";
+import { BulkTripModal } from "@/widgets/modals/bulk-trip-modal";
+
 
 export function Trip() {
   const [showmodal, setShowModal] = React.useState(false)
+  const [showmodalbulk, setShowModalbulk] = React.useState(false)
   const [showConfirmModal, setShowConfirmModal] = React.useState(false)
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
-console.log("Data ",data);
 
   React.useEffect(() => {
     fetch('http://localhost:4500/api/v1/trip/listall')
@@ -33,6 +34,13 @@ console.log("Data ",data);
     setSelectedData([])
     setShowModal(!showmodal)
   }
+
+  const handleBulkModal = () => {
+    setSelectedData([])
+    setShowModalbulk(!showmodalbulk)
+  }
+
+
 
   const handleSelect = (item) => {
     setShowModal(!showmodal)
@@ -54,6 +62,8 @@ console.log("Data ",data);
     <>
       <ConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/vehicle/disable/" />
       <TripModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
+      <BulkTripModal showmodal={showmodalbulk} handleModal={handleBulkModal} data={selectedData} />
+
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
@@ -62,6 +72,9 @@ console.log("Data ",data);
           <Typography variant="h6" color="white">
             Outlets
           </Typography>
+          <Button variant="filled" color="white" className="text-sm" onClick={handleBulkModal}>
+            Bulk Add New
+          </Button>
           <Button variant="filled" color="white" className="text-sm" onClick={handleModal}>
             Add New
           </Button>

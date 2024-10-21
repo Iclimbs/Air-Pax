@@ -28,31 +28,55 @@ const hash = {
 
 // Login 
 
+// Regular User Login 
+
 userRouter.post("/login", async (req, res) => {
     try {
         const { phoneno, password } = req.body
         const userExists = await UserModel.find({ phoneno })
         if (userExists.length === 0) {
-            return res.json({ status: "error", message: "No User Exists Please SignUp First", redirect: "/user/register" })
+            return res.json({ status: "error", message: "No User Exists With This PhoneNo", redirect: "/user/register" })
         } else {
-            if (userExists[0].verified.phone == false) {
-                res.json({ status: "error", message: "Please Verify Your Phone No First ", token: userExists[0].signuptoken, redirect: "/user/otp-verification" })
-            } else if (userExists[0].password == null) {
-                res.json({ status: "error", message: "Please Create A Password Before Login", token: userExists[0].signuptoken, redirect: "/user/create-password" })
+            if (userExists[0].verified.phone === false) {
+                res.json({ status: "error", message: "Please Verify Your Phone No First", token: userExists[0].signuptoken, redirect: "/user/otp-verification" })
             } else if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
-                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (5 * 60 * 60)
+                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60)
                 }, "Authentication")
+                res.json({ status: "success", message: "Login Successful", token: token })
+            } else if (hash.sha256(password) !== userExists[0].password) {
+                res.json({ status: "error", message: "Wrong Password Please Try Again" })
+            }
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login ${error.message}` })
+    }
+})
+
+
+userRouter.post("/login/admin", async (req, res) => {
+    try {
+        const { phoneno, password } = req.body
+        const userExists = await UserModel.find({ phoneno })
+        if (userExists.length === 0) {
+            return res.json({ status: "error", message: "No Admin User Exists Please Contact Your Developer" })
+        } else {
+            if (userExists[0].type.admin == false) {
+                res.json({ status: "error", message: "Please Leave This Site You Don't Have Required Access " })
+            }
+            else if (hash.sha256(password) === userExists[0].password) {
+                let token = jwt.sign({
+                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, admin: userExists[0].type.admin, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (1 * 60)
+                }, "Authorization")
                 res.json({ status: "success", message: "Login Successful", token: token })
             } else if (hash.sha256(password) != userExists[0].password) {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }
         }
     } catch (error) {
-        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+        res.json({ status: "error", message: `Error Found in Admin Login ${error.message}` })
     }
 })
-
 
 // User Registration Step 1 Basic Detail's Registration
 
@@ -67,17 +91,21 @@ userRouter.post("/register", async (req, res) => {
                 name,
                 email,
                 phoneno,
-                signuptoken: jwt.sign({ name: name, email: email, phoneno: phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7) }, "Registration"),
+                signuptoken: jwt.sign({ name: name, email: email, phoneno: phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30) }, "Registration"),
                 otp: otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false }),
                 password: null
             })
-            await user.save()
+            try {
+                await user.save()
+            } catch (error) {
+                res.json({ status: "error", message: `Failed To Register User ${error.message}` })
+            }
             fetch(`https://2factor.in/API/V1/${process.env.twofactorkey}/SMS/${user.phoneno}/${user.otp}/Airpax`)
                 .then((response) => response.json())
                 .then((data) => {
                     data.Status === 'Success' ?
                         res.json({ status: "success", message: "User Registration Successful. Please Check Your Phone For OTP", redirect: "/user/otp-verification", token: user.signuptoken })
-                        : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/user/login", token: user.signuptoken })
+                        : res.json({ status: "error", message: "User Registration UnSuccessful. Failed to Send OTP. PLease Try again Aftersome Time", redirect: "/user/otp-verification", token: user.signuptoken })
                 });
         }
     } catch (error) {
@@ -91,10 +119,17 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
     const signuptoken = req.headers.authorization.split(" ")[1]
     try {
         const { otp } = req.body
+        if (otp.length !== 6) {
+            res.json({ status: "error", message: "Otp Must Of 6 Digit's in Length " })
+        }
         const user = await UserModel.find({ signuptoken: signuptoken, otp: otp })
         user[0].verified.phone = true;
         user[0].otp = null;
-        await user[0].save()
+        try {
+            await user[0].save()
+        } catch (error) {
+            res.json({ status: "error", message: `Failed To Update User Detail's ${error.message}` })
+        }
         if (user.length >= 1 && user[0].password !== null) { // Password Already Created By the User
             let token = jwt.sign({
                 _id: user[0]._id, name: user[0].name, email: user[0].email, phoneno: user[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
@@ -102,11 +137,11 @@ userRouter.post("/otp/verification", RegistrationAuthentication, async (req, res
             res.json({ status: "success", message: "Otp Verification Successful", token: token, redirect: "/" })
         } else if (user.length >= 1 && user[0].password == null) {
             res.json({ status: "success", message: "Otp Verification Successful", redirect: "/user/create-password" })
-        } else if (user.length == 0) {
-            res.json({ status: "error", message: "Otp Verification Failed. Please Try Again", })
+        } else if (user.length === 0) {
+            res.json({ status: "error", message: "No User Found For OTP Verification", })
         }
     } catch (error) {
-        res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
+        res.json({ status: "error", message: `Your Otp Verification is Unsuccessful. ${error.message}` })
     }
 })
 
@@ -123,7 +158,7 @@ userRouter.get("/otp/resend", RegistrationAuthentication, async (req, res) => {
                     : res.json({ status: "error", message: "Failed to Send OTP. PLease Try again Aftersome Time" })
             });
     } catch (error) {
-        res.json({ status: "error", message: "Your Enquiry Registration is Unsuccessful." })
+        res.json({ status: "error", message: `Unable To Send OTP ${error.message}` })
     }
 })
 
@@ -137,13 +172,17 @@ userRouter.post("/password/create", RegistrationAuthentication, async (req, res)
             if (user.length >= 1 && user[0].verified.phone == true) {
                 user[0].password = hash.sha256(password)
                 user[0].signuptoken = null
-                await user[0].save()
+                try {
+                    await user[0].save()
+                } catch (error) {
+                    res.json({ status: "error", message: "Unable To Set Password For User", redirect: "/" })
+                }
                 let token = jwt.sign({
                     _id: user[0]?._id, name: user[0]?.name, email: user[0]?.email, phoneno: user[0]?.phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 }, "Authentication")
                 res.json({ status: "success", message: "Login Successful", token: token, redirect: "/" })
             } else {
-                res.json({ status: "error", message: "Please Complete Your OTP Verification", redirect: "/user/otp-verification" })
+                res.json({ status: "error", message: "No User Found With This Token ID", redirect: "/" })
             }
         } else {
             res.json({ status: "error", message: "Password & Confirm Password Doesn't Match" })
@@ -181,7 +220,7 @@ userRouter.post("/forgot", async (req, res) => {
                     const mailOptions = {
                         from: process.env.emailuser,
                         to: `${userExists[0].email}`,
-                        subject: 'Otp To Reset Password.',
+                        subject: 'Otp To Reset Password ',
                         html: template
                     }
                     transporter.sendMail(mailOptions, (error, info) => {
@@ -198,7 +237,7 @@ userRouter.post("/forgot", async (req, res) => {
         }
     }
     catch (error) {
-        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+        res.json({ status: "error", message: `Error Found in Forgot Password ${error.message}` })
     }
 })
 
@@ -217,16 +256,20 @@ userRouter.post("/password/change", async (req, res) => {
                 user[0].password = hash.sha256(password)
                 user[0].forgotpasswordtoken = null
                 user[0].otp = null
-                await user[0].save()
-                res.json({ status: "success", message: "Password Changed Successfully Please Login Now !!", redirect: "/user/login" })
+                try {
+                    await user[0].save()
+                    res.json({ status: "success", message: "Password Changed Successfully Please Login Now !!", redirect: "/user/login" })
+                } catch (error) {
+                    res.json({ status: "error", message: "Unable To Reset Your Password Please Try Again ", redirect: "/user/login" })
+                }
             } else {
-                res.json({ status: "error", message: "You Haven't Made a request to Change Password", redirect: "/user/login" })
+                res.json({ status: "error", message: "No User Found ", redirect: "/user/login" })
             }
         } else {
             res.json({ status: "error", message: "Password & Confirm Password Doesn't Match" })
         }
     } catch (error) {
-        res.json({ status: "error", message: `Error Found in Creating New Password  ${error.message}` })
+        res.json({ status: "error", message: `Error Found in Changing Password  ${error.message}` })
     }
 })
 
@@ -391,7 +434,7 @@ userRouter.get("/me", UserAuthentication, async (req, res) => {
 
 // Getting List of All the User's Registered In the Database
 
-userRouter.get("/listall", async (req, res) => {
+userRouter.get("/listall", AdminAuthentication, async (req, res) => {
     try {
         const user = await UserModel.find({}, { password: 0, otp: 0, signuptoken: 0, forgotpasswordtoken: 0 })
         res.json({ status: "success", data: user })
@@ -403,7 +446,7 @@ userRouter.get("/listall", async (req, res) => {
 
 // Getting Detail of a particular user Registered in the Database
 
-userRouter.get("/detailone/:id", async (req, res) => {
+userRouter.get("/detailone/:id", AdminAuthentication, async (req, res) => {
     try {
         const user = await UserModel.find({ _id: req.params.id }, { password: 0, otp: 0, signuptoken: 0, forgotpasswordtoken: 0 })
         res.json({ status: "success", data: user })

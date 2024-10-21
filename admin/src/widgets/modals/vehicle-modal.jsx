@@ -34,6 +34,7 @@ export function VehicleModal(props) {
             errors[0].focus();
             return false;
         }
+        payload.name = payload.name + payload.registrationno
 
         fetch(`http://localhost:4500${action}`, {
             method: method,
@@ -56,18 +57,6 @@ export function VehicleModal(props) {
                 console.log(err);
             });
     }
-
-
-    //   const handleFileUpload = (e) => {
-    //     const file = e.target.files[0]
-    //     Papa.parse(file, {
-    //       header: true,
-    //       skipEmptyLines: true,
-    //       complete: (results) => {
-    //         setSeat(results.data)
-    //       }
-    //     })
-    //   }
     return (
         <>
             <Dialog size="sm" open={props.showmodal} handler={props.handleModal} className="p-4">
@@ -139,7 +128,7 @@ export function VehicleModal(props) {
                                 </Typography>
                                 <input type="file" name="seat" onChange={handleFileUpload} required={true} />
                             </div> */}
-                             <div className="w-full">
+                            <div className="w-full">
                                 <frfs-text label="Seats"
                                     name="seats"
                                     required
@@ -155,7 +144,7 @@ export function VehicleModal(props) {
                                     value={props?.data.price}
                                 />
                             </div>
-                           
+
                         </div>
 
                     </DialogBody>
