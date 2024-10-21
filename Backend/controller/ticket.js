@@ -158,7 +158,7 @@ TicketRouter.get("/upcoming", async (req, res) => {
             const currenttime = hour + ":" + minutes
 
             const decoded = jwt.verify(token, 'Authentication')
-            const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, starttime: { $gt: currenttime }, userid: decoded._id })
+            const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, userid: decoded._id })
             return res.json({ status: "success", data: upcomingtrips })
         }
     } catch (error) {
