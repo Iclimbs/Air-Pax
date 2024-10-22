@@ -425,7 +425,8 @@ userRouter.get("/me", UserAuthentication, async (req, res) => {
             return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/user/login" })
         } else {
             const decoded = jwt.verify(token, 'Authentication')
-            return res.json({ status: "success", message: "Getting User Details", user: decoded })
+            const user = await UserModel.find({_id:decoded._id})
+            return res.json({ status: "success", message: "Getting User Details", user: user[0] })
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
@@ -457,14 +458,15 @@ userRouter.get("/detailone/:id", AdminAuthentication, async (req, res) => {
 
 // Updating User Detail's in the Database.
 
-userRouter.patch("/me/update", async (req, res) => {
+userRouter.patch("/me/update", UserAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = jwt.verify(token, 'Authentication')
-
+    const updateData = req.body
     try {
-        return res.json({ status: "success", message: "Getting User Details", user: decoded })
+        const updatedUser = await UserModel.findByIdAndUpdate({ _id: decoded._id },updateData)        
+        return res.json({ status: "success", message: "User Details Updated"})
     } catch (error) {
-        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+        res.json({ status: "error", message: `Failed To Update User Detail's  ${error.message}` })
     }
 })
 

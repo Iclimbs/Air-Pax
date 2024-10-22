@@ -66,11 +66,15 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
         from: tripdetails[0].from,
         to: tripdetails[0].to, journeystartdate: tripdetails[0].journeystartdate, journeyenddate: tripdetails[0].journeyenddate, busid: tripdetails[0].busid, starttime: tripdetails[0].starttime, endtime: tripdetails[0].endtime, totaltime: tripdetails[0].totaltime, distance: tripdetails[0].distance, pnr, seats: bookedseats, userid: userdetails[0]._id, tripId: tripdetails[0]._id
     })
-    try {
-        await BookingDetails.save()
-    } catch (error) {
-        res.json({ status: "error", message: `Failed To Save Booking Detail's ${error.message}` })
+    const bookingExists = await BookingModel.find({ pnr: pnr, userid: userdetails[0]._id, tripId: tripdetails[0]._id })
+    if (bookingExists.length === 0) {
+        try {
+            await BookingDetails.save()
+        } catch (error) {
+            res.json({ status: "error", message: `Failed To Save Booking Detail's ${error.message}` })
+        }
     }
+
     let confirmpayment = path.join(__dirname, "../emailtemplate/confirmpayment.ejs")
     ejs.renderFile(confirmpayment, { user: userdetails[0], seat: seatdetails, trip: tripdetails[0], payment: paymentdetails[0] }, function (err, template) {
         if (err) {
