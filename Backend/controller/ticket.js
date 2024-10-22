@@ -47,8 +47,8 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
     let bookedseats = tripdetails[0].seatsbooked;
     journeytime = new Date(`${tripdetails[0].journeystartdate}T${tripdetails[0].starttime}:00`)
     let newseats = bookedseats.filter(seat => !cancelticket.includes(seat));
-    console.log("newseats ",newseats);
-    
+    console.log("newseats ", newseats);
+
     tripdetails[0].seatsbooked = newseats;
     try {
         await tripdetails[0].save()
@@ -262,14 +262,20 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
         return res.json({ status: "error", message: "Ticket Cancellation Process Failed !! Payment is Not Confirmed For This Pnr" })
     } else {
         let refundamount = 0;
+        // let ticketcost = 0;
         const timeDifferenceMs = journeytime - currentDateTime
         const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
 
         if (timeDifferenceHours > 48) {
 
-            refundamount = Math.floor((ticketcost * cancelticketno) * 0.9)
+            // refundamount = Math.floor((ticketcost * cancelticketno) * 0.9)
+            refundamount = Math.floor((totalamount) * 0.9)
+
+            
         } else if (timeDifferenceHours > 24) {
-            refundamount = Math.floor((ticketcost * cancelticketno) * 0.5)
+            refundamount = Math.floor((totalamount) * 0.5)
+
+            // refundamount = Math.floor((ticketcost * cancelticketno) * 0.5)
         }
         try {
             paymentdetails[0].refundamount = refundamount;
