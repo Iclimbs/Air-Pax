@@ -47,6 +47,8 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
     let bookedseats = tripdetails[0].seatsbooked;
     journeytime = new Date(`${tripdetails[0].journeystartdate}T${tripdetails[0].starttime}:00`)
     let newseats = bookedseats.filter(seat => !cancelticket.includes(seat));
+    console.log("newseats ",newseats);
+    
     tripdetails[0].seatsbooked = newseats;
     try {
         await tripdetails[0].save()
@@ -158,7 +160,7 @@ TicketRouter.get("/upcoming", async (req, res) => {
             const currenttime = hour + ":" + minutes
 
             const decoded = jwt.verify(token, 'Authentication')
-            const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, userid: decoded._id })
+            const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, userid: decoded._id, status: "Confirmed" })
             return res.json({ status: "success", data: upcomingtrips })
         }
     } catch (error) {
@@ -177,14 +179,12 @@ TicketRouter.get("/detailone/:id", UserAuthentication, async (req, res) => {
 })
 
 TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
-    const { pnr, bookingId, seats } = req.body
+    const { pnr, bookingId, seats, reasonForCancellation } = req.body
     const bookingdetails = await BookingModel.find({ _id: bookingId, pnr: pnr })
     // Update Booking Details
     if (!bookingdetails) {
         return res.json({ status: "error", message: "No Booking Detail's Found" })
     }
-    console.log("bookign details", bookingdetails);
-
     let bookingstatus = "Cancelled"
     for (let index = 0; index < seats.length; index++) {
         if (!bookingdetails[0].seats.includes(seats[index].seatNumber)) {
@@ -274,6 +274,7 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
         try {
             paymentdetails[0].refundamount = refundamount;
             paymentdetails[0].paymentstatus = "Refunded";
+            paymentdetails[0].refundreason = reasonForCancellation
             await paymentdetails[0].save()
         } catch (error) {
             res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
@@ -281,13 +282,11 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     }
 
     const userdetails = await UserModel.find({ _id: bookingdetails[0].userid })
-    console.log("userdetals ", userdetails[0]);
-    console.log("cancelledSeats ", cancelledSeats)
 
     // res.json({ status: "success" })
 
     let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
-    ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr }, function (err, template) {
+    ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
         if (err) {
             res.json({ status: "error", message: err.message })
         } else {

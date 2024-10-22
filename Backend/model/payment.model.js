@@ -8,6 +8,7 @@ const PaymentSchema = mongoose.Schema({
         default:"Pending"
     },
     refundamount:Number,
+    refundreason:String,
     refno:String,
     method:String,
     CreatedAt: { type: Date, default: Date.now },

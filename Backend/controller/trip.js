@@ -121,7 +121,7 @@ tripRouter.get("/detailone/:id", async (req, res) => {
         // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
         let lockedseats = [];
         for (let index = 0; index < seats.length; index++) {
-            if (bookedseats.includes(seats[index].seatNumber) === false) {
+            if ((bookedseats.includes(seats[index].seatNumber) === false) && ((seats[index].details.status == "Pending") || (seats[index].details.status == "Completed"))) {
                 lockedseats.push(seats[index].seatNumber)
             }
         }
