@@ -271,7 +271,7 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
             // refundamount = Math.floor((ticketcost * cancelticketno) * 0.9)
             refundamount = Math.floor((totalamount) * 0.9)
 
-            
+
         } else if (timeDifferenceHours > 24) {
             refundamount = Math.floor((totalamount) * 0.5)
 
