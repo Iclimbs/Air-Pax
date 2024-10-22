@@ -186,10 +186,9 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
         return res.json({ status: "error", message: "No Booking Detail's Found" })
     }
     let bookingstatus = "Cancelled"
-    for (let index = 0; index < seats.length; index++) {
-        if (!bookingdetails[0].seats.includes(seats[index].seatNumber)) {
-            bookingstatus = "Confirmed"
-        }
+
+    if (bookingdetails[0].seats.length !== seats.length) {
+        bookingstatus = "Confirmed"
     }
 
     try {
@@ -226,15 +225,9 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
 
         }
     }
-    // console.log("remove seat  ", seatstoberemoved);
-
-    // console.log("bulkwrite ", bulkwriteseat);
-
-
     try {
         await SeatModel.bulkWrite(bulkwriteseat)
     } catch (error) {
-        // console.log(error);
 
         res.json({ status: "error", message: "Bulk Update Seat Process Failed " })
     }
@@ -267,15 +260,10 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
         const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
 
         if (timeDifferenceHours > 48) {
-
-            // refundamount = Math.floor((ticketcost * cancelticketno) * 0.9)
             refundamount = Math.floor((totalamount) * 0.9)
-
 
         } else if (timeDifferenceHours > 24) {
             refundamount = Math.floor((totalamount) * 0.5)
-
-            // refundamount = Math.floor((ticketcost * cancelticketno) * 0.5)
         }
         try {
             paymentdetails[0].refundamount = refundamount;
@@ -288,8 +276,6 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     }
 
     const userdetails = await UserModel.find({ _id: bookingdetails[0].userid })
-
-    // res.json({ status: "success" })
 
     let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
     ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
