@@ -10,29 +10,38 @@ import {
 } from "@material-tailwind/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
-
-
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "react-router-dom";
+ 
+// Define Zod schema for form validation
+const schema = z.object({
+    name: z.string().min(1, { message: "Name is required" }),
+    price: z.string().refine((value) => !isNaN(Number(value)), {
+        message: "Price must be a positive number",
+      }),
+    available: z.boolean({ message: "Availability must be a boolean" })
+});
+ 
 export function OutletModal(props) {
-    const handleSubmit = (e) => {
-        let frm = e.target.form;
-        if (!frm) return console.log("misconfigured");
-        const action = frm.getAttribute("action");
-        const method = frm.getAttribute("method") || "post";
-        let payload = {};
-        let errors = [];
-        frm.querySelectorAll("[name]").forEach((fld) => {
-            if (!fld.validity.valid) errors.push(fld);
-            if (["checkbox", "radio"].indexOf(fld.type) === -1) {
-                payload[fld.name] = fld.value;
-                return;
-            }
-            if (fld.checked) payload[fld.name] = fld.value;
-        });
-        if (errors.length) {
-            errors[0].focus();
-            return false;
-        }
-
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        resolver: zodResolver(schema),
+    });
+ 
+    const onSubmit = (data) => {
+        // Convert string inputs to the expected types before validation
+        const formData = {
+            ...data,
+            price: parseFloat(data.price), // Convert price to number
+            available: data.available === "true" || data.available === true // Convert available to boolean
+        };
+  
+        // Your API call logic here
         fetch(`http://localhost:4500${action}`, {
             method: method,
             body: JSON.stringify(payload),
@@ -53,80 +62,79 @@ export function OutletModal(props) {
             .catch((err) => {
                 console.log(err);
             });
-    }
+    };
+ 
     return (
-        <>
-            <Dialog size="sm" open={props.showmodal} handler={props.handleModal} className="p-4">
-                <form method={props?.data.length!==0 ? "PATCH" : "post"}
-                    action={props?.data.length!==0 ? `/api/v1/counter/edit/${props.data._id}` : "/api/v1/counter/add"}
-                    className="contact"
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                    }}>
-                    <DialogHeader className="relative m-0 block">
-                        <Typography variant="h4" color="blue-gray">
-                            Manage Counter
-                        </Typography>
-                        <Typography className="mt-1 font-normal text-gray-600">
-                            Keep your Counter records up-to-date and organized.
-                        </Typography>
-                        <IconButton
-                            size="sm"
-                            variant="text"
-                            className="!absolute right-3.5 top-3.5"
-                            onClick={props.handleModal}
+        <Dialog size="sm" open={props.showmodal} handler={props.handleModal} className="p-4">
+            <form className="flex flex-col mt-4" onSubmit={handleSubmit(onSubmit)}>
+                <DialogHeader className="relative m-0 block">
+                    <Typography variant="h4" color="blue-gray">
+                        Manage Food
+                    </Typography>
+                    <IconButton
+                        size="sm"
+                        variant="text"
+                        className="!absolute right-3.5 top-3.5"
+                        onClick={props.handleModal}
+                    >
+                        <XMarkIcon className="h-4 w-4 stroke-2" />
+                    </IconButton>
+                </DialogHeader>
+                <DialogBody className="space-y-4 pb-6">
+                    <div className="mb-6">
+                        <label className="block text-black font-semibold mb-2" htmlFor="name">
+                            Food Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            {...register("name")}
+                            type="text"
+                            id="name"
+                            className="text-black w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            placeholder="Enter food name"
+                        />
+                        {errors.name && (
+                            <p className="text-red-500">{errors.name.message}</p>
+                        )}
+                    </div>
+                    <div className="mb-6">
+                        <label className="block mb-2 text-black font-semibold" htmlFor="price">
+                            Price <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            {...register("price")}
+                            type="number" // Keep it as text, we'll convert to number in onSubmit
+                            id="price"
+                            className="text-black w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            placeholder="Enter food price"
+                        />
+                        {errors.price && (
+                            <p className="text-red-500">{errors.price.message}</p>
+                        )}
+                    </div>
+                    <div className="mb-6">
+                        <label className="block mb-2 text-black font-semibold" htmlFor="available">
+                            Available <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            {...register("available")}
+                            id="available"
+                            className="text-black w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                         >
-                            <XMarkIcon className="h-4 w-4 stroke-2" />
-                        </IconButton>
-                    </DialogHeader>
-                    <DialogBody className="space-y-4 pb-6">
-                        <div>
-                            <frfs-text label="Name"
-                                name="name"
-                                required
-                                editable
-                                value={props?.data.name}
-                            />
-                        </div>
-                        <div>
-                            <frfs-text label="City"
-                                name="city"
-                                required
-                                editable
-                                value={props?.data.city}
-                            />
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="w-full">
-                                <frfs-text label="Location"
-                                    name="location"
-                                    required
-                                    editable
-                                    value={props?.data.location}
-                                />
-
-                            </div>
-                            <div className="w-full">
-
-                                <frfs-tel label="Mobile"
-                                    name="phoneno"
-                                    cn='in'
-                                    required
-                                    editable
-                                    value={props?.data.phoneno}
-                                />
-                            </div>
-                        </div>
-
-                    </DialogBody>
-                    <DialogFooter>
-                        <Button className="ml-auto" onClick={handleSubmit}>
-                            {props?.data ? "Add Counter" : "Edit Counter"}
-                        </Button>
-                    </DialogFooter>
-                </form>
-
-            </Dialog>
-        </>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                        {errors.available && (
+                            <p className="text-red-500">{errors.available.message}</p>
+                        )}
+                    </div>
+                    <button
+                        className="text-white p-3 bg-gray-900 rounded-lg shadow-lg hover:bg-primary-dark transition"
+                        type="submit"
+                    >
+                        Add Food
+                    </button>
+                </DialogBody>
+            </form>
+        </Dialog>
     );
 }
