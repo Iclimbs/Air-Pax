@@ -115,7 +115,7 @@ export function CounterModal(props) {
                     </DialogBody>
                     <DialogFooter>
                         <Button className="ml-auto" onClick={handleSubmit}>
-                            {props?.data ? "Add Counter" : "Edit Counter"}
+                        {props?.data.name ? "Edit Counter" : "Add Counter"}
                         </Button>
                     </DialogFooter>
                 </form>

@@ -50,18 +50,18 @@ export const routes = [
         path: "/trip",
         element: <Trip />,
       },
-      {
-        icon: <IoTicketOutline  {...icon} />,
-        name: "Ticket Booking",
-        path: "/ticket-booking",
-        element: <TicketBooking/>,
-      },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
-        path: "/notifications",
-        element: <Notifications />,
-      },
+      // {
+      //   icon: <IoTicketOutline  {...icon} />,
+      //   name: "Ticket Booking",
+      //   path: "/ticket-booking",
+      //   element: <TicketBooking/>,
+      // },
+      // {
+      //   icon: <InformationCircleIcon {...icon} />,
+      //   name: "notifications",
+      //   path: "/notifications",
+      //   element: <Notifications />,
+      // },
     ],
   },
   {

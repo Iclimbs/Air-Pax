@@ -7,7 +7,7 @@ export function Footer({ brandName, brandLink, routes }) {
 
   return (
     <footer className="py-2">
-      <div className="flex w-full flex-wrap items-center justify-center gap-6 px-2 md:justify-between">
+      {/* <div className="flex w-full flex-wrap items-center justify-center gap-6 px-2 md:justify-between">
         <Typography variant="small" className="font-normal text-inherit">
           &copy; {year}, made with{" "}
           <HeartIcon className="-mt-0.5 inline-block h-3.5 w-3.5 text-red-600" /> by{" "}
@@ -35,19 +35,19 @@ export function Footer({ brandName, brandLink, routes }) {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
     </footer>
   );
 }
 
 Footer.defaultProps = {
-  brandName: "iClimb Systems India Pvt Ltd",
-  brandLink: "https://iclimbs.com/",
+  brandName: "Airpax",
+  brandLink: "https://airpax.co/",
   routes: [
-    { name: "iClimb Systems India Pvt Ltd", path: "https://iclimbs.com/" },
-    { name: "About Us", path: "https://iclimbs.com/about-us" },
-    { name: "Blog", path: "https://iclimbs.com/blogs" },
-    { name: "Services", path: "https://iclimbs.com/services" },
+    { name: "Airpax", path: "https://airpax.co/" },
+    { name: "About Us", path: "https://airpax.co/about-us" },
+    { name: "Blog", path: "https://airpax.co/blogs" },
+    { name: "Services", path: "https://airpax.co/services" },
   ],
 };
 

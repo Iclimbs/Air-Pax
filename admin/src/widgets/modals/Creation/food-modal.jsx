@@ -107,7 +107,7 @@ const FoodModal = (props) => {
                     </DialogBody>
                     <DialogFooter>
                         <Button className="ml-auto" onClick={handleSubmit}>
-                            {props?.data ? "Add Food Item" : "Edit Food Item"}
+                            {props?.data.name ? "Edit Food Item" :"Add Food Item"}
                         </Button>
                     </DialogFooter>
                 </form>

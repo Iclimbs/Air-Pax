@@ -17,7 +17,7 @@ export const UserProvider = ({ children }) => {
   const getUser = () => {
     if (!token) return;
 
-    fetch("https://air-pax.onrender.com/api/v1/user/me", {
+    fetch("https://airpax.co/api/v1/user/me", {
       method: "GET",
       headers: {
         token,

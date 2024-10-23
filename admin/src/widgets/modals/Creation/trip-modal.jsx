@@ -212,7 +212,7 @@ export function TripModal(props) {
                     </DialogBody>
                     <DialogFooter>
                         <Button className="ml-auto" onClick={handleSubmit}>
-                            {props?.data ? "Add Trip" : "Edit Trip"}
+                            {props?.data.name ?  "Edit Trip" : "Add Trip"}
                         </Button>
                     </DialogFooter>
                 </form>
