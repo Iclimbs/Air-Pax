@@ -7,9 +7,9 @@ import {
 } from "@material-tailwind/react";
 import React from "react";
 import { tripTableData } from "@/data";
-import ConfirmModal from "@/widgets/modals/confirm-modal";
-import { TripModal } from "@/widgets/modals/trip-modal";
-import { BulkTripModal } from "@/widgets/modals/bulk-trip-modal";
+import ConfirmModal from "@/widgets/modals/Confirmation/confirm-modal";
+import { TripModal } from "@/widgets/modals/Creation/trip-modal";
+import { BulkTripModal } from "@/widgets/modals/Creation/bulk-trip-modal";
 
 
 export function Trip() {
@@ -39,8 +39,6 @@ export function Trip() {
     setSelectedData([])
     setShowModalbulk(!showmodalbulk)
   }
-
-
 
   const handleSelect = (item) => {
     setShowModal(!showmodal)

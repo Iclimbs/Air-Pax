@@ -8,15 +8,17 @@ import {
 } from "@material-tailwind/react";
 import React from "react";
 import { foodTableData } from "@/data";
-import { OutletModal } from "@/widgets/modals/outlet-modal";
-import ConfirmModal from "@/widgets/modals/confirm-modal";
+import FoodModal from "@/widgets/modals/Creation/food-modal";
+import FoodConfirmModal from "@/widgets/modals/Confirmation/food-confirm-modal";
 
 export function Food() {
   const [showmodal, setShowModal] = React.useState(false)
   const [showFoodModal, setShowFoodModal] = React.useState(false)
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
-  
+  console.log("selected data ", selectedData);
+
+
   React.useEffect(() => {
     fetch('http://localhost:4500/api/v1/food/listall')
       .then((response) => response.json())
@@ -51,8 +53,8 @@ export function Food() {
 
   return (
     <>
-      <ConfirmModal showmodal={showFoodModal} toggleConfirmModal={toggleFoodModal} data={selectedData} endpoint="/api/v1/food/disable/" />
-      <OutletModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
+      <FoodConfirmModal showmodal={showFoodModal} toggleConfirmModal={toggleFoodModal} data={selectedData} endpoint="/api/v1/food/disable/" />
+      <FoodModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
@@ -102,7 +104,7 @@ export function Food() {
                               color="blue-gray"
                               className="font-semibold"
                             >
-                                {el.name}
+                              {el.name}
                             </Typography>
                           </div>
                         </div>
@@ -139,7 +141,7 @@ export function Food() {
                           className="text-xs font-semibold text-blue-gray-600"
                           onClick={() => { handleConfirmModal(el) }}
                         >
-                          Disable
+                          {el.available ? "Disable" : "Enable"}
                         </Button>
 
                       </td>

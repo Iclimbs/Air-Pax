@@ -8,8 +8,8 @@ import {
 } from "@material-tailwind/react";
 import React from "react";
 import { outletTableData } from "@/data";
-import { OutletModal } from "@/widgets/modals/outlet-modal";
-import ConfirmModal from "@/widgets/modals/confirm-modal";
+import { CounterModal } from "@/widgets/modals/Creation/counter-modal";
+import CounterConfirmModal from "@/widgets/modals/Confirmation/counter-confirm-modal";
 
 export function Counter() {
   const [showmodal, setShowModal] = React.useState(false)
@@ -17,8 +17,8 @@ export function Counter() {
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
 
-  console.log("data ",data);
-  
+  console.log("data ", selectedData);
+
   React.useEffect(() => {
     fetch('http://localhost:4500/api/v1/counter/listall')
       .then((response) => response.json())
@@ -53,8 +53,8 @@ export function Counter() {
 
   return (
     <>
-      <ConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/counter/disable/" />
-      <OutletModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
+      <CounterConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/counter/disable/" />
+      <CounterModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
@@ -148,7 +148,7 @@ export function Counter() {
                           className="text-xs font-semibold text-blue-gray-600"
                           onClick={() => { handleConfirmModal(el) }}
                         >
-                          Disable
+                          {el.status.disabled ?  "Enable" :"Disable"}
                         </Button>
 
                       </td>

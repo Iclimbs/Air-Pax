@@ -10,9 +10,7 @@ import {
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 
-
-
-const FoodModal = (props) => {
+const VehicleConfirmModal = (props) => {
     const handleSubmit = () => {
         fetch(`http://localhost:4500${props.endpoint}${props.data._id}`, {
             method: "PATCH",
@@ -23,28 +21,27 @@ const FoodModal = (props) => {
         })
             .then((res) => res.json())
             .then((data) => {
-                if (data.status==="success") {
+                if (data.status === "success") {
                     props.toggleConfirmModal()
                     toast.success(data.message)
                 } else {
                     props.toggleConfirmModal()
-                    toast.success(data.message)
+                    toast.error(data.message)
                 }
             })
             .catch((err) => {
-                console.log(err);
+                toast.error(err.message)
             })
     }
     return (
         <>
-
             <Dialog size="sm" open={props.showmodal} handler={props.toggleConfirmModal} className="p-4">
                 <DialogHeader className="relative m-0 block">
                     <Typography variant="h4" color="blue-gray">
                         Confirmation Alert!
                     </Typography>
                     <Typography className="mt-1 font-normal text-gray-600">
-                        Are you sure to disable this counter?
+                    Are you sure you want to change this Vehicle Availability?
                     </Typography>
                     <IconButton
                         size="sm"
@@ -71,4 +68,4 @@ const FoodModal = (props) => {
     )
 }
 
-export default FoodModal
+export default VehicleConfirmModal

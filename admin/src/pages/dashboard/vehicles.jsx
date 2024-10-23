@@ -8,14 +8,17 @@ import {
 } from "@material-tailwind/react";
 import React from "react";
 import { vehicleTableData } from "@/data";
-import ConfirmModal from "@/widgets/modals/confirm-modal";
-import { VehicleModal } from "@/widgets/modals/vehicle-modal";
+import { VehicleModal } from "@/widgets/modals/Creation/vehicle-modal";
+import toast from "react-hot-toast";
+import VehicleConfirmModal from "@/widgets/modals/Confirmation/vehicle-confirm-modal";
 
 export function Vehicles() {
   const [showmodal, setShowModal] = React.useState(false)
   const [showConfirmModal, setShowConfirmModal] = React.useState(false)
   const [data, setData] = React.useState([])
   const [selectedData, setSelectedData] = React.useState([])
+  console.log("selected data ", selectedData);
+
 
   React.useEffect(() => {
     fetch('http://localhost:4500/api/v1/vehicle/listall')
@@ -24,7 +27,7 @@ export function Vehicles() {
         setData(data.data)
       })
       .catch(error => {
-        console.error(error);
+        toast.error(error.message)
       })
   }, [])
 
@@ -51,7 +54,7 @@ export function Vehicles() {
 
   return (
     <>
-      <ConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/vehicle/disable/" />
+      <VehicleConfirmModal showmodal={showConfirmModal} toggleConfirmModal={toggleConfirmModal} data={selectedData} endpoint="/api/v1/vehicle/disable/" />
       <VehicleModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
@@ -161,7 +164,7 @@ export function Vehicles() {
                           className="text-xs font-semibold text-blue-gray-600"
                           onClick={() => { handleConfirmModal(el) }}
                         >
-                          Disable
+                          {el.active ? "Disable" :"Enable"}
                         </Button>
                       </td>
                     </tr>
