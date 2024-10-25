@@ -1,6 +1,7 @@
+import SearchRoute from '@/components/SearchRoute';
 import { UserContext } from '@/context/UserContext';
 import SeatLayout from '@/widgets/layout/seatLayout';
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 
 const TicketBooking = () => {
@@ -13,7 +14,7 @@ const TicketBooking = () => {
     const [seatprices, setSeatPrices] = useState(0);
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [bookedSeats, setbookedSeats] = useState([]);
-    console.log("booking",data);
+    
     const handleChange = (e, i) => {
       const { name, value } = e.target;
       const onchangeValue = [...userData];
@@ -54,42 +55,42 @@ const TicketBooking = () => {
         .catch((err) => console.log(err));
     }, []);
   
-    const handleSubmit = (event) => {
-      event.preventDefault();
-      const payload = {
-        userdetails:user,
-        passengerdetails:userData,
-        tripId:params.id
+    // const handleSubmit = (event) => {
+    //   event.preventDefault();
+    //   const payload = {
+    //     userdetails:user,
+    //     passengerdetails:userData,
+    //     tripId:params.id
   
-      }
-      fetch(`https://air-pax.onrender.com/api/v1/seat/selectedseats`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    //   }
+    //   fetch(`https://air-pax.onrender.com/api/v1/seat/selectedseats`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
   
-        },
-        body: JSON.stringify(payload),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.status == "success") {
-            console.log("bookTicket", data);
-            // localStorage.setItem("token", JSON.stringify(data.token))
-            // navigate("/");
-          } else {
-            console.log("bookTicket", data);
-            // toast.error(data.message);
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          // toast.error("An error occurred. Please try again later.");
-        });
+    //     },
+    //     body: JSON.stringify(payload),
+    //   })
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //       if (data.status == "success") {
+    //         console.log("bookTicket", data);
+    //         // localStorage.setItem("token", JSON.stringify(data.token))
+    //         // navigate("/");
+    //       } else {
+    //         console.log("bookTicket", data);
+    //         // toast.error(data.message);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //       // toast.error("An error occurred. Please try again later.");
+    //     });
   
-    };
+    // };
   return (
     <div>
-         <div className="py-10 w-full  lg:px-8 px-5  bg-[#171717] rounded-lg lg:w-2/33 text-white">
+         {/* <div className="py-10 w-full lg:px-8 px-5 bg-[#171717] rounded-lg lg:w-2/33 text-white">
             <SeatLayout
               bookedSeats={bookedSeats}
               totalSeats={totalSeats}
@@ -97,6 +98,7 @@ const TicketBooking = () => {
               selectedSeats={selectedSeats}
               handleSeatClick={handleSeatClick}
             />
+
             <form className="flex flex-col mt-8" onSubmit={handleSubmit}>
               <div>
                 <p className="text-secondaryText font-heading text-xl pt-5">
@@ -148,30 +150,7 @@ const TicketBooking = () => {
                       />
                     </div>
                   </div>
-                  <div className="w-full md:w-1/2 md:pl-4 ">
-                    <div className="mt-6 ">
-                      <label className="block mb-2 text-xl h-8" htmlFor="lastName">
-                        Purpose of Travel
-                      </label>
-                      {/* <input
-                        type="tel"
-                        id="usercontactnumber"
-                        className="w-full p-2 border border-white rounded-lg bg-[#171717]"
-                        placeholder="Enter your Contact Number"
-                        required
-                      /> */}
-                      <select className=" rounded-lg bg-cardBackground border w-full py-2 px-2" name="travel_purpose" onChange={(e) => { }} >
-                        <option value="">Please Select</option>
-                        <option value="Leisure">Leisure</option>
-                        <option value="Business">Business</option>
-                        <option value="Visiting Family & Friends">Visiting Family & Friends</option>
-                        <option value="Govt Travel">Govt Travel</option>
-                        <option value="Education">Education</option>
-                        <option value="Medical">Medical</option>
-                        <option value="Others">Others</option>
-                      </select>
-                    </div>
-                  </div>
+                  
                 </div>
               </div>
               <p className="text-secondaryText font-heading text-xl pt-5">
@@ -267,7 +246,8 @@ const TicketBooking = () => {
                 Submit
               </button>
             </form>
-          </div>
+          </div> */}
+          <SearchRoute/>
     </div>
   )
 }

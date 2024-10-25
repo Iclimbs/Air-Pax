@@ -62,13 +62,13 @@ export function Trip() {
       <TripModal showmodal={showmodal} handleModal={handleModal} data={selectedData} />
       <BulkTripModal showmodal={showmodalbulk} handleModal={handleBulkModal} data={selectedData} />
 
-      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
+      {/* <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
-      </div>
+      </div> */}
       <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between">
+        <CardHeader variant="gradient" color="gray" className="my-8 p-6 flex justify-between">
           <Typography variant="h6" color="white">
-            Outlets
+            Trips
           </Typography>
           <Button variant="filled" color="white" className="text-sm" onClick={handleBulkModal}>
             Bulk Add New

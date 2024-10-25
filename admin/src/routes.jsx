@@ -12,6 +12,7 @@ import { SignIn, SignUp } from "@/pages/auth";
 import Vehicles from "./pages/dashboard/vehicles";
 import TicketBooking from "./pages/dashboard/ticketBooking";
 
+
 const icon = {
   className: "w-5 h-5 text-inherit",
 };
@@ -50,20 +51,39 @@ export const routes = [
         path: "/trip",
         element: <Trip />,
       },
-      // {
-      //   icon: <IoTicketOutline  {...icon} />,
-      //   name: "Ticket Booking",
-      //   path: "/ticket-booking",
-      //   element: <TicketBooking/>,
-      // },
-      // {
-      //   icon: <InformationCircleIcon {...icon} />,
-      //   name: "notifications",
-      //   path: "/notifications",
-      //   element: <Notifications />,
-      // },
+      {
+        icon: <IoTicketOutline  {...icon} />,
+        name: "Ticket Booking",
+        path: "/ticket-booking",
+        element: <TicketBooking/>,
+        
+
+      },
     ],
   },
+// start Driver route
+{
+  layout: "driver",
+  pages: [
+    {
+      icon: <HomeIcon {...icon} />,
+      name: "Driver Dashboard",
+      path: "/home",
+      element: <Home />,
+    },
+    {
+      icon: <UserCircleIcon {...icon} />,
+      name: "Food Details",
+      path: "/food",
+      element: <Food />,
+    },
+    
+   
+  ],
+},
+
+//end Driver route
+
   {
     title: "auth pages",
     layout: "auth",
@@ -82,6 +102,7 @@ export const routes = [
       },
     ],
   },
+  
 ];
 
 export default routes;
