@@ -61,12 +61,12 @@ userRouter.post("/login/admin", async (req, res) => {
         if (userExists.length === 0) {
             return res.json({ status: "error", message: "No Admin User Exists Please Contact Your Developer" })
         } else {
-            if (userExists[0].type.admin == false) {
+            if (userExists[0].accounttype === "admin") {
                 res.json({ status: "error", message: "Please Leave This Site You Don't Have Required Access " })
             }
             else if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
-                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, admin: userExists[0].type.admin, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (1 * 60)
+                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, admin: userExists[0].accounttype, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (1 * 60)
                 }, "Authorization")
                 res.json({ status: "success", message: "Login Successful", token: token })
             } else if (hash.sha256(password) != userExists[0].password) {

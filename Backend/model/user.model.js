@@ -4,14 +4,14 @@ const userschema = mongoose.Schema({
     type: String,
     required: true,
   },
-  age:{
-    type:String
+  age: {
+    type: String
   },
-  gender:{
-    type:String
+  gender: {
+    type: String
   },
-  address:{
-    type:String
+  address: {
+    type: String
   },
   email: {
     type: String,
@@ -44,16 +44,10 @@ const userschema = mongoose.Schema({
   picture: {
     type: String
   },
-  type: {
-    admin: {
-      type: Boolean,
-      default: false
-    },
-    user: {
-      type: Boolean,
-      default: true
-
-    }
+  accounttype: {
+    type: String,
+    enum: ["user", "admin", "conductor", "driver"], // Replace with your allowed values
+    default: "user"
   },
   CreatedAt: { type: Date, default: Date.now },
 });
