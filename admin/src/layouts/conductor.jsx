@@ -7,18 +7,18 @@ import {
   Configurator,
   Footer,
 } from "@/widgets/layout";
-import {driverRoutes} from "@/routes";
+import {conductorRoutes} from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
 
 
-export function  Driver() {
+export function Conductor() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
       <Sidenav
-        routes={driverRoutes}
+        routes={conductorRoutes}
         brandImg={
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
         }
@@ -36,9 +36,9 @@ export function  Driver() {
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
         <Routes>
-          {driverRoutes.map(
+          {conductorRoutes.map(
             ({ layout, pages }) =>
-              layout === "driver" &&
+              layout === "conductor" &&
               pages.map(({ path, element }) => (
                 <Route exact path={path} element={element} />
               ))
@@ -52,6 +52,6 @@ export function  Driver() {
   );
 }
 
-Driver.displayName = "/src/layout/driver.jsx";
+Conductor.displayName = "/src/layout/conductor.jsx";
 
-export default Driver;
+export default Conductor;

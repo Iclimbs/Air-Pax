@@ -11,6 +11,9 @@ import { Home, Notifications, Counter, Trip,Food } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import Vehicles from "./pages/dashboard/vehicles";
 import TicketBooking from "./pages/dashboard/ticketBooking";
+import ConductorHome from "./pages/conductor/ConductorHome";
+import AssignedRoutes from "./pages/conductor/AssignedRoutes";
+import SwapShift from "./pages/conductor/SwapShift";
 
 
 const icon = {
@@ -61,29 +64,6 @@ export const routes = [
       },
     ],
   },
-// start Driver route
-{
-  layout: "driver",
-  pages: [
-    {
-      icon: <HomeIcon {...icon} />,
-      name: "Driver Dashboard",
-      path: "/home",
-      element: <Home />,
-    },
-    {
-      icon: <UserCircleIcon {...icon} />,
-      name: "Food Details",
-      path: "/food",
-      element: <Food />,
-    },
-    
-   
-  ],
-},
-
-//end Driver route
-
   {
     title: "auth pages",
     layout: "auth",
@@ -102,7 +82,95 @@ export const routes = [
       },
     ],
   },
-  
+];
+// start Driver route
+export const driverRoutes = [
+{
+  layout: "driver",
+  pages: [
+    {
+      icon: <HomeIcon {...icon} />,
+      name: "Conductor Dashboard",
+      path: "/home",
+      element: <ConductorHome />,
+    },
+    {
+      icon: <UserCircleIcon {...icon} />,
+      name: "Assigned Routes",
+      path: "/assigned-routes",
+      element: <AssignedRoutes />,
+    },
+    {
+      icon: <UserCircleIcon {...icon} />,
+      name: "Swap Shift",
+      path: "/swaf-shift",
+      element: <SwapShift />,
+    },
+   
+  ],
+},
+{
+    title: "auth pages",
+    layout: "auth",
+    pages: [
+      {
+        icon: <ServerStackIcon {...icon} />,
+        name: "sign in",
+        path: "/sign-in",
+        element: <SignIn />,
+      },
+      {
+        icon: <RectangleStackIcon {...icon} />,
+        name: "sign up",
+        path: "/sign-up",
+        element: <SignUp />,
+      },
+    ],
+},
 ];
 
-export default routes;
+export const conductorRoutes = [
+  {
+    layout: "conductor",
+    pages: [
+      {
+        icon: <HomeIcon {...icon} />,
+        name: "Conductor Dashboard",
+        path: "/home",
+        element: <ConductorHome />,
+      },
+      {
+        icon: <UserCircleIcon {...icon} />,
+        name: "Assigned Routes",
+        path: "/assigned-routes",
+        element: <AssignedRoutes />,
+      },
+      {
+        icon: <UserCircleIcon {...icon} />,
+        name: "Swap Shift",
+        path: "/swaf-shift",
+        element: <SwapShift />,
+      },
+      
+     
+    ],
+  },
+  {
+      title: "auth pages",
+      layout: "auth",
+      pages: [
+        {
+          icon: <ServerStackIcon {...icon} />,
+          name: "sign in",
+          path: "/sign-in",
+          element: <SignIn />,
+        },
+        {
+          icon: <RectangleStackIcon {...icon} />,
+          name: "sign up",
+          path: "/sign-up",
+          element: <SignUp />,
+        },
+      ],
+  },
+  ];
