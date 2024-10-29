@@ -23,7 +23,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         length: 10,
         useLetters: true,
         useNumbers: true
-    });
+    }).toUpperCase()
     let seats = [] // All the Seat Number's for which the using is trying to book ticket. 
     let seatdetails = [] // All the Details of the Passenger's for which seat's are going to be booked.
     // For Loop To Add All the Passenger Detail's in the Seatdetail's Array which can be Added in the Seat Model || Seats Collection 
@@ -32,7 +32,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
             expireAt: Date.now() + 15 * 60 * 1000, // Lock for 5 minutes
-            pnr: ticketpnr.toUpperCase(),
+            pnr: ticketpnr,
             details: { fname: toProperCase(passengerdetails[index].fname), lname: toProperCase(passengerdetails[index].lname), age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].food }
         })
     }
