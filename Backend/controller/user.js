@@ -434,6 +434,24 @@ userRouter.get("/me", UserAuthentication, async (req, res) => {
     }
 })
 
+// Getting Basic Admin User Detail's Like username, email & more which is passed via token
+
+userRouter.get("/admin/me", AdminAuthentication, async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    try {
+        if (!token) {
+            return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/user/login" })
+        } else {
+            const decoded = jwt.verify(token, 'Authorization')
+            const user = await UserModel.find({ _id: decoded._id })
+            return res.json({ status: "success", message: "Getting User Details", user: user[0] })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+    }
+})
+
+
 // Getting List of All the User's Registered In the Database
 
 userRouter.get("/listall", AdminAuthentication, async (req, res) => {
