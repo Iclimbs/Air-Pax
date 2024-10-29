@@ -553,15 +553,14 @@ userRouter.post("/create/admin", AdminAuthentication, async (req, res) => {
 })
 
 
-userRouter.get("/admin/listall", async (req, res) => {
+userRouter.get("/admin/listall", AdminAuthentication, async (req, res) => {
     try {
-        const user = await UserModel.aggregate([{"$or":[{ "$match": { "accounttype":"conductor"}},{ "$match": { "accounttype":"driver"}}]}])
+        const user = await UserModel.find({
+            accounttype: { $in: ["conductor", "driver"] }
+        })
         res.json({ status: "success", data: user })
     } catch (error) {
-        console.log("error",error.message);
-        
         res.json({ status: "error", message: "Failed To Get User List" })
-
     }
 })
 
