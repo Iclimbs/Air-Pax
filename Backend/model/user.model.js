@@ -49,6 +49,10 @@ const userschema = mongoose.Schema({
     enum: ["user", "admin", "conductor", "driver"], // Replace with your allowed values
     default: "user"
   },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
   CreatedAt: { type: Date, default: Date.now },
 });
 const UserModel = mongoose.model("Users", userschema);
