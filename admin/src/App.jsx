@@ -3,9 +3,10 @@ import { Dashboard, Auth, Driver } from "@/layouts";
 import { UserProvider } from "./context/UserContext";
 import { useState } from "react";
 import Conductor from "./layouts/conductor";
+import SelectSeat from "./pages/dashboard/selectSeat";
 
 function App() {
-  const [userRole, setUserRole] = useState("conductor");
+  const [userRole, setUserRole] = useState("admin");
 
   const getRoutes = () => {
     switch (userRole) {
@@ -13,6 +14,7 @@ function App() {
         return (
           <>
             <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/dashboard/tickets-booking/:id" element={<SelectSeat />} />
             <Route path="/auth/*" element={<Auth />} />
             <Route path="*" element={<Navigate to="/dashboard/home" replace />} />
           </>
