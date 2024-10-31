@@ -8,6 +8,7 @@ PnrRouter.get("/:pnr", async (req, res) => {
     const { pnr } = req.params;
     // Creating An Object which will contain all the basic details required for the user.
     let details = {};
+    details.passengerdetails = [];
     // Getting the list of Seats Booked 
     const ticketdetails = await SeatModel.find({ pnr: pnr }, { _id: 0, CreatedAt: 0 })
 
@@ -16,7 +17,11 @@ PnrRouter.get("/:pnr", async (req, res) => {
         return res.json({ status: "error", message: "No Ticket Detail's Found Related to this Pnr" })
     }
 
-    details.passengerdetails = ticketdetails[0].details;
+    // Inserting All Passenger Detail's List In Passenger Detail's Array 
+    for (let index = 0; index < ticketdetails.length; index++) {
+        details.passengerdetails.push(ticketdetails[0].details)
+    }
+    // details.passengerdetails = ticketdetails[0].details;
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })

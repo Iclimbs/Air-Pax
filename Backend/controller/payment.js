@@ -14,7 +14,7 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     const { pnr } = req.params
     const filter = { pnr: pnr };
     const update = {
-        $set: { isBooked: true, expireAt: null, "details.status": "Completed" }
+        $set: { isBooked: true, expireAt: null, "details.status": "Confirmed" }
     } // set status field
     // Step 1 Getting The list of all the seat's with this PNR & Updating their status
     try {
@@ -24,14 +24,14 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     }
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
-    paymentdetails[0].paymentstatus = "Completed"
+    paymentdetails[0].paymentstatus = "Confirmed"
     try {
         await paymentdetails[0].save()
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update Payment  Status ${error.message}` })
     }
-    const seatdetails = await SeatModel.find({ pnr: pnr, expireAt: null, isBooked: true, isLocked: true, "details.status": "Completed" })
-    console.log("seatdetails ", seatdetails);
+    const seatdetails = await SeatModel.find({ pnr: pnr, expireAt: null, isBooked: true, isLocked: true, "details.status": "Confirmed" })
+    // console.log("seatdetails ", seatdetails);
 
     // bookedseat contain the list of all the Seats booked with this pnr
     let bookedseats = []
@@ -64,7 +64,18 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     const BookingDetails = new BookingModel({
         name: tripdetails[0].name,
         from: tripdetails[0].from,
-        to: tripdetails[0].to, journeystartdate: tripdetails[0].journeystartdate, journeyenddate: tripdetails[0].journeyenddate, busid: tripdetails[0].busid, starttime: tripdetails[0].starttime, endtime: tripdetails[0].endtime, totaltime: tripdetails[0].totaltime, distance: tripdetails[0].distance, pnr, seats: bookedseats, userid: userdetails[0]._id, tripId: tripdetails[0]._id
+        to: tripdetails[0].to, 
+        journeystartdate: tripdetails[0].journeystartdate,
+        journeyenddate: tripdetails[0].journeyenddate, 
+        busid: tripdetails[0].busid,
+        starttime: tripdetails[0].starttime, 
+        endtime: tripdetails[0].endtime, 
+        totaltime: tripdetails[0].totaltime, 
+        distance: tripdetails[0].distance, 
+        pnr, 
+        seats: bookedseats, 
+        userid: userdetails[0]._id, 
+        tripId: tripdetails[0]._id
     })
     const bookingExists = await BookingModel.find({ pnr: pnr, userid: userdetails[0]._id, tripId: tripdetails[0]._id })
     if (bookingExists.length === 0) {

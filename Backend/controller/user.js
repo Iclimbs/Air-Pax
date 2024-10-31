@@ -53,20 +53,21 @@ userRouter.post("/login", async (req, res) => {
     }
 })
 
-
 userRouter.post("/login/admin", async (req, res) => {
     try {
         const { phoneno, password } = req.body
         const userExists = await UserModel.find({ phoneno })
+        if (userExists[0].disabled === "true") {
+            res.json({ status: "error", message: "Your Account has been Temporarily disabled" })
+        }
         if (userExists.length === 0) {
             return res.json({ status: "error", message: "No Admin User Exists Please Contact Your Developer" })
         } else {
-            if (userExists[0].type.admin == false) {
+            if (userExists[0].accounttype !== "admin" && userExists[0].accounttype !== "conductor" && userExists[0].accounttype !== "driver") {
                 res.json({ status: "error", message: "Please Leave This Site You Don't Have Required Access " })
-            }
-            else if (hash.sha256(password) === userExists[0].password) {
+            } else if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
-                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, admin: userExists[0].type.admin, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (1 * 60)
+                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, accounttype: userExists[0].accounttype, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
                 }, "Authorization")
                 res.json({ status: "success", message: "Login Successful", token: token })
             } else if (hash.sha256(password) != userExists[0].password) {
@@ -425,13 +426,31 @@ userRouter.get("/me", UserAuthentication, async (req, res) => {
             return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/user/login" })
         } else {
             const decoded = jwt.verify(token, 'Authentication')
-            const user = await UserModel.find({_id:decoded._id})
+            const user = await UserModel.find({ _id: decoded._id })
             return res.json({ status: "success", message: "Getting User Details", user: user[0] })
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
     }
 })
+
+// Getting Basic Admin User Detail's Like username, email & more which is passed via token
+
+userRouter.get("/admin/me", AdminAuthentication, async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    try {
+        if (!token) {
+            return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/user/login" })
+        } else {
+            const decoded = jwt.verify(token, 'Authorization')
+            const user = await UserModel.find({ _id: decoded._id })
+            return res.json({ status: "success", message: "Getting User Details", user: user[0] })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
+    }
+})
+
 
 // Getting List of All the User's Registered In the Database
 
@@ -463,8 +482,8 @@ userRouter.patch("/me/update", UserAuthentication, async (req, res) => {
     const decoded = jwt.verify(token, 'Authentication')
     const updateData = req.body
     try {
-        const updatedUser = await UserModel.findByIdAndUpdate({ _id: decoded._id },updateData)        
-        return res.json({ status: "success", message: "User Details Updated"})
+        const updatedUser = await UserModel.findByIdAndUpdate({ _id: decoded._id }, updateData)
+        return res.json({ status: "success", message: "User Details Updated" })
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update User Detail's  ${error.message}` })
     }
@@ -497,4 +516,81 @@ userRouter.get("/register/google", async (req, res) => {
         return res.json({ status: "error", message: `Error Found in User Registration ${error}` })
     }
 })
+
+
+
+
+// Create Additional Admin User's 
+// Routes to Create Driver & Conductor
+// Create Conductor & Driver Account's
+
+userRouter.post("/create/admin", AdminAuthentication, async (req, res) => {
+    const { name, age, gender, phoneno, password, type } = req.body
+    const userExists = await UserModel.find({ phoneno })
+    if (userExists.length >= 1) {
+        return res.json({ status: "error", message: "Account Already Created With This Phone Number" })
+    } else {
+        try {
+            const user = new UserModel({
+                name: name,
+                age: age,
+                phoneno: phoneno,
+                gender: gender,
+                password: hash.sha256(password),
+                accounttype: type,
+                "verified.phone": true
+            })
+            try {
+                await user.save()
+                res.json({ status: "success", message: `Admin User Profile Created Successfully` })
+            } catch (error) {
+                res.json({ status: "error", message: `Failed To Create Admin User Profile ${error.message}` })
+            }
+        } catch (error) {
+            return res.json({ status: "error", message: `Failed To Create Admin User Profile ${error.message} `, })
+        }
+    }
+})
+
+
+userRouter.get("/admin/listall", AdminAuthentication, async (req, res) => {
+    try {
+        const user = await UserModel.find({
+            accounttype: { $in: ["conductor", "driver"] }
+        })
+        res.json({ status: "success", data: user })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get User List" })
+    }
+})
+
+
+userRouter.patch("/admin/update/:id", AdminAuthentication, async (req, res) => {
+    const { id } = req.params
+    const updateData = req.body
+    try {
+        const updatedUser = await UserModel.findByIdAndUpdate({ _id: id }, updateData)
+        return res.json({ status: "success", message: "User Details Updated" })
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update User Detail's  ${error.message}` })
+    }
+})
+
+
+
+
+userRouter.patch("/admin/disable/:id", AdminAuthentication, async (req, res) => {
+    const { id } = req.params
+    try {
+        const user = await UserModel.findById({ _id: id })
+        user.disabled = !user.disabled
+        await user.save()
+        res.json({ status: "success", message: "Admin User Status Successfully Updated !!" })
+    } catch (error) {
+        console.log("error ", error.message);
+        res.json({ status: "error", message: "Failed To Update Admin User Status" })
+    }
+})
+
+
 module.exports = { userRouter }

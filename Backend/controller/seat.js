@@ -9,6 +9,12 @@ const ccav = require("../payment/ccavutil")
 const crypto = require('node:crypto');
 const jwt = require('jsonwebtoken')
 
+const toProperCase = (word) => {
+    if (!word) return ''; // Return empty string if input is falsy
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+};
+
+
 
 SeatRouter.post("/selectedseats", async (req, res) => {
     const { userdetails, passengerdetails, tripId, totalamount } = req.body
@@ -17,7 +23,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         length: 10,
         useLetters: true,
         useNumbers: true
-    });
+    }).toUpperCase()
     let seats = [] // All the Seat Number's for which the using is trying to book ticket. 
     let seatdetails = [] // All the Details of the Passenger's for which seat's are going to be booked.
     // For Loop To Add All the Passenger Detail's in the Seatdetail's Array which can be Added in the Seat Model || Seats Collection 
@@ -25,9 +31,9 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
-            expireAt: Date.now() + 5 * 60 * 1000, // Lock for 5 minutes
+            expireAt: Date.now() + 15 * 60 * 1000, // Lock for 5 minutes
             pnr: ticketpnr,
-            details: { fname: passengerdetails[index].fname, lname: passengerdetails[index].lname, age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].food }
+            details: { fname: toProperCase(passengerdetails[index].fname), lname: toProperCase(passengerdetails[index].lname), age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].food }
         })
     }
     // Getting List of All The Seat's which are locked (Seat's Can Be Temporary locked for that person untill the payment is complete or the condition which seat is permanently locked after the payment is completed) 
