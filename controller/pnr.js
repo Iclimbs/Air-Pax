@@ -21,7 +21,7 @@ PnrRouter.get("/:pnr", async (req, res) => {
     for (let index = 0; index < ticketdetails.length; index++) {
         details.passengerdetails.push(ticketdetails[0].details)
     }
-    // details.passengerdetails = ticketdetails[0].details;
+
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })

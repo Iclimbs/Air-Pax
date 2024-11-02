@@ -13,6 +13,16 @@ const { UserModel } = require("../model/user.model");
 const { transporter } = require('../service/transporter');
 
 
+function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+}
+
+
+
+
 
 TicketRouter.post("/gmr/cancel", async (req, res) => {
     const { tripId, bookingRefId, pnr, cancelticket } = req.body;
@@ -126,13 +136,14 @@ TicketRouter.get("/history", async (req, res) => {
         } else {
             // Creating Date To Filter Data on the Basis of Date 
             const dateObj = new Date();
-            const month = dateObj.getUTCMonth() + 1; // months from 1-12
-            const day = dateObj.getUTCDate();
+            // Creating Date
+            const month = (dateObj.getUTCMonth() + 1) < 10 ? String(dateObj.getUTCMonth() + 1).padStart(2, '0') : dateObj.getUTCMonth() + 1 // months from 1-12
+            const day = dateObj.getUTCDate() < 10 ? String(dateObj.getUTCDate()).padStart(2, '0') : dateObj.getUTCDate()
             const year = dateObj.getUTCFullYear();
             const newDate = year + "-" + month + "-" + day;
 
             const decoded = jwt.verify(token, 'Authentication')
-            const upcomingtrips = await BookingModel.find({ journeystartdate: { $lt: newDate }, userid: decoded._id })
+            const upcomingtrips = await BookingModel.find({ journeystartdate: { $lte: newDate }, userid: decoded._id })
             return res.json({ status: "success", data: upcomingtrips })
         }
     } catch (error) {
@@ -150,15 +161,11 @@ TicketRouter.get("/upcoming", async (req, res) => {
             // Creating Date To Filter Data on the Basis of Date 
             const dateObj = new Date();
             // Creating Date
-            const month = dateObj.getUTCMonth() + 1; // months from 1-12
-            const day = dateObj.getUTCDate();
+            const month = (dateObj.getUTCMonth() + 1) < 10 ? String(dateObj.getUTCMonth() + 1).padStart(2, '0') : dateObj.getUTCMonth() + 1 // months from 1-12
+            const day = dateObj.getUTCDate() < 10 ? String(dateObj.getUTCDate()).padStart(2, '0') : dateObj.getUTCDate()
             const year = dateObj.getUTCFullYear();
             const newDate = year + "-" + month + "-" + day;
-            // Creating TIme
-            const hour = dateObj.getHours();
-            const minutes = dateObj.getMinutes();
-            const currenttime = hour + ":" + minutes
-
+            
             const decoded = jwt.verify(token, 'Authentication')
             const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, userid: decoded._id, status: "Confirmed" })
             return res.json({ status: "success", data: upcomingtrips })
