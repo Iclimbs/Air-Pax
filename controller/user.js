@@ -525,7 +525,7 @@ userRouter.get("/register/google", async (req, res) => {
 // Create Conductor & Driver Account's
 
 userRouter.post("/create/admin", AdminAuthentication, async (req, res) => {
-    const { name, age, gender, phoneno, password, type } = req.body
+    const { name, age, gender, phoneno, password, accounttype } = req.body
     const userExists = await UserModel.find({ phoneno })
     if (userExists.length >= 1) {
         return res.json({ status: "error", message: "Account Already Created With This Phone Number" })
@@ -537,7 +537,7 @@ userRouter.post("/create/admin", AdminAuthentication, async (req, res) => {
                 phoneno: phoneno,
                 gender: gender,
                 password: hash.sha256(password),
-                accounttype: type,
+                accounttype: accounttype,
                 "verified.phone": true
             })
             try {
