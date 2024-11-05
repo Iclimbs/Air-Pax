@@ -13,7 +13,7 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
         length: 10,
         useLetters: true,
         useNumbers: true
-    });
+    }).toUpperCase()
     let seats = [] // All the Seats Passenger Detail's For Which User is Applying to Book 
     let seatdetails = [] // All the Details of the Passenger's 
 
@@ -21,7 +21,7 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
         seats.push(PassengerDetails[index].SeatNo)
         seatdetails.push({
             seatNumber: PassengerDetails[index].SeatNo, isLocked: true, tripId: TripId, bookedby: PrimaryUser.PhoneNo,
-            lockExpires: Date.now() + 20 * 60 * 1000, // Lock for 20 minutes
+            expireAt: Date.now() + 15 * 60 * 1000, // Lock for 15 minutes
             pnr: ticketpnr,
             details: { fname: PassengerDetails[index].Fname, lname: PassengerDetails[index].Lname, age: PassengerDetails[index].Age, gender: PassengerDetails[index].Gender, phoneno: PassengerDetails[index].PhoneNo, email: PassengerDetails[index].Email, country: PassengerDetails[index].Country, seatno: PassengerDetails[index].SeatNo }
         })
@@ -38,7 +38,7 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
         }
     }
     if (alreadyexist) {
-        return res.json({ status: "error", message: "Some Seat's Are Already Booked Please Select Any Other Seat", seats: alreadyexistseats })
+        return res.json({ status: "error", message: `Some Seat's Are Already Booked Please Select Any Other Seat`, seats: alreadyexistseats })
     } else {
         const newticket = new OtherUserModel({
             primaryuser: { name: PrimaryUser.Name, phoneno: PrimaryUser.PhoneNo, email: PrimaryUser.Email },
@@ -51,16 +51,14 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
         try {
             await newticket.save()
         } catch (error) {
-            console.log(error);
+            res.json({ status: "error", message: `Failed To Save Details ${error.message}` })
+        }
+        try {
+            const result = await SeatModel.insertMany(seatdetails);
+        } catch (error) {
             res.json({ status: "error", message: `Failed To Save Details ${error.message}` })
 
         }
-        let new_seatsbooked = bookedseats.concat(seats)
-        trip[0].seatsbooked = new_seatsbooked
-        trip[0].availableseats = trip[0].availableseats - seats.length
-        trip[0].bookedseats = new_seatsbooked.length
-        await trip[0].save();
-        const result = await SeatModel.insertMany(seatdetails);
         const payment = new PaymentModel({
             pnr: ticketpnr,
             userid: PrimaryUser.PhoneNo,

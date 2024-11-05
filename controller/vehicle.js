@@ -4,10 +4,10 @@ const { VehicleModel } = require("../model/vehicle.model")
 const vehicleRouter = express.Router()
 
 vehicleRouter.post("/add", async (req, res) => {
-    const { name, busno, registrationno, facilities, seats, price } = req.body;
+    const { name, busimeino, simno, facilities } = req.body;
     
     try {
-        const newvehicle = new VehicleModel({ name, busno, registrationno, facilities: facilities.split(","), seats, price })
+        const newvehicle = new VehicleModel({ name, busimeino, simno, facilities: facilities.split(",") })
         await newvehicle.save()
         res.json({ status: "success", message: "New Vehicle Added !!" })
     } catch (error) {

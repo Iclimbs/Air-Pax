@@ -564,6 +564,27 @@ userRouter.get("/admin/listall", AdminAuthentication, async (req, res) => {
     }
 })
 
+userRouter.get("/admin/listall/driver", AdminAuthentication, async (req, res) => {
+    try {
+        const user = await UserModel.find({
+            accounttype: "driver"
+        }, { password: 0, CreatedAt: 0 })
+        res.json({ status: "success", data: user })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get User List" })
+    }
+})
+
+userRouter.get("/admin/listall/conductor", AdminAuthentication, async (req, res) => {
+    try {
+        const user = await UserModel.find({
+            accounttype: "conductor"
+        }, { password: 0, CreatedAt: 0 })
+        res.json({ status: "success", data: user })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get User List" })
+    }
+})
 
 userRouter.patch("/admin/update/:id", AdminAuthentication, async (req, res) => {
     const { id } = req.params

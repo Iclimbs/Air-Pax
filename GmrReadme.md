@@ -1,10 +1,8 @@
-Payment Success :- http://localhost:4500/api/v1/new/payment/success?pnr=9huqbkb1rt&ref=TH6386303864207&method=mastercard
+SEAT BOOKING FOR GMR
 
-Payment Failure :- http://localhost:4500/api/v1/new/payment/failure?pnr=4bry6avzzt&ref=TH638633814237&method=razorpay
+Link :- http://localhost:4500/api/v1/new/seat/selectedseats
 
-
-New Seat Booking Gmr :- http://localhost:4500/api/v1/new/seat/selectedseats
-
+Payload :- 
 {
   "PrimaryUser": {
     "Name": "Uttam Kumar",
@@ -37,6 +35,12 @@ New Seat Booking Gmr :- http://localhost:4500/api/v1/new/seat/selectedseats
   "BookingRefId": "TH638628903213",
   "Amount": 3171.84
 }
+
+
+Payment Success :- http://localhost:4500/api/v1/new/payment/success?pnr=9huqbkb1rt&ref=TH6386303864207&method=mastercard
+
+Payment Failure :- http://localhost:4500/api/v1/new/payment/failure?pnr=4bry6avzzt&ref=TH638633814237&method=razorpay
+
 
 ajb1ycuebh
 

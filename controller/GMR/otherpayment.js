@@ -7,22 +7,77 @@ const { SeatModel } = require("../../model/seat.model")
 const { TripModel } = require("../../model/trip.model");
 const { PaymentModel } = require('../../model/payment.model');
 const { OtherUserModel } = require('../../model/Other.seat.model');
-
 const OtherPaymentRouter = express.Router()
 
 OtherPaymentRouter.get("/success/", async (req, res) => {
     const { pnr, ref, method } = req.query
     const filter = { pnr: pnr };
     const update = {
-        $set: { isBooked: true }, // set status field
+        $set: { isBooked: true, expireAt: null, "details.status": "Confirmed" }
     }
-    const seat = await SeatModel.updateMany(filter, update);
-    const paymentdetails = await PaymentModel.find({ pnr: pnr })
+
+    // Updating Detail's in Seat Model Data
+    try {
+        const seat = await SeatModel.updateMany(filter, update);
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Seat Status ${error.message}` })
+    }
+
+    // Updating Detail's in Payment Model Data
+    const paymentdetails = await PaymentModel.find({ pnr: pnr });
     paymentdetails[0].refno = ref,
         paymentdetails[0].method = method,
         paymentdetails[0].paymentstatus.pending = false
-    paymentdetails[0].paymentstatus.complete = true
-    await paymentdetails[0].save()
+    paymentdetails[0].paymentstatus = "Confirmed"
+    try {
+        await paymentdetails[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
+
+    }
+
+    // Updating Detail's in Trip Model Data
+
+    const seatdetails = await SeatModel.find({ pnr: pnr, expireAt: null, isBooked: true, isLocked: true, "details.status": "Confirmed" })
+
+    // bookedseat contain the list of all the Seats booked with this pnr
+    let bookedseats = []
+
+    for (let index = 0; index < seatdetails.length; index++) {
+        bookedseats.push(seatdetails[index].seatNumber)
+    }
+
+    // Getting Trip Detail's
+    let tripid = seatdetails[0].tripId;
+
+    const tripdata = await TripModel.find({ _id: tripid })
+    // Storing the Existing List of Seats which are booked
+    let newbookedseats = bookedseats.concat(tripdata[0].seatsbooked)
+
+    try {
+        tripdata[0].seatsbooked = newbookedseats;
+        tripdata[0].bookedseats = newbookedseats.length;
+        tripdata[0].availableseats = tripdata[0].totalseats - newbookedseats.length
+        await tripdata[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
+    }
+
+
+
+    // Updating Detail's in GMR Model Data
+
+    try {
+        const userdata = await OtherUserModel.updateOne({ pnr: pnr }, { $set: { "passengerdetails.$[elem].status": "Confirmed" } }, {
+            arrayFilters: [{ "elem.status": "Pending" }]
+        })
+
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
+    }
+
+
+
     const userdetails = await OtherUserModel.find({ pnr: pnr })
     const tripdetails = await TripModel.find({ _id: userdetails[0].tripId })
     let Gmrconfirmpayment = path.join(__dirname, "../../emailtemplate/gmrconfirmpayment.ejs")
@@ -50,28 +105,39 @@ OtherPaymentRouter.get("/success/", async (req, res) => {
 
 OtherPaymentRouter.get("/failure/", async (req, res) => {
     const { pnr, ref, method } = req.query
-    const filter = { pnr: pnr, isBooked: false };
-    const lockedseats = await SeatModel.find(filter) // contains list of all the seats which are currently locked with the particula Pnr ID. 
-    let removeseats = [] // list of seat's which need's to be removed whose payment is not yet completed 
-    let tripid = "" // Trip ID this consists the id of the Trip From which the unbooked seats will be Removed
-
-    for (let index = 0; index < lockedseats.length; index++) {
-        removeseats.push(lockedseats[index].seatNumber)
-        tripid = lockedseats[index].tripId
+    const filter = { pnr: pnr };
+    const update = {
+        $set: { isBooked: false, isLocked: false, expireAt: null, "details.status": "Failed" }
     }
-    const trip = await TripModel.find({ _id: tripid })
-    const bookedseats = trip[0].seatsbooked.filter(item => !removeseats.includes(item)); // bookedseats will contain the list of those seats whose payment is completed
-    trip[0].seatsbooked = bookedseats
-    trip[0].bookedseats = trip[0].bookedseats - removeseats.length
-    trip[0].availableseats = trip[0].availableseats + removeseats.length
-    await trip[0].save()
-    const seat = await SeatModel.deleteMany(filter);
+
+    try {
+        const seat = await SeatModel.updateMany(filter, update);
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Seat Booking Detail's  ${error.message}` })
+    }
+
+    // Updating Detail's in GMR Model Data
+
+    try {
+        const userdata = await OtherUserModel.updateOne({ pnr: pnr }, { $set: { "passengerdetails.$[elem].status": "Failed" } }, {
+            arrayFilters: [{ "elem.status": "Pending" }]
+        })
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
+    }
+
+
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
     paymentdetails[0].refno = ref,
         paymentdetails[0].method = method,
-        paymentdetails[0].paymentstatus.pending = false
-    paymentdetails[0].paymentstatus.failure = true
-    await paymentdetails[0].save()
+        paymentdetails[0].paymentstatus = "Failed"
+    try {
+        await paymentdetails[0].save()
+
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Seat Booking Detail's  ${error.message}` })
+
+    }
     res.json({ status: "success", message: "Ticket Booking Failed !!" })
 })
 module.exports = { OtherPaymentRouter }

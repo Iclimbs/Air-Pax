@@ -57,6 +57,12 @@ const tripschema = mongoose.Schema({
     seatsbooked: {
         type: Array
     },
+    driver: {
+        type: String
+    },
+    conductor: {
+        type: String
+    },
     CreatedAt: { type: Date, default: Date.now },
 });
 const TripModel = mongoose.model("Trips", tripschema)

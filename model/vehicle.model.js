@@ -4,11 +4,11 @@ const vehicleschema = mongoose.Schema({
         type: String,
         required: true,
     },
-    busno: {
+    busimeino: {
         type: String,
         required: true,
     },
-    registrationno: {
+    simno: {
         type: String,
         required: true
     },
@@ -16,21 +16,9 @@ const vehicleschema = mongoose.Schema({
         type: Array,
         required: true
     },
-    assigned: {
-        type: mongoose.Types.ObjectId,
-        default: null
-    },
     active: {
         type: Boolean,
         default: true
-    },
-    seats: {
-        type: Number,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true
     },
     CreatedAt: { type: Date, default: Date.now },
 });
