@@ -141,8 +141,6 @@ TicketRouter.get("/history", async (req, res) => {
             } else {
                 res.json({ status: "error", message: `No Upcoming Trip's Found For Today's Booking` })
             }
-
-            return res.json({ status: "success", data: upcomingtrips })
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Trip History Details ${error.message}` })
