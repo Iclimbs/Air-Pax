@@ -82,7 +82,7 @@ tripRouter.get("/list", async (req, res) => {
         if (upcomingEvents.length >= 1) {
             res.json({ status: "success", data: upcomingEvents })
         } else {
-            res.json({ status: "error", message: `No Upcoming Trip's Found Today` })
+            res.json({ status: "success", message: `No Upcoming Trip's Found Today` })
         }
     } catch (error) {
         res.json({ status: "error", message: `Failed To Get List Of Today's Trip's ${error.message}` })
