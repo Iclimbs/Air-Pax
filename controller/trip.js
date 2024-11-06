@@ -3,6 +3,13 @@ const { TripModel } = require("../model/trip.model");
 const { SeatModel } = require("../model/seat.model");
 const tripRouter = express.Router()
 
+
+function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+}
+
+
 tripRouter.post("/add", async (req, res) => {
     const { name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, distance, price, totalseats, totaltime } = req.body;
     try {
@@ -66,11 +73,19 @@ tripRouter.get("/listall", async (req, res) => {
 
 tripRouter.get("/list", async (req, res) => {
     const { from, to, date } = req.query
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
     try {
         const trips = await TripModel.find({ from: from, to: to, journeystartdate: date })
-        res.json({ status: "success", data: trips })
+        const upcomingEvents = trips.filter(item => timeToMinutes(item.starttime) > currentMinutes);
+        if (upcomingEvents.length >= 1) {
+            res.json({ status: "success", data: upcomingEvents })
+        } else {
+            res.json({ status: "error", message: `No Upcoming Trip's Found Today` })
+        }
     } catch (error) {
-        res.json({ status: "error", message: "Get List Failed" })
+        res.json({ status: "error", message: `Failed To Get List Of Today's Trip's ${error.message}` })
     }
 })
 

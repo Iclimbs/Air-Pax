@@ -13,15 +13,10 @@ const { UserModel } = require("../model/user.model");
 const { transporter } = require('../service/transporter');
 
 
-function formatDate(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const year = date.getFullYear();
-    return `${year}-${month}-${day}`;
+function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
 }
-
-
-
 
 
 TicketRouter.post("/gmr/cancel", async (req, res) => {
@@ -122,10 +117,6 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
 })
 
 
-
-
-
-
 // Get the List of Upcoming Tickets For the User
 
 TicketRouter.get("/history", async (req, res) => {
@@ -144,6 +135,13 @@ TicketRouter.get("/history", async (req, res) => {
 
             const decoded = jwt.verify(token, 'Authentication')
             const upcomingtrips = await BookingModel.find({ journeystartdate: { $lte: newDate }, userid: decoded._id })
+
+            if (upcomingtrips.length >= 1) {
+                res.json({ status: "success", data: upcomingtrips })
+            } else {
+                res.json({ status: "error", message: `No Upcoming Trip's Found For Today's Booking` })
+            }
+
             return res.json({ status: "success", data: upcomingtrips })
         }
     } catch (error) {
@@ -165,10 +163,15 @@ TicketRouter.get("/upcoming", async (req, res) => {
             const day = dateObj.getUTCDate() < 10 ? String(dateObj.getUTCDate()).padStart(2, '0') : dateObj.getUTCDate()
             const year = dateObj.getUTCFullYear();
             const newDate = year + "-" + month + "-" + day;
-            
+
             const decoded = jwt.verify(token, 'Authentication')
             const upcomingtrips = await BookingModel.find({ journeystartdate: { $gte: newDate }, userid: decoded._id, status: "Confirmed" })
-            return res.json({ status: "success", data: upcomingtrips })
+
+            if (upcomingtrips.length >= 1) {
+                res.json({ status: "success", data: upcomingtrips })
+            } else {
+                res.json({ status: "error", message: `No Upcoming Trip's Found For Today's Booking` })
+            }
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Upcoming Trip Details ${error.message}` })
