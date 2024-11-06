@@ -443,7 +443,7 @@ userRouter.get("/admin/me", AdminAuthentication, async (req, res) => {
             return res.json({ status: "error", message: "Please Login to Access User Detail's", redirect: "/user/login" })
         } else {
             const decoded = jwt.verify(token, 'Authorization')
-            const user = await UserModel.find({ _id: decoded._id })
+            const user = await UserModel.find({ _id: decoded._id }, { password: 0, CreatedAt: 0 })
             return res.json({ status: "success", message: "Getting User Details", user: user[0] })
         }
     } catch (error) {

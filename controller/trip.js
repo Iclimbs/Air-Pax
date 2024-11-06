@@ -78,11 +78,11 @@ tripRouter.get("/list", async (req, res) => {
 
     try {
         const trips = await TripModel.find({ from: from, to: to, journeystartdate: date })
-        const upcomingEvents = trips.filter(item => timeToMinutes(item.starttime) < currentMinutes);
+        const upcomingEvents = trips.filter(item => timeToMinutes(item.starttime) > currentMinutes);
         if (upcomingEvents.length >= 1) {
             res.json({ status: "success", data: upcomingEvents })
         } else {
-            res.json({ status: "success",data: trips, message: `No Upcoming Trip's Found Today` })
+            res.json({ status: "error",data: trips, message: `No Upcoming Trip's Found Today` })
         }
     } catch (error) {
         res.json({ status: "error", message: `Failed To Get List Of Today's Trip's ${error.message}` })

@@ -70,7 +70,7 @@ CounterRouter.get("/listall/active", async (req, res) => {
             res.json({ status: "error", message: "No Counter is Active Right Now !" })
         }
     } catch (error) {
-        res.json({ status: "error", message: error.message })
+        res.json({ status: "error", message: `Error Found While Trying To Fetch Active Counter's ${error.message}` })
     }
 })
 module.exports = { CounterRouter }
