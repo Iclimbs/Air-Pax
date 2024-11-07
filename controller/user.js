@@ -64,12 +64,12 @@ userRouter.post("/login/admin", async (req, res) => {
             return res.json({ status: "error", message: "No Admin User Exists Please Contact Your Developer" })
         } else {
             if (userExists[0].accounttype !== "admin" && userExists[0].accounttype !== "conductor" && userExists[0].accounttype !== "driver") {
-                res.json({ status: "error", message: "Please Leave This Site You Don't Have Required Access " })
+                res.json({ status: "error", message: "Please Leave This Site You Don't Have Required Access" })
             } else if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
-                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, accounttype: userExists[0].accounttype, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (60 * 60)
+                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, accounttype: userExists[0].accounttype, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)
                 }, "Authorization")
-                res.json({ status: "success", message: "Login Successful", token: token })
+                res.json({ status: "success", message: "Login Successful", token: token, type: userExists[0].accounttype })
             } else if (hash.sha256(password) != userExists[0].password) {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }
@@ -444,7 +444,7 @@ userRouter.get("/admin/me", AdminAuthentication, async (req, res) => {
         } else {
             const decoded = jwt.verify(token, 'Authorization')
             const user = await UserModel.find({ _id: decoded._id }, { password: 0, CreatedAt: 0 })
-            return res.json({ status: "success", message: "Getting User Details", user: user[0] })
+            return res.json({ status: "success", data: user[0] })
         }
     } catch (error) {
         res.json({ status: "error", message: `Error Found in Login Section ${error.message}` })
@@ -466,7 +466,7 @@ userRouter.get("/listall", AdminAuthentication, async (req, res) => {
 
 // Getting Detail of a particular user Registered in the Database
 
-userRouter.get("/detailone/:id", AdminAuthentication, async (req, res) => {
+userRouter.get("/detailone/:id", async (req, res) => {
     try {
         const user = await UserModel.find({ _id: req.params.id }, { password: 0, otp: 0, signuptoken: 0, forgotpasswordtoken: 0 })
         res.json({ status: "success", data: user })
@@ -564,7 +564,7 @@ userRouter.get("/admin/listall", AdminAuthentication, async (req, res) => {
     }
 })
 
-userRouter.get("/admin/listall/driver", AdminAuthentication, async (req, res) => {
+userRouter.get("/admin/listall/driver", async (req, res) => {
     try {
         const user = await UserModel.find({
             accounttype: "driver"
@@ -575,7 +575,7 @@ userRouter.get("/admin/listall/driver", AdminAuthentication, async (req, res) =>
     }
 })
 
-userRouter.get("/admin/listall/conductor", AdminAuthentication, async (req, res) => {
+userRouter.get("/admin/listall/conductor", async (req, res) => {
     try {
         const user = await UserModel.find({
             accounttype: "conductor"

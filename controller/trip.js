@@ -1,6 +1,8 @@
 const express = require("express")
+const jwt = require('jsonwebtoken');
 const { TripModel } = require("../model/trip.model");
 const { SeatModel } = require("../model/seat.model");
+const { AdminAuthentication } = require("../middleware/Authorization");
 const tripRouter = express.Router()
 
 
@@ -11,9 +13,9 @@ function timeToMinutes(timeStr) {
 
 
 tripRouter.post("/add", async (req, res) => {
-    const { name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, distance, price, totalseats, totaltime } = req.body;
+    const { name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, distance, price, totalseats, totaltime, conductor, driver } = req.body;
     try {
-        const newtrip = new TripModel({ name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, totaltime, price, distance, totalseats, bookedseats: 0, availableseats: totalseats })
+        const newtrip = new TripModel({ name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, totaltime, price, distance, totalseats, bookedseats: 0, availableseats: totalseats, conductor, driver })
         await newtrip.save()
         res.json({ status: "success", message: "Successfully Addeded A New Trip" })
     } catch (error) {
@@ -82,7 +84,7 @@ tripRouter.get("/list", async (req, res) => {
         if (upcomingEvents.length >= 1) {
             res.json({ status: "success", data: upcomingEvents })
         } else {
-            res.json({ status: "error",data: trips, message: `No Upcoming Trip's Found Today` })
+            res.json({ status: "error", data: trips, message: `No Upcoming Trip's Found Today` })
         }
     } catch (error) {
         res.json({ status: "error", message: `Failed To Get List Of Today's Trip's ${error.message}` })
@@ -91,39 +93,39 @@ tripRouter.get("/list", async (req, res) => {
 
 
 
-tripRouter.get("/list/schedule", async (req, res) => {
-    try {
-        // Creating Date To Filter Data on the Basis of Date 
+// tripRouter.get("/list/schedule", async (req, res) => {
+//     try {
+//         // Creating Date To Filter Data on the Basis of Date 
 
-        const currentdate = new Date();
-        // Creating Current Date
+//         const currentdate = new Date();
+//         // Creating Current Date
 
-        const currentmonth = currentdate.getUTCMonth() + 1; // months from 1-12
-        const currentday = currentdate.getUTCDate();
-        const currentyear = currentdate.getUTCFullYear();
-        const currentDate = currentyear + "-" + currentmonth + "-" + currentday;
+//         const currentmonth = currentdate.getUTCMonth() + 1; // months from 1-12
+//         const currentday = currentdate.getUTCDate();
+//         const currentyear = currentdate.getUTCFullYear();
+//         const currentDate = currentyear + "-" + currentmonth + "-" + currentday;
 
-        // Creating TIme
-        const hour = currentdate.getHours();
-        const minutes = currentdate.getMinutes();
-        const currenttime = hour + ":" + minutes
+//         // Creating TIme
+//         const hour = currentdate.getHours();
+//         const minutes = currentdate.getMinutes();
+//         const currenttime = hour + ":" + minutes
 
-        // Creating End Date
-        const enddate = new Date(new Date().setDate(new Date().getDate() + 7))
-        const endmonth = enddate.getUTCMonth() + 1; // months from 1-12
-        const endday = enddate.getUTCDate();
-        const endyear = enddate.getUTCFullYear();
-        const endDate = endyear + "-" + endmonth + "-" + endday;
+//         // Creating End Date
+//         const enddate = new Date(new Date().setDate(new Date().getDate() + 7))
+//         const endmonth = enddate.getUTCMonth() + 1; // months from 1-12
+//         const endday = enddate.getUTCDate();
+//         const endyear = enddate.getUTCFullYear();
+//         const endDate = endyear + "-" + endmonth + "-" + endday;
 
-        const trips = await TripModel.find({ journeystartdate: { $lte: endDate, $gte: currentDate }, starttime: { $gt: currenttime } })
-        return res.json({ status: "success", data: trips })
-    } catch (error) {
-        console.log(error.message);
+//         const trips = await TripModel.find({ journeystartdate: { $lte: endDate, $gte: currentDate }, starttime: { $gt: currenttime } })
+//         return res.json({ status: "success", data: trips })
+//     } catch (error) {
+//         console.log(error.message);
 
-        res.json({ status: "error", message: "Get List Failed" })
+//         res.json({ status: "error", message: "Get List Failed" })
 
-    }
-})
+//     }
+// })
 
 
 
@@ -150,5 +152,32 @@ tripRouter.get("/detailone/:id", async (req, res) => {
 
     }
 })
+
+
+tripRouter.get("/assigned/conductor", AdminAuthentication, async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    const decoded = jwt.verify(token, 'Authorization')
+
+    try {
+        const trip = await TripModel.find({ conductor: decoded._id })
+        res.json({ status: "success", data: trip })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get User List" })
+    }
+})
+
+tripRouter.get("/assigned/driver", AdminAuthentication, async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    const decoded = jwt.verify(token, 'Authorization')
+    try {
+        const trip = await TripModel.find({ driver: decoded._id })
+        res.json({ status: "success", data: trip })
+    } catch (error) {
+        console.log(error.message);
+
+        res.json({ status: "error", message: "Failed To Get User List" })
+    }
+})
+
 
 module.exports = { tripRouter }

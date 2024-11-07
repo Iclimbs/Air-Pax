@@ -236,7 +236,6 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     try {
         await SeatModel.bulkWrite(bulkwriteseat)
     } catch (error) {
-
         res.json({ status: "error", message: "Bulk Update Seat Process Failed " })
     }
 
