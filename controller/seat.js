@@ -158,4 +158,17 @@ SeatRouter.get("/list/booked/:id", async (req, res) => {
     }
 })
 
+SeatRouter.get("/list/passenger/:id", async (req, res) => {
+    const { id } = req.params
+    console.log(id);
+    
+    try {
+        const seatlist = await SeatModel.find({ tripId: id })
+        res.json({ status: "success", data: seatlist })
+    } catch (error) {
+        res.json({ status: "error", message: "Failed To Get Booked Ticket List" })
+
+    }
+})
+
 module.exports = { SeatRouter }
