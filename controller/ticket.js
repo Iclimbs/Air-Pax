@@ -13,12 +13,6 @@ const { UserModel } = require("../model/user.model");
 const { transporter } = require('../service/transporter');
 
 
-function timeToMinutes(timeStr) {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    return hours * 60 + minutes;
-}
-
-
 TicketRouter.post("/gmr/cancel", async (req, res) => {
     const { tripId, bookingRefId, pnr, cancelticket } = req.body;
     // Basic Detail's Requirements
@@ -189,6 +183,7 @@ TicketRouter.get("/detailone/:id", UserAuthentication, async (req, res) => {
 TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     const { pnr, bookingId, seats, reasonForCancellation } = req.body
     const bookingdetails = await BookingModel.find({ _id: bookingId, pnr: pnr })
+
     // Update Booking Details
     if (!bookingdetails) {
         return res.json({ status: "error", message: "No Booking Detail's Found" })
@@ -210,7 +205,7 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
 
 
     // Update Seat Details 
-    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Completed" })
+    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Confirmed" })
 
     // Getting Total Amount Paid By the User For Booking Tickets Which he want to cancel right now 
     let totalamount = 0;
@@ -306,8 +301,7 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
             })
         }
     })
-    // seats should be an array ob object where each object will contain id & seatNo
 })
 
 
-module.exports = { TicketRouter }
+module.exports = { TicketRouter } 

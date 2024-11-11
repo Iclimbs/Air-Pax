@@ -4,7 +4,11 @@ const vehicleschema = mongoose.Schema({
         type: String,
         required: true,
     },
-    busimeino: {
+    gpsname: {
+        type: String,
+        required: true
+    },
+    gpsimeino: {
         type: String,
         required: true,
     },

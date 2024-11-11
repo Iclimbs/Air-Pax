@@ -24,6 +24,7 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     }
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
+        
     paymentdetails[0].paymentstatus = "Confirmed"
     try {
         await paymentdetails[0].save()
@@ -64,17 +65,17 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     const BookingDetails = new BookingModel({
         name: tripdetails[0].name,
         from: tripdetails[0].from,
-        to: tripdetails[0].to, 
+        to: tripdetails[0].to,
         journeystartdate: tripdetails[0].journeystartdate,
-        journeyenddate: tripdetails[0].journeyenddate, 
+        journeyenddate: tripdetails[0].journeyenddate,
         busid: tripdetails[0].busid,
-        starttime: tripdetails[0].starttime, 
-        endtime: tripdetails[0].endtime, 
-        totaltime: tripdetails[0].totaltime, 
-        distance: tripdetails[0].distance, 
-        pnr, 
-        seats: bookedseats, 
-        userid: userdetails[0]._id, 
+        starttime: tripdetails[0].starttime,
+        endtime: tripdetails[0].endtime,
+        totaltime: tripdetails[0].totaltime,
+        distance: tripdetails[0].distance,
+        pnr,
+        seats: bookedseats,
+        userid: userdetails[0]._id,
         tripId: tripdetails[0]._id
     })
     const bookingExists = await BookingModel.find({ pnr: pnr, userid: userdetails[0]._id, tripId: tripdetails[0]._id })
@@ -85,7 +86,6 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
             res.json({ status: "error", message: `Failed To Save Booking Detail's ${error.message}` })
         }
     }
-
     let confirmpayment = path.join(__dirname, "../emailtemplate/confirmpayment.ejs")
     ejs.renderFile(confirmpayment, { user: userdetails[0], seat: seatdetails, trip: tripdetails[0], payment: paymentdetails[0] }, function (err, template) {
         if (err) {
@@ -113,21 +113,8 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
 
 PaymentRouter.get("/failure/:pnr", async (req, res) => {
     const { pnr } = req.params
-    // const filter = { pnr: pnr, isBooked: false };
-    // const lockedseats = await SeatModel.find(filter) // contains list of all the seats which are currently locked with the particula Pnr ID. 
-    // let removeseats = [] // list of seat's which need's to be removed whose payment is not yet completed 
-    // let tripid = "" // Trip ID this consists the id of the Trip From which the unbooked seats will be Removed
-    // for (let index = 0; index < lockedseats.length; index++) {
-    //     removeseats.push(lockedseats[index].seatNumber)
-    //     tripid = lockedseats[index].tripId
-    // }
-    // const trip = await TripModel.find({ _id: tripid })
-    // const bookedseats = trip[0].seatsbooked.filter(item => !removeseats.includes(item)); // bookedseats will contain the list of those seats whose payment is completed
-    // trip[0].seatsbooked = bookedseats
-    // trip[0].bookedseats = trip[0].bookedseats - removeseats.length
-    // trip[0].availableseats = trip[0].availableseats + removeseats.length
-    // await trip[0].save()
-    // const seat = await SeatModel.deleteMany(filter);
+    const filter = { pnr: pnr, isBooked: false };
+    const lockedseats = await SeatModel.find(filter) // contains list of all the seats which are currently locked with the particula Pnr ID. 
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
     paymentdetails[0].paymentstatus = "Failed";
     await paymentdetails[0].save()

@@ -2,7 +2,6 @@ require('dotenv').config()
 const express = require("express")
 const generateUniqueId = require('generate-unique-id');
 const { SeatModel } = require("../../model/seat.model")
-const { TripModel } = require("../../model/trip.model")
 const { OtherUserModel } = require("../../model/Other.seat.model");
 const { PaymentModel } = require('../../model/payment.model');
 const OtherSeatRouter = express.Router()
@@ -26,10 +25,17 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
             details: { fname: PassengerDetails[index].Fname, lname: PassengerDetails[index].Lname, age: PassengerDetails[index].Age, gender: PassengerDetails[index].Gender, phoneno: PassengerDetails[index].PhoneNo, email: PassengerDetails[index].Email, country: PassengerDetails[index].Country, seatno: PassengerDetails[index].SeatNo }
         })
     }
-    const trip = await TripModel.find({ _id: TripId })
-    let bookedseats = trip[0].seatsbooked;
+    // const trip = await TripModel.find({ _id: TripId })
+    // let bookedseats = trip[0].seatsbooked;
+    let bookedseats = [];
     let alreadyexist = false;
     let alreadyexistseats = []; //check the list of Seat's whose seats are already booked. 
+
+    const temporarylockedseats = await SeatModel.find({ tripId: TripId, "details.status": { $nin: ['Refunded', 'Failed'] } }, { seatNumber: 1, _id: 0 })
+
+    for (let index = 0; index < temporarylockedseats.length; index++) {
+        bookedseats.push(temporarylockedseats[index].seatNumber)
+    }
 
     for (let index = 0; index < seats.length; index++) {
         if (bookedseats.includes(seats[index])) {
@@ -53,23 +59,25 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
         } catch (error) {
             res.json({ status: "error", message: `Failed To Save Details ${error.message}` })
         }
+
         try {
             const result = await SeatModel.insertMany(seatdetails);
         } catch (error) {
             res.json({ status: "error", message: `Failed To Save Details ${error.message}` })
-
         }
+
         const payment = new PaymentModel({
             pnr: ticketpnr,
             userid: PrimaryUser.PhoneNo,
             amount: Amount,
         })
+
         try {
             await payment.save()
         } catch (error) {
             res.json({ status: "error", message: `Failed To Save Details ${error.message}` })
-
         }
+
         return res.json({ status: "success", pnr: ticketpnr })
     }
 })

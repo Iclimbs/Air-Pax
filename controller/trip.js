@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { TripModel } = require("../model/trip.model");
 const { SeatModel } = require("../model/seat.model");
 const { AdminAuthentication } = require("../middleware/Authorization");
+const { OtherUserModel } = require("../model/Other.seat.model");
 const tripRouter = express.Router()
 
 
@@ -91,61 +92,28 @@ tripRouter.get("/list", async (req, res) => {
     }
 })
 
-
-
-// tripRouter.get("/list/schedule", async (req, res) => {
-//     try {
-//         // Creating Date To Filter Data on the Basis of Date 
-
-//         const currentdate = new Date();
-//         // Creating Current Date
-
-//         const currentmonth = currentdate.getUTCMonth() + 1; // months from 1-12
-//         const currentday = currentdate.getUTCDate();
-//         const currentyear = currentdate.getUTCFullYear();
-//         const currentDate = currentyear + "-" + currentmonth + "-" + currentday;
-
-//         // Creating TIme
-//         const hour = currentdate.getHours();
-//         const minutes = currentdate.getMinutes();
-//         const currenttime = hour + ":" + minutes
-
-//         // Creating End Date
-//         const enddate = new Date(new Date().setDate(new Date().getDate() + 7))
-//         const endmonth = enddate.getUTCMonth() + 1; // months from 1-12
-//         const endday = enddate.getUTCDate();
-//         const endyear = enddate.getUTCFullYear();
-//         const endDate = endyear + "-" + endmonth + "-" + endday;
-
-//         const trips = await TripModel.find({ journeystartdate: { $lte: endDate, $gte: currentDate }, starttime: { $gt: currenttime } })
-//         return res.json({ status: "success", data: trips })
-//     } catch (error) {
-//         console.log(error.message);
-
-//         res.json({ status: "error", message: "Get List Failed" })
-
-//     }
-// })
-
-
-
 tripRouter.get("/detailone/:id", async (req, res) => {
     try {
         const trips = await TripModel.find({ _id: req.params.id })
         const seats = await SeatModel.find({ tripId: req.params.id })
         // Seat's Which are already booked & Payment is completed
-        let bookedseats = trips[0].seatsbooked;
+        let bookedseats = trips[0].seatsbooked; 
         // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
         let lockedseats = [];
         for (let index = 0; index < seats.length; index++) {
-            if ((bookedseats.includes(seats[index].seatNumber) === false) && ((seats[index].details.status == "Pending") || (seats[index].details.status == "Completed"))) {
+            if ((bookedseats.includes(seats[index].seatNumber) === false) && ((seats[index].details.status == "Pending") || (seats[index].details.status == "Completed") || (seats[index].details.status == "Failed"))) {
                 lockedseats.push(seats[index].seatNumber)
             }
-        }
+        }        
+
         let currentseat = bookedseats.concat(lockedseats)
+
         trips[0].seatsbooked = currentseat
+
         trips[0].bookedseats = currentseat.length;
+
         trips[0].availableseats = trips[0].totalseats - currentseat.length
+
         res.json({ status: "success", data: trips })
     } catch (error) {
         res.json({ status: "error", message: `Get List Failed ${error.message}` })

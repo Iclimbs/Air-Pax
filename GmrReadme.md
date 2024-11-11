@@ -13,7 +13,7 @@ Payload :-
     {
       "Fname": "sdas",
       "Lname": "sads",
-      "Gender": "Female",
+      "Gender": "Female", 
       "Age": 22,
       "PhoneNo": 7898789878,
       "Email": "adwq@gmail.com",
@@ -36,13 +36,22 @@ Payload :-
   "Amount": 3171.84
 }
 
-
+PAYMENT SUCCESS FOR GMR
 Payment Success :- http://localhost:4500/api/v1/new/payment/success?pnr=9huqbkb1rt&ref=TH6386303864207&method=mastercard
 
+PAYMENT FAILURE FOR GMR
 Payment Failure :- http://localhost:4500/api/v1/new/payment/failure?pnr=4bry6avzzt&ref=TH638633814237&method=razorpay
 
 
-ajb1ycuebh
+PNR STATUS FOR GMR
+PNR STATUS :- http://localhost:4500/api/v1/pnr/gmr/:pnr
 
 
-Testing New Jira Work
+TICKET CANCELLATION FOR GMR
+TICKET CANCEL :- http://localhost:4500/api/v1/ticket/gmr/cancel
+Paylod :- {
+"tripId": "66f1197ca1d4b90b144cd945",
+"bookingRefId": "422",
+"pnr": "jcr46ebaj2",
+"cancelticket": ["2B","2A"]
+}
