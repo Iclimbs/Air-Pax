@@ -59,10 +59,10 @@ const bookingSchema = mongoose.Schema({
         type: String,
         default: "Confirmed"
     },
-    bookedfrom :{
-        type:String,
-        default:"Airpax",
-        enum: ["Airpax","Gmr"], // Replace with your allowed values
+    bookedfrom: {
+        type: String,
+        default: "Airpax",
+        enum: ["Airpax", "Gmr"], // Replace with your allowed values
     },
     CreatedAt: { type: Date, default: Date.now },
 });

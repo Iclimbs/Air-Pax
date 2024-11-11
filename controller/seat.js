@@ -2,7 +2,6 @@ require('dotenv').config()
 const express = require("express")
 const generateUniqueId = require('generate-unique-id');
 const { SeatModel } = require("../model/seat.model")
-const { TripModel } = require("../model/trip.model");
 const { PaymentModel } = require('../model/payment.model');
 const SeatRouter = express.Router();
 const ccav = require("../payment/ccavutil")
@@ -13,8 +12,6 @@ const toProperCase = (word) => {
     if (!word) return ''; // Return empty string if input is falsy
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 };
-
-
 
 SeatRouter.post("/selectedseats", async (req, res) => {
     const { userdetails, passengerdetails, tripId, totalamount } = req.body
@@ -159,9 +156,7 @@ SeatRouter.get("/list/booked/:id", async (req, res) => {
 })
 
 SeatRouter.get("/list/passenger/:id", async (req, res) => {
-    const { id } = req.params
-    console.log(id);
-    
+    const { id } = req.params    
     try {
         const seatlist = await SeatModel.find({ tripId: id })
         res.json({ status: "success", data: seatlist })
