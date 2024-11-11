@@ -97,14 +97,14 @@ tripRouter.get("/detailone/:id", async (req, res) => {
         const trips = await TripModel.find({ _id: req.params.id })
         const seats = await SeatModel.find({ tripId: req.params.id })
         // Seat's Which are already booked & Payment is completed
-        let bookedseats = trips[0].seatsbooked; 
+        let bookedseats = trips[0].seatsbooked;
         // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
         let lockedseats = [];
         for (let index = 0; index < seats.length; index++) {
             if ((bookedseats.includes(seats[index].seatNumber) === false) && ((seats[index].details.status == "Pending") || (seats[index].details.status == "Completed") || (seats[index].details.status == "Failed"))) {
                 lockedseats.push(seats[index].seatNumber)
             }
-        }        
+        }
 
         let currentseat = bookedseats.concat(lockedseats)
 
@@ -114,10 +114,14 @@ tripRouter.get("/detailone/:id", async (req, res) => {
 
         trips[0].availableseats = trips[0].totalseats - currentseat.length
 
-        res.json({ status: "success", data: trips })
+        if (trips.length !== 0) {
+            res.json({ status: "success", data: trips })
+        } else {
+            res.json({ status: "error", message: "No Trip Found With This ID" })
+        }
+
     } catch (error) {
         res.json({ status: "error", message: `Get List Failed ${error.message}` })
-
     }
 })
 

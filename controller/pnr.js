@@ -19,7 +19,7 @@ PnrRouter.get("/:pnr", async (req, res) => {
 
     // Inserting All Passenger Detail's List In Passenger Detail's Array 
     for (let index = 0; index < ticketdetails.length; index++) {
-        details.passengerdetails.push(ticketdetails[0].details)
+        details.passengerdetails.push(ticketdetails[index].details)
     }
 
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })

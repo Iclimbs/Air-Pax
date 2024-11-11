@@ -28,13 +28,14 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
-            expireAt: Date.now() + 15 * 60 * 1000, // Lock for 15 minutes
+            expireAt: Date.now() + 2 * 60 * 1000, // Lock for 15 minutes
             pnr: ticketpnr,
             details: { fname: toProperCase(passengerdetails[index].fname), lname: toProperCase(passengerdetails[index].lname), age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].food }
         })
     }
+    
     // Getting List of All The Seat's which are locked (Seat's Can Be Temporary locked for that person untill the payment is complete or the condition which seat is permanently locked after the payment is completed) 
-    const temporarylockedseats = await SeatModel.find({ tripId: TripId, "details.status": { $nin: ['Refunded', 'Failed'] } }, { seatNumber: 1, _id: 0 })
+    const temporarylockedseats = await SeatModel.find({ tripId: tripId, "details.status": { $nin: ['Refunded', 'Failed'] } }, { seatNumber: 1, _id: 0 })
 
     // Step 1 Checking If the User is trying to book those seat's which are already booked & Payment is completed.
 
