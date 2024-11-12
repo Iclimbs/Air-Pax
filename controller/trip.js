@@ -52,8 +52,6 @@ tripRouter.post("/add/bulk", async (req, res) => {
     }
 })
 
-
-
 tripRouter.patch("/edit/:id", async (req, res) => {
     const { id } = req.params
     try {
@@ -82,11 +80,13 @@ tripRouter.get("/list", async (req, res) => {
     try {
         const trips = await TripModel.find({ from: from, to: to, journeystartdate: date })
         const upcomingEvents = trips.filter(item => timeToMinutes(item.starttime) > currentMinutes);
-        if (upcomingEvents.length >= 1) {
-            res.json({ status: "success", data: upcomingEvents })
-        } else {
-            res.json({ status: "error", data: trips, message: `No Upcoming Trip's Found Today` })
-        }
+        // if (upcomingEvents.length >= 1) {
+        //     res.json({ status: "success", data: trips })
+        // } else {
+        //     res.json({ status: "success", data: trips })
+        // }
+        res.json({ status: "success", data: trips })
+
     } catch (error) {
         res.json({ status: "error", message: `Failed To Get List Of Today's Trip's ${error.message}` })
     }
@@ -124,7 +124,6 @@ tripRouter.get("/detailone/:id", async (req, res) => {
         res.json({ status: "error", message: `Get List Failed ${error.message}` })
     }
 })
-
 
 tripRouter.get("/assigned/conductor", AdminAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]

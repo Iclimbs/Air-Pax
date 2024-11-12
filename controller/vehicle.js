@@ -4,10 +4,10 @@ const { VehicleModel } = require("../model/vehicle.model")
 const vehicleRouter = express.Router()
 
 vehicleRouter.post("/add", async (req, res) => {
-    const { name, busimeino, simno, facilities } = req.body;
-    
+    const { name, gpsname, gpsimeino, simno, facilities } = req.body;
+
     try {
-        const newvehicle = new VehicleModel({ name, busimeino, simno, facilities: facilities.split(",") })
+        const newvehicle = new VehicleModel({ name, gpsname, gpsimeino, simno, facilities: facilities.split(",") })
         await newvehicle.save()
         res.json({ status: "success", message: "New Vehicle Added !!" })
     } catch (error) {
@@ -20,8 +20,8 @@ vehicleRouter.post("/add", async (req, res) => {
 vehicleRouter.patch("/edit/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const  vehicle = await VehicleModel.findByIdAndUpdate({ _id: id }, req.body)
-        await  vehicle.save()
+        const vehicle = await VehicleModel.findByIdAndUpdate({ _id: id }, req.body)
+        await vehicle.save()
         res.json({ status: "success", message: " vehicle Details Successfully Updated !!" })
     } catch (error) {
         res.json({ status: "error", message: "Failed To Update  vehicle  Details" })
@@ -59,7 +59,7 @@ vehicleRouter.get("/listall", async (req, res) => {
 
 vehicleRouter.get("/search/:name", async (req, res) => {
     try {
-        const vehicleList = await VehicleModel.find({name:req.params.name})
+        const vehicleList = await VehicleModel.find({ name: req.params.name })
         res.json({ status: "success", data: vehicleList })
     } catch (error) {
         res.json({ status: "error", message: error.message })
