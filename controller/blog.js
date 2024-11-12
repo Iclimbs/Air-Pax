@@ -6,6 +6,7 @@ const multer = require("multer");
 const path = require('node:path');
 const { PopularBlogModel } = require('../model/popularblog.model');
 const { ActivityCardBlogModel } = require('../model/activitycardblog.model');
+const { ActivityBlogModel } = require('../model/activityblog.model');
 const uploadPath = path.join(__dirname, "../public/");
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -139,32 +140,32 @@ BlogRouter.post("/activity/add", upload.single("img"), async (req, res) => {
     const { title, tour } = req.body;
     const fileName = req.file.filename;
     try {
-        const newactivityblog = new FeaturedBlogModel({ title, img: fileName, tour })
+        const newactivityblog = new ActivityBlogModel({ title, img: fileName, tour })
         await newactivityblog.save()
-        res.json({ status: "success", message: "New Featured Blog Added !!" })
+        res.json({ status: "success", message: "New Activity Blog Added !!" })
     } catch (error) {
-        res.json({ status: "error", message: `Failed To Add New Blog ${error.message}` })
+        res.json({ status: "error", message: `Failed To Add New Activity Blog ${error.message}` })
     }
 })
 
-BlogRouter.patch("/edit/:id", async (req, res) => {
+BlogRouter.patch("/activity/edit/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const food = await FoodModel.findByIdAndUpdate({ _id: id }, req.body)
-        await food.save()
+        const activityblog = await ActivityBlogModel.findByIdAndUpdate({ _id: id }, req.body)
+        await activityblog.save()
         res.json({ status: "success", message: "Food Item Details Successfully Updated !!" })
     } catch (error) {
-        res.json({ status: "error", message: "Failed To Update Food Item Details" })
+        res.json({ status: "error", message: `Failed To Update Activity Blog Details ${error.message}` })
     }
 })
 
 
-BlogRouter.patch("/disable/:id", async (req, res) => {
+BlogRouter.patch("/activity/disable/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const food = await FoodModel.findById({ _id: id })
-        food.available = !food.available;
-        await food.save()
+        const activityblog = await ActivityBlogModel.findById({ _id: id })
+        activityblog.status = !activityblog.status;
+        await activityblog.save()
         res.json({ status: "success", message: "Food Item Availability Updated !!" })
     } catch (error) {
         res.json({ status: "error", message: "Failed To Update Food Item Availability Details" })
@@ -172,7 +173,7 @@ BlogRouter.patch("/disable/:id", async (req, res) => {
 })
 
 
-BlogRouter.get("/listall", async (req, res) => {
+BlogRouter.get("/activity/listall", async (req, res) => {
     try {
         const foodList = await FoodModel.find()
         res.json({ status: "success", data: foodList })
@@ -180,6 +181,16 @@ BlogRouter.get("/listall", async (req, res) => {
         res.json({ status: "error", message: error.message })
     }
 })
+
+BlogRouter.get("/activity/listall/active", async (req, res) => {
+    try {
+        const activityCardList = await ActivityCardBlogModel.find({ status: true })
+        res.json({ status: "success", data: activityCardList })
+    } catch (error) {
+        res.json({ status: "error", message: error.message })
+    }
+})
+
 
 // Feature Blog Routes
 
