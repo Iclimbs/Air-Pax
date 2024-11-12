@@ -206,35 +206,44 @@ BlogRouter.post("/featuredblog/add", upload.single("img"), async (req, res) => {
     }
 })
 
-BlogRouter.patch("/edit/:id", async (req, res) => {
+BlogRouter.patch("/featuredblog/edit/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const food = await FoodModel.findByIdAndUpdate({ _id: id }, req.body)
-        await food.save()
-        res.json({ status: "success", message: "Food Item Details Successfully Updated !!" })
+        const featuredList = await FeaturedBlogModel.findByIdAndUpdate({ _id: id }, req.body)
+        await featuredList.save()
+        res.json({ status: "success", message: "Fetured List Item Details Successfully Updated !!" })
     } catch (error) {
-        res.json({ status: "error", message: "Failed To Update Food Item Details" })
+        res.json({ status: "error", message: `Failed To Update Food Item Details ${error.message}` })
     }
 })
 
 
-BlogRouter.patch("/disable/:id", async (req, res) => {
+BlogRouter.patch("/featuredblog/disable/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const food = await FoodModel.findById({ _id: id })
-        food.available = !food.available;
-        await food.save()
-        res.json({ status: "success", message: "Food Item Availability Updated !!" })
+        const featuredList = await FeaturedBlogModel.findById({ _id: id })
+        featuredList.status = !featuredList.status;
+        await featuredList.save()
+        res.json({ status: "success", message: "Featured List Item Availability Updated !!" })
     } catch (error) {
-        res.json({ status: "error", message: "Failed To Update Food Item Availability Details" })
+        res.json({ status: "error", message: `Failed To Update Featured List Item Availability Details ${error.message}` })
     }
 })
 
 
-BlogRouter.get("/listall", async (req, res) => {
+BlogRouter.get("/featuredblog/listall", async (req, res) => {
     try {
-        const foodList = await FoodModel.find()
-        res.json({ status: "success", data: foodList })
+        const featuredList = await FeaturedBlogModel.find()
+        res.json({ status: "success", data: featuredList })
+    } catch (error) {
+        res.json({ status: "error", message: error.message })
+    }
+})
+
+BlogRouter.get("/featuredblog/listall/active", async (req, res) => {
+    try {
+        const featuredList = await FeaturedBlogModel.find({ status: true })
+        res.json({ status: "success", data: featuredList })
     } catch (error) {
         res.json({ status: "error", message: error.message })
     }
