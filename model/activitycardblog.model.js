@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema({
+const activitySchema = mongoose.Schema({
     title: {
         type: String,
         required: true
@@ -12,7 +12,11 @@ const Schema = mongoose.Schema({
         type: String,
         required: true
     },
+    status: {
+        type: Boolean,
+        default: true
+    },
     CreatedAt: { type: Date, default: Date.now },
 });
-const ActivityCardBlogModel = mongoose.model("ActivityCardBlog", Schema)
+const ActivityCardBlogModel = mongoose.model("ActivityCardBlog", activitySchema)
 module.exports = { ActivityCardBlogModel };

@@ -12,6 +12,10 @@ const popularSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    status: {
+        type: Boolean,
+        default: true
+    },
     CreatedAt: { type: Date, default: Date.now },
 });
 const PopularBlogModel = mongoose.model("PopularBlog", popularSchema)
