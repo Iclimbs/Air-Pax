@@ -30,10 +30,20 @@ SeatRouter.post("/selectedseats", async (req, res) => {
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
             expireAt: Date.now() + 2 * 60 * 1000, // Lock for 15 minutes
             pnr: ticketpnr,
-            details: { fname: toProperCase(passengerdetails[index].fname), lname: toProperCase(passengerdetails[index].lname), age: passengerdetails[index].age, gender: passengerdetails[index].gender, seatNo: passengerdetails[index].seatno, amount: passengerdetails[index].amount, food: passengerdetails[index].food }
+            details: {
+                fname: toProperCase(passengerdetails[index].fname),
+                lname: toProperCase(passengerdetails[index].lname),
+                age: passengerdetails[index].age,
+                gender: passengerdetails[index].gender,
+                seatNo: passengerdetails[index].seatno,
+                amount: passengerdetails[index].amount,
+                food: passengerdetails[index].food,
+                mobileno: passengerdetails[index].mobileno,
+                email: passengerdetails[index].email
+            }
         })
     }
-    
+
     // Getting List of All The Seat's which are locked (Seat's Can Be Temporary locked for that person untill the payment is complete or the condition which seat is permanently locked after the payment is completed) 
     const temporarylockedseats = await SeatModel.find({ tripId: tripId, "details.status": { $nin: ['Refunded', 'Failed'] } }, { seatNumber: 1, _id: 0 })
 
@@ -157,7 +167,7 @@ SeatRouter.get("/list/booked/:id", async (req, res) => {
 })
 
 SeatRouter.get("/list/passenger/:id", async (req, res) => {
-    const { id } = req.params    
+    const { id } = req.params
     try {
         const seatlist = await SeatModel.find({ tripId: id })
         res.json({ status: "success", data: seatlist })

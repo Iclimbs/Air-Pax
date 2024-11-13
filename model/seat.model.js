@@ -10,6 +10,8 @@ const SubseatSchema = new Schema({
     seatNo: { type: String },
     status: { type: String, default: "Pending" },
     amount: { type: Number },
+    mobileno: { type: Number },
+    email: { type: String },
     food: [
         {
             name: {

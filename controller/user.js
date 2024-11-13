@@ -53,6 +53,19 @@ userRouter.post("/login", async (req, res) => {
     }
 })
 
+userRouter.get("/login/guest", async (req, res) => {
+    try {
+        const userExists = await UserModel.find({ accounttype: "guest" })
+        let token = jwt.sign({
+            _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (1 * 60 * 60)
+        }, "Authentication")
+        res.json({ status: "success", message: "Login Successful", token: token })
+    } catch (error) {
+    res.json({ status: "error", message: `Error Found in Login ${error.message}` })
+}
+})
+
+
 userRouter.post("/login/admin", async (req, res) => {
     try {
         const { phoneno, password } = req.body
@@ -78,6 +91,7 @@ userRouter.post("/login/admin", async (req, res) => {
         res.json({ status: "error", message: `Error Found in Admin Login ${error.message}` })
     }
 })
+
 
 // User Registration Step 1 Basic Detail's Registration
 
