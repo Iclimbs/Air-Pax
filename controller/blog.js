@@ -35,7 +35,7 @@ BlogRouter.post("/popularblog/add", upload.single("img"), async (req, res) => {
     }
 })
 
-BlogRouter.patch("/popularblog/edit/:id", async (req, res) => {
+BlogRouter.patch("/popularblog/edit/:id",upload.single("img"), async (req, res) => {
     const { id } = req.params
     try {
         const popularblog = await PopularBlogModel.findByIdAndUpdate({ _id: id }, req.body)
