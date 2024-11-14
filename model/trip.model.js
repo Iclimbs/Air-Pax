@@ -1,4 +1,21 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+const ConductorSchema = new Schema({
+    LogIn: { type: Date },
+    LogOut: { type: Date },
+    fuel: { type: Number },
+    fuelCost: { type: Number }
+})
+
+const DriverSchema = new Schema({
+    LogIn: { type: Date },
+    LogOut: { type: Date },
+    maintenance: { type: Number },
+})
+
+
+
 const tripschema = mongoose.Schema({
     name: {
         type: String,
@@ -63,6 +80,8 @@ const tripschema = mongoose.Schema({
     conductor: {
         type: String
     },
+    conductordetails: ConductorSchema,
+    driverdetails: DriverSchema,
     CreatedAt: { type: Date, default: Date.now },
 });
 const TripModel = mongoose.model("Trips", tripschema)

@@ -43,7 +43,7 @@ userRouter.post("/login", async (req, res) => {
                 let token = jwt.sign({
                     _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60)
                 }, "Authentication")
-                res.json({ status: "success", message: "Login Successful", token: token })
+                res.json({ status: "success", message: "Login Successful", token: token , type:"user" })
             } else if (hash.sha256(password) !== userExists[0].password) {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }
@@ -59,10 +59,10 @@ userRouter.get("/login/guest", async (req, res) => {
         let token = jwt.sign({
             _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (1 * 60 * 60)
         }, "Authentication")
-        res.json({ status: "success", message: "Login Successful", token: token })
+        res.json({ status: "success", message: "Login Successful", token: token, type: "Guest" })
     } catch (error) {
-    res.json({ status: "error", message: `Error Found in Login ${error.message}` })
-}
+        res.json({ status: "error", message: `Error Found in Login ${error.message}` })
+    }
 })
 
 

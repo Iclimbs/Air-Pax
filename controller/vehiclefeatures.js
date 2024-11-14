@@ -39,7 +39,7 @@ FeatureRouter.patch("/edit/:id", upload.single("img"), async (req, res) => {
         const vehicle = await vehicleFeaturesModel.find({ _id: id })
         vehicle[0].name = req.body.name;
         vehicle[0].img = fileName
-        await vehicle.save()
+        await vehicle[0].save()
         res.json({ status: "success", message: "Features Details Successfully Updated !!" })
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update Features Details ${error.message}` })
