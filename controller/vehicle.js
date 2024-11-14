@@ -7,7 +7,7 @@ vehicleRouter.post("/add", async (req, res) => {
     const { name, gpsname, gpsimeino, simno, facilities } = req.body;
 
     try {
-        const newvehicle = new VehicleModel({ name, gpsname, gpsimeino, simno, facilities: facilities.split(",") })
+        const newvehicle = new VehicleModel({ name, gpsname, gpsimeino, simno, facilities: facilities })
         await newvehicle.save()
         res.json({ status: "success", message: "New Vehicle Added !!" })
     } catch (error) {

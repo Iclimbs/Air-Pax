@@ -73,7 +73,7 @@ FeatureRouter.get("/listall", async (req, res) => {
 
 FeatureRouter.get("/listall/active", async (req, res) => {
     try {
-        const vehicleList = await vehicleFeaturesModel.find({ status: true })
+        const vehicleList = await vehicleFeaturesModel.find({ status: true },{CreatedAt:0,status:0})
         if (vehicleList.length !== 0) {
             res.json({ status: "success", data: vehicleList })
         } else {
