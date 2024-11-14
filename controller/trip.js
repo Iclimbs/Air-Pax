@@ -4,6 +4,7 @@ const { TripModel } = require("../model/trip.model");
 const { SeatModel } = require("../model/seat.model");
 const { AdminAuthentication } = require("../middleware/Authorization");
 const { OtherUserModel } = require("../model/Other.seat.model");
+const { VehicleModel } = require("../model/vehicle.model");
 const tripRouter = express.Router()
 
 
@@ -95,7 +96,13 @@ tripRouter.get("/list", async (req, res) => {
 tripRouter.get("/detailone/:id", async (req, res) => {
     try {
         const trips = await TripModel.find({ _id: req.params.id })
+        if (trips.length === 0) {
+            return res.json({ status: "error", message: "No Trip Found With This ID" })
+        }
         const seats = await SeatModel.find({ tripId: req.params.id })
+
+        const vehicle = await VehicleModel.find({ name: trips[0].busid })
+
         // Seat's Which are already booked & Payment is completed
         let bookedseats = trips[0].seatsbooked;
         // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
@@ -107,6 +114,8 @@ tripRouter.get("/detailone/:id", async (req, res) => {
         }
 
         let currentseat = bookedseats.concat(lockedseats)
+
+        trips[0].facilities = vehicle[0].facilities
 
         trips[0].seatsbooked = currentseat
 

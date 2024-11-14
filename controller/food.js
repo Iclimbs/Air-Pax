@@ -50,7 +50,7 @@ FoodRouter.get("/listall", async (req, res) => {
 
 FoodRouter.get("/listall/active", async (req, res) => {
     try {
-        const foodList = await FoodModel.find({ available: true },{available:0,_id:0,CreatedAt:0})
+        const foodList = await FoodModel.find({ available: true },{available:0,CreatedAt:0})
         if (foodList.length >= 1) {
             res.json({ status: "success", data: foodList })
         } else {

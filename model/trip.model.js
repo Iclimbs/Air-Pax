@@ -80,6 +80,10 @@ const tripschema = mongoose.Schema({
     conductor: {
         type: String
     },
+    facilities: {
+        type: Array,
+        default: []
+    },
     conductordetails: ConductorSchema,
     driverdetails: DriverSchema,
     CreatedAt: { type: Date, default: Date.now },
