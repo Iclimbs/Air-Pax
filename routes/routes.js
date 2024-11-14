@@ -13,6 +13,7 @@ const { tripRouter } = require("../controller/trip");
 const { userRouter } = require("../controller/user");
 const { validateRouter } = require("../controller/validate");
 const { vehicleRouter } = require("../controller/vehicle");
+const { FeatureRouter } = require("../controller/vehiclefeatures");
 
 router
     .use("/user", userRouter)
@@ -29,6 +30,7 @@ router
     .use("/pnr",PnrRouter)
     .use("/ticket",TicketRouter)
     .use("/blog",BlogRouter)
+    .use("/features",FeatureRouter)
 
 
 module.exports = router;
