@@ -80,7 +80,7 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
         let user = ticketdetails[0].primaryuser;
         let seat = ticketdetails[0].passengerdetails;
 
-        let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")
+        let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")        
         ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, pnr: pnr, seat: seat, trip: tripdetails[0], payment: paymentdetails[0], amount: refundamount }, function (err, template) {
             if (err) {
                 res.json({ status: "error", message: err.message })
@@ -101,10 +101,7 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
                 })
             }
         })
-
     }
-
-
 })
 
 
