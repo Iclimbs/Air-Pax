@@ -55,7 +55,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     details.bookedticket = ticketdetails[0].passengerdetails;
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
 
-    const vehicledetails = await VehicleModel.find({name:tripdetails[0].busid})    
+    const vehicledetails = await VehicleModel.find({name:tripdetails[0].busid})        
 
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
@@ -65,7 +65,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     details.to = tripdetails[0].to;
     details.journeystartdate = tripdetails[0].journeystartdate;
     details.journeyenddate = tripdetails[0].journeyenddate;
-    details.busid = vehicledetails[0].busid;
+    details.busid = vehicledetails[0].gpsname;
     details.starttime = tripdetails[0].starttime;
     details.endtime = tripdetails[0].endtime;
     details.totaltime = tripdetails[0].totaltime;
