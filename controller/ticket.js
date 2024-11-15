@@ -46,7 +46,6 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
     let bookedseats = tripdetails[0].seatsbooked;
     journeytime = new Date(`${tripdetails[0].journeystartdate}T${tripdetails[0].starttime}:00`)
     let newseats = bookedseats.filter(seat => !cancelticket.includes(seat));
-    console.log("newseats ", newseats);
 
     tripdetails[0].seatsbooked = newseats;
     try {
@@ -82,14 +81,14 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
         let seat = ticketdetails[0].passengerdetails;
 
         let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")
-        ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, pnr: pnr, seat: seat, trip: tripdetails[0], payment: paymentdetails[0], amount:refundamount }, function (err, template) {
+        ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, pnr: pnr, seat: seat, trip: tripdetails[0], payment: paymentdetails[0], amount: refundamount }, function (err, template) {
             if (err) {
                 res.json({ status: "error", message: err.message })
             } else {
                 const mailOptions = {
                     from: process.env.emailuser,
                     to: `${user.email}`,
-                    subject: 'Otp To Reset Password.',
+                    subject: `Booking Cancellation, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
                     html: template
                 }
                 transporter.sendMail(mailOptions, (error, info) => {
