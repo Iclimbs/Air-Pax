@@ -53,7 +53,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
     }
-    details.tripId = tripdetails[0].tripId
+    details.tripId = ticketdetails[0].tripId
     details.from = tripdetails[0].from;
     details.to = tripdetails[0].to;
     details.journeystartdate = tripdetails[0].journeystartdate;
@@ -62,7 +62,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     details.starttime = tripdetails[0].starttime;
     details.endtime = tripdetails[0].endtime;
     details.totaltime = tripdetails[0].totaltime;
-    details.distance = tripdetails[0].distance;
+    details.distance = tripdetails[0].distance;    
     res.json({ status: "success", message: "Pnr Detail's", details: details })
 })
 
