@@ -80,17 +80,15 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
         }
         let user = ticketdetails[0].primaryuser;
         let seat = ticketdetails[0].passengerdetails;
-        // console.log("seat ", seat);
-        // console.log("user ", user);
 
         let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")
-        ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, seat: seatdetails, trip: tripdetails[0], payment: paymentdetails[0] }, function (err, template) {
+        ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, pnr: pnr, seat: seat, trip: tripdetails[0], payment: paymentdetails[0], amount:refundamount }, function (err, template) {
             if (err) {
                 res.json({ status: "error", message: err.message })
             } else {
                 const mailOptions = {
                     from: process.env.emailuser,
-                    to: `${userExists[0].email}`,
+                    to: `${user.email}`,
                     subject: 'Otp To Reset Password.',
                     html: template
                 }
