@@ -4,6 +4,7 @@ const FeatureRouter = express.Router()
 const multer = require("multer");
 const path = require('node:path');
 const { vehicleFeaturesModel } = require('../model/vehiclefeatures.model');
+
 const uploadPath = path.join(__dirname, "../public/features");
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
