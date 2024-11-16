@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const { TripModel } = require("../model/trip.model");
 const { SeatModel } = require("../model/seat.model");
 const { AdminAuthentication } = require("../middleware/Authorization");
-const { OtherUserModel } = require("../model/Other.seat.model");
 const { VehicleModel } = require("../model/vehicle.model");
 const tripRouter = express.Router()
 
@@ -77,17 +76,30 @@ tripRouter.get("/list", async (req, res) => {
     const { from, to, date } = req.query
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
     try {
         const trips = await TripModel.find({ from: from, to: to, journeystartdate: date })
-        const upcomingEvents = trips.filter(item => timeToMinutes(item.starttime) > currentMinutes);
-        // if (upcomingEvents.length >= 1) {
-        //     res.json({ status: "success", data: trips })
-        // } else {
-        //     res.json({ status: "success", data: trips })
-        // }
-        res.json({ status: "success", data: trips })
+        const dateObj = new Date();
+        // Creating Date
+        const month = (dateObj.getUTCMonth() + 1) < 10 ? String(dateObj.getUTCMonth() + 1).padStart(2, '0') : dateObj.getUTCMonth() + 1 // months from 1-12
+        const day = dateObj.getUTCDate() < 10 ? String(dateObj.getUTCDate()).padStart(2, '0') : dateObj.getUTCDate()
+        const year = dateObj.getUTCFullYear();
+        const newDate = year + "-" + month + "-" + day;
 
+        // Checking For Current Date If The Current Date & Date passed in Query is Same Return The list of trips based on timing or return all trip list.
+        if (newDate == date) {
+            const upcomingEvents = trips.filter(item => timeToMinutes(item.starttime) > currentMinutes);
+            if (upcomingEvents.length >= 1) {
+                res.json({ status: "success", data: upcomingEvents })
+            } else {
+                res.json({ status: "error", message: "No Upcoming Trips Found" })
+            }
+        } else {
+            if (trips.length >= 1) {
+                res.json({ status: "success", data: trips })
+            } else {
+                res.json({ status: "error", message: "No Upcoming Trips Found" })
+            }
+        }
     } catch (error) {
         res.json({ status: "error", message: `Failed To Get List Of Today's Trip's ${error.message}` })
     }
