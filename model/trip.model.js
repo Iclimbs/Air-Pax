@@ -84,6 +84,10 @@ const tripschema = mongoose.Schema({
         type: Array,
         default: []
     },
+    foodavailability: {
+        type: Boolean,
+        default: true
+    },
     conductordetails: ConductorSchema,
     driverdetails: DriverSchema,
     CreatedAt: { type: Date, default: Date.now },

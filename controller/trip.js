@@ -14,9 +14,9 @@ function timeToMinutes(timeStr) {
 
 
 tripRouter.post("/add", async (req, res) => {
-    const { name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, distance, price, totalseats, totaltime, conductor, driver } = req.body;
+    const { name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, distance, price, totalseats, totaltime, conductor, driver, foodavailability } = req.body;
     try {
-        const newtrip = new TripModel({ name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, totaltime, price, distance, totalseats, bookedseats: 0, availableseats: totalseats, conductor, driver })
+        const newtrip = new TripModel({ name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, totaltime, price, distance, totalseats, bookedseats: 0, availableseats: totalseats, conductor, driver, foodavailability })
         await newtrip.save()
         res.json({ status: "success", message: "Successfully Addeded A New Trip" })
     } catch (error) {
