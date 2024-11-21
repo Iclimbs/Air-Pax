@@ -41,10 +41,3 @@ PaymentGateway.post("/payment-status", async (req, res) => {
     });
 })
 module.exports = { PaymentGateway }
-
-// htmlcode = '< html ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Response Handler</title></head><body><center><font size="4" color="blue"><b>Response Page</b></font><br>' + pData + '</center><br></body><script>let status = document.getElementById("cell-4"); let element = document.getElementById("cell-1"); function redirectToPage() {window.location.href=`https://www.airpax.co/payment/${status.innerText}/${element.innerText}`}window.onload = redirectToPage;</script></html>';
-
-// let status = document.getElementById("cell-4"); let element = document.getElementById("cell-1");
-
-
-// htmlcode = '< html ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Response Handler</title></head><body><center><font size="4" color="blue"><b>Response Page</b></font><br>' + pData + '</center><br></body><script>let pnr = document.getElementById("cell-1");let ref_no = document.getElementById("cell-3");let status = document.getElementById("cell-4");let failure_message = document.getElementById("cell-5");let mode = document.getElementById("cell-6");function redirectToPage() { status, innerText === "Success" ? window.location.href = `http://localhost:5173/payment/${status.innerText}/${pnr.innerText}/${ref_no.innerText}/${mode.innerText}:window.location.href=http://localhost:5173/payment/${status.innerText}/${pnr.innerText}/${ref_no.innerText}/${mode.innerText}/${failure_message.innerText}`} window.onload = redirectToPage;</script ></html > ';
