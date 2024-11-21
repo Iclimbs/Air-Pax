@@ -22,7 +22,17 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
             seatNumber: PassengerDetails[index].SeatNo, isLocked: true, tripId: TripId, bookedby: PrimaryUser.PhoneNo,
             expireAt: Date.now() + 15 * 60 * 1000, // Lock for 15 minutes
             pnr: ticketpnr,
-            details: { fname: PassengerDetails[index].Fname, lname: PassengerDetails[index].Lname, age: PassengerDetails[index].Age, gender: PassengerDetails[index].Gender, phoneno: PassengerDetails[index].PhoneNo, email: PassengerDetails[index].Email, country: PassengerDetails[index].Country, seatno: PassengerDetails[index].SeatNo }
+            details: {
+                fname: PassengerDetails[index].Fname,
+                lname: PassengerDetails[index].Lname,
+                age: PassengerDetails[index].Age,
+                gender: PassengerDetails[index].Gender,
+                phoneno: PassengerDetails[index].PhoneNo,
+                email: PassengerDetails[index].Email,
+                country: PassengerDetails[index].Country,
+                seatno: PassengerDetails[index].SeatNo,
+                amount: Math.floor(Amount / PassengerDetails.length)
+            }
         })
     }
     // const trip = await TripModel.find({ _id: TripId })

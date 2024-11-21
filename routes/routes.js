@@ -7,6 +7,7 @@ const { OtherSeatRouter } = require("../controller/GMR/otherseat");
 const { PaymentRouter } = require("../controller/payment");
 const { PaymentGateway } = require("../controller/paymentgateway");
 const { PnrRouter } = require("../controller/pnr");
+const { ReportRouter } = require("../controller/report");
 const { SeatRouter } = require("../controller/seat");
 const { TicketRouter } = require("../controller/ticket");
 const { tripRouter } = require("../controller/trip");
@@ -31,6 +32,7 @@ router
     .use("/ticket",TicketRouter)
     .use("/blog",BlogRouter)
     .use("/features",FeatureRouter)
+    .use("/report",ReportRouter)
 
 
 module.exports = router;

@@ -117,7 +117,6 @@ tripRouter.get("/detailone/:id", async (req, res) => {
 
         // Seat's Which are already booked & Payment is completed
         let bookedseats = trips[0].seatsbooked;
-        console.log("booked seats ",bookedseats);
         
         // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
         let lockedseats = [];
@@ -127,13 +126,9 @@ tripRouter.get("/detailone/:id", async (req, res) => {
                 lockedseats.push(seats[index].seatNumber)
             }
         }
-        console.log("locked seats ",lockedseats);
 
         let currentseat = bookedseats.concat(lockedseats)
-
-        console.log("current seat ",currentseat);
-        
-
+    
         trips[0].facilities = vehicle[0].facilities
 
         trips[0].seatsbooked = currentseat

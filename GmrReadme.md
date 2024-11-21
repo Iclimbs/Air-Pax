@@ -39,6 +39,8 @@ Payload :-
 PAYMENT SUCCESS FOR GMR
 Payment Success :- http://localhost:4500/api/v1/new/payment/success?pnr=9huqbkb1rt&ref=TH6386303864207&method=mastercard
 
+0KSEW1MOBV
+
 PAYMENT FAILURE FOR GMR
 Payment Failure :- http://localhost:4500/api/v1/new/payment/failure?pnr=4bry6avzzt&ref=TH638633814237&method=razorpay
 
