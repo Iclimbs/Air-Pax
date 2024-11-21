@@ -10,8 +10,8 @@ const { transporter } = require('../service/transporter');
 const { BookingModel } = require('../model/booking.model');
 const PaymentRouter = express.Router()
 
-PaymentRouter.get("/success/:pnr", async (req, res) => {
-    const { pnr } = req.params
+PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
+    const { pnr, ref_no, mode } = req.params
     const filter = { pnr: pnr };
     const update = {
         $set: { isBooked: true, expireAt: null, "details.status": "Confirmed" }
@@ -25,7 +25,9 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
 
-    paymentdetails[0].paymentstatus = "Confirmed"
+    paymentdetails[0].paymentstatus = "Confirmed";
+    paymentdetails[0].refno = ref_no;
+    paymentdetails[0].method = mode
     try {
         await paymentdetails[0].save()
     } catch (error) {
@@ -111,8 +113,8 @@ PaymentRouter.get("/success/:pnr", async (req, res) => {
 })
 
 
-PaymentRouter.get("/failure/:pnr", async (req, res) => {
-    const { pnr } = req.params
+PaymentRouter.get("/failure/:pnr/:ref_no/:mode", async (req, res) => {
+    const { pnr, ref_no, mode } = req.params
     const filter = { pnr: pnr };
     const update = {
         $set: { isBooked: true, expireAt: null, "details.status": "Failed" }
@@ -126,7 +128,9 @@ PaymentRouter.get("/failure/:pnr", async (req, res) => {
     }
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
-    paymentdetails[0].paymentstatus = "Failed"
+    paymentdetails[0].paymentstatus = "Failed";
+    paymentdetails[0].refno = ref_no;
+    paymentdetails[0].method = mode;
     try {
         await paymentdetails[0].save()
     } catch (error) {

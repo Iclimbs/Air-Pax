@@ -6,7 +6,9 @@ const { PaymentModel } = require('../model/payment.model');
 const SeatRouter = express.Router();
 const ccav = require("../payment/ccavutil")
 const crypto = require('node:crypto');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const { BookingModel } = require('../model/booking.model');
+const { TripModel } = require('../model/trip.model');
 
 const toProperCase = (word) => {
     if (!word) return ''; // Return empty string if input is falsy
@@ -115,6 +117,132 @@ SeatRouter.post("/selectedseats", async (req, res) => {
                 ccavenueUrl
             }
         });
+    }
+})
+
+SeatRouter.post("/booking/admin", async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    const decoded = jwt.verify(token, 'Authorization')
+    const { passengerdetails, tripId, amount } = req.body
+    // Generating Random Ticket PNR
+    const ticketpnr = generateUniqueId({
+        length: 10,
+        useLetters: true,
+        useNumbers: true
+    }).toUpperCase()
+    let seats = [] // All the Seat Number's for which the using is trying to book ticket. 
+    let seatdetails = [] // All the Details of the Passenger's for which seat's are going to be booked.
+    // For Loop To Add All the Passenger Detail's in the Seatdetail's Array which can be Added in the Seat Model || Seats Collection 
+    for (let index = 0; index < passengerdetails.length; index++) {
+        seats.push(passengerdetails[index].seatno)
+        seatdetails.push({
+            seatNumber: passengerdetails[index].seatno, isLocked: true, isBooked: true, tripId: tripId, bookedby: decoded._id,
+            expireAt: null, // Lock for 15 minutes
+            pnr: ticketpnr,
+            details: {
+                fname: toProperCase(passengerdetails[index].fname),
+                lname: toProperCase(passengerdetails[index].lname),
+                age: passengerdetails[index].age,
+                gender: passengerdetails[index].gender,
+                seatNo: passengerdetails[index].seatno,
+                amount: passengerdetails[index].amount,
+                food: passengerdetails[index].food,
+                mobileno: passengerdetails[index].mobileno,
+                email: passengerdetails[index].email,
+                status: "Confirmed"
+            }
+        })
+    }
+
+    // Getting List of All The Seat's which are locked (Seat's Can Be Temporary locked for that person untill the payment is complete or the condition which seat is permanently locked after the payment is completed) 
+    const temporarylockedseats = await SeatModel.find({ tripId: tripId, "details.status": { $nin: ['Refunded', 'Failed'] } }, { seatNumber: 1, _id: 0 })
+
+    // Step 1 Checking If the User is trying to book those seat's which are already booked & Payment is completed.
+
+    // Getting the list of all the seat's which are already booked.
+    let lockedseats = []
+    // Setting a default condition to check if the seat which the user is trying to book has already been booked or not.
+    let alreadyexist = false;
+    // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
+    let alreadyexistseats = [];
+    // For Loop to get the list of all the seats which are currently locked!!
+
+    for (let index = 0; index < temporarylockedseats.length; index++) {
+        lockedseats.push(temporarylockedseats[index].seatNumber)
+    }
+
+    // Testing For Commpon Seat Number's in LokedSeats & Alreadyexistseats
+    for (let index = 0; index < seats.length; index++) {
+        if (lockedseats.includes(seats[index])) {
+            alreadyexistseats.push(seats[index])
+            alreadyexist = true;
+        }
+    }
+
+    // Creating New Document In Bookign Model To Stored Booking Order Detail's
+
+    // Get Trip Detail's 
+    const tripdetails = await TripModel.find({ _id: tripId })
+    if (tripdetails.length == 0) {
+        return res.json({ status: "error", message: "No Trip Found With This ID" })
+    }
+
+    const BookingDetails = new BookingModel({
+        name: tripdetails[0].name,
+        from: tripdetails[0].from,
+        to: tripdetails[0].to,
+        journeystartdate: tripdetails[0].journeystartdate,
+        journeyenddate: tripdetails[0].journeyenddate,
+        busid: tripdetails[0].busid,
+        starttime: tripdetails[0].starttime,
+        endtime: tripdetails[0].endtime,
+        totaltime: tripdetails[0].totaltime,
+        distance: tripdetails[0].distance,
+        pnr: ticketpnr,
+        seats: seats,
+        userid: decoded._id,
+        tripId: tripdetails[0]._id
+    })
+    // Checking If A booking is already present in Booking Model Or Not
+    const bookingExists = await BookingModel.find({ pnr: ticketpnr, userid: decoded._id, tripId: tripdetails[0]._id })
+
+    if (alreadyexist) {
+        return res.json({ status: "error", message: "Some Seat's Are Already Booked Please Select Any Other Seat", seats: alreadyexistseats })
+    } else {
+        // Storing Booking Details After Confirming That No Booking Detail is Present
+        if (bookingExists.length === 0) {
+            try {
+                await BookingDetails.save()
+            } catch (error) {
+                res.json({ status: "error", message: `Failed To Save Booking Detail's ${error.message}` })
+            }
+        }
+        // Saving Payment Detail's In Payment Model
+        try {
+            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: decoded._id, amount: amount, paymentstatus: "Confirmed", method: "Cash" })
+            await paymentdetails.save()
+        } catch (error) {
+            return res.json({ status: "error", message: `Failed To Added Payment Details ${error.message}` })
+        }
+        // Saving Seats Detail's For Which Admin Is Trying to Book Ticket 
+        try {
+            const result = await SeatModel.insertMany(seatdetails);
+        } catch (error) {
+            return res.json({ status: "error", message: `Failed To Added Seat Details ${error.message}`, data: seatdetails })
+        }
+
+        // Updating Trip Detail's To Confirm Ticket Booking 
+        let newbookedseats = seats.concat(tripdetails[0].seatsbooked);
+
+        try {
+            tripdetails[0].seatsbooked = newbookedseats;
+            tripdetails[0].bookedseats = newbookedseats.length;
+            tripdetails[0].availableseats = tripdetails[0].totalseats - newbookedseats.length
+            await tripdetails[0].save()
+        } catch (error) {
+            res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
+        }
+        return res.json({ status: "success", message: "Ticket Booking Successful" })
     }
 })
 

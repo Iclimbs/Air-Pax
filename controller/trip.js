@@ -117,15 +117,22 @@ tripRouter.get("/detailone/:id", async (req, res) => {
 
         // Seat's Which are already booked & Payment is completed
         let bookedseats = trips[0].seatsbooked;
+        console.log("booked seats ",bookedseats);
+        
         // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
         let lockedseats = [];
+        
         for (let index = 0; index < seats.length; index++) {
-            if ((bookedseats.includes(seats[index].seatNumber) === false) && ((seats[index].details.status == "Pending") || (seats[index].details.status == "Completed") || (seats[index].details.status == "Failed"))) {
+            if (seats[index].details.status == "Pending") {
                 lockedseats.push(seats[index].seatNumber)
             }
         }
+        console.log("locked seats ",lockedseats);
 
         let currentseat = bookedseats.concat(lockedseats)
+
+        console.log("current seat ",currentseat);
+        
 
         trips[0].facilities = vehicle[0].facilities
 
@@ -150,8 +157,17 @@ tripRouter.get("/assigned/conductor", AdminAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = jwt.verify(token, 'Authorization')
 
+    const dateObj = new Date();
+    // Creating Date
+    const month = (dateObj.getUTCMonth() + 1) < 10 ? String(dateObj.getUTCMonth() + 1).padStart(2, '0') : dateObj.getUTCMonth() + 1 // months from 1-12
+    const day = dateObj.getUTCDate() < 10 ? String(dateObj.getUTCDate()).padStart(2, '0') : dateObj.getUTCDate()
+    const year = dateObj.getUTCFullYear();
+    const newDate = year + "-" + month + "-" + day;
+
+
+
     try {
-        const trip = await TripModel.find({ conductor: decoded._id })
+        const trip = await TripModel.find({ journeystartdate: { $gte: newDate }, conductor: decoded._id })
         res.json({ status: "success", data: trip })
     } catch (error) {
         res.json({ status: "error", message: "Failed To Get User List" })
