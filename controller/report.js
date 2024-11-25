@@ -208,16 +208,7 @@ ReportRouter.get("/today", async (req, res) => {
     { lifetimeSuccessSales.length !== 0 ? statisticsCardsData[5].value = `₹ ${lifetimeSuccessSales[0]?.totalSum}` : statisticsCardsData[5].value = 0 }
     { lifetimeFailedSales.length !== 0 ? statisticsCardsData[6].value = `₹ ${lifetimeFailedSales[0]?.totalSum}` : statisticsCardsData[6].value = 0 }
     { lifetimeRefundedSales.length !== 0 ? statisticsCardsData[7].value = `₹ ${lifetimeRefundedSales[0]?.totalSum}` : statisticsCardsData[7].value = 0 }
-
-
-    // lifetimeFailedSales
-
-    // lifetimeRefundedSales
-
-    // console.log(lifetimeSuccessSales[0]);
-
-
-    res.json({ status: "success", data: statisticsCardsData, message: "No Data Found On The Particular Date" })
+    res.json({ status: "success", data: statisticsCardsData })
 })
 
 
@@ -304,41 +295,51 @@ ReportRouter.get("/sales/weekly", async (req, res) => {
     }
 })
 
-ReportRouter.get("/sales/monthly", async (req, res) => {
+ReportRouter.get("/sales/custom", async (req, res) => {
     // Url :- http://localhost:4500/api/v1/report/sales/monthly?month=January
-
+    // http://localhost:4500/api/v1/report/sales/custom?from=2024-10-13&to=2024-11-13&status=Refunded
     const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     const now = new Date();
 
-    let startOfMonth;
-    let endOfMonth;
+    let start;
+    let end;
 
     if (req.query.month) {
         const monthindex = month.indexOf(req.query.month)
-        startOfMonth = new Date(now.getFullYear(), monthindex, 1);
-        // Calculate the end of the current month (last day of the month)
-        endOfMonth = new Date(now.getFullYear(), monthindex + 1, 0);
-
-    } else {
-        startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        // Calculate the end of the current month (last day of the month)
-        endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        start = new Date(now.getFullYear(), monthindex, 1);
+        end = new Date(now.getFullYear(), monthindex + 1, 0);
     }
 
-    // Calculate the start of the current month (1st day of the month)
+    if (req.query.from && req.query.to) {
+        end = new Date(req.query.to);
+        end.setHours(23, 59, 59, 999); // End of today
+        start = new Date(req.query.from);
+        start.setHours(0, 0, 0, 0); // Start of the day
+    }
 
     const result = await SeatModel.aggregate([
         {
             $match: {
-                CreatedAt: { $gte: startOfMonth, $lte: endOfMonth },
-                "details.status": "Confirmed"
+                CreatedAt: { $gte: start, $lte: end },
+                "details.status": req.query?.status
             },
         },
         {
             $group: {
                 _id: { $dateToString: { format: "%Y-%m-%d", date: "$CreatedAt" } }, // Group by day
                 totalSum: { $sum: "$details.amount" }, // Calculate the sum of the 'price' field
+                records: {
+                    $push: {
+                        name: { $concat: ["$details.fname", " ", "$details.lname"] }, // Combine first and last name
+                        age: "$details.age", // Include age
+                        email: "$details.email", // Assuming "bookedby" is used as email (modify if needed)
+                        gender: "$details.gender", // Include gender
+                        amount: "$details.amount", // Include amount
+                        mobileno: "$details.mobileno"
+                    }
+                }
+
             },
         },
         { $sort: { _id: 1 } }, // Sort by date in ascending order
@@ -351,8 +352,37 @@ ReportRouter.get("/sales/monthly", async (req, res) => {
     }
 })
 
-ReportRouter.get("/group/age", async (req, res) => {
+ReportRouter.get("/group/age/custom", async (req, res) => {
+    // Link :- http://localhost:4500/api/v1/report/group/age/custom?status=Confirmed&month=November
+    // Link :- 
+
+    const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    const now = new Date();
+
+    let start;
+    let end;
+
+    if (req.query.month) {
+        const monthindex = month.indexOf(req.query.month)
+        start = new Date(now.getFullYear(), monthindex, 1);
+        end = new Date(now.getFullYear(), monthindex + 1, 0);
+    }
+
+    if (req.query.from && req.query.to) {
+        end = new Date(req.query.to);
+        end.setHours(23, 59, 59, 999); // End of today
+        start = new Date(req.query.from);
+        start.setHours(0, 0, 0, 0); // Start of the day
+    }
+
     const result = await SeatModel.aggregate([
+        {
+            $match: {
+                CreatedAt: { $gte: start, $lte: end },
+                "details.status": req.query?.status
+            }
+        },
         {
             $bucket: {
                 groupBy: "$details.age", // Field to group by
@@ -361,7 +391,17 @@ ReportRouter.get("/group/age", async (req, res) => {
                 output: {
                     ticketsCount: { $sum: 1 }, // Count tickets in each group
                     totalAmount: { $sum: "$details.amount" }, // Sum the ticket prices for each group
-                    records: { $push: "$$ROOT" }, // Push all documents in each group
+                    records: {
+                        $push: {
+                            name: { $concat: ["$details.fname", " ", "$details.lname"] }, // Combine first and last name
+                            age: "$details.age", // Include age
+                            email: "$details.email", // Assuming "bookedby" is used as email (modify if needed)
+                            gender: "$details.gender", // Include gender
+                            amount: "$details.amount", // Include amount
+                            mobileno: "$details.mobileno"
+                        }
+                    }
+
                 },
             },
         }
