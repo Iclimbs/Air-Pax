@@ -65,7 +65,7 @@ tripRouter.patch("/edit/:id", async (req, res) => {
 
 tripRouter.get("/listall", async (req, res) => {
     try {
-        const trips = await TripModel.find({})
+        const trips = await TripModel.find({}).sort({ journeystartdate: -1 }).limit(25)
         res.json({ status: "success", data: trips })
     } catch (error) {
         res.json({ status: "error", message: "Get List Failed" })

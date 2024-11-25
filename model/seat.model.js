@@ -28,7 +28,6 @@ const SubseatSchema = new Schema({
     ]
 })
 
-
 const seatSchema = mongoose.Schema({
     seatNumber: { type: String, required: true },
     isBooked: { type: Boolean, default: false },
@@ -40,6 +39,7 @@ const seatSchema = mongoose.Schema({
     },
     pnr: String,
     totalamount: Number,
+    platform: String,
     tripId: {
         type: String,
         required: true

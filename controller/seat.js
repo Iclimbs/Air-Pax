@@ -16,7 +16,7 @@ const toProperCase = (word) => {
 };
 
 SeatRouter.post("/selectedseats", async (req, res) => {
-    const { userdetails, passengerdetails, tripId, totalamount } = req.body
+    const { userdetails, passengerdetails, tripId, totalamount, platform } = req.body
     // Generating Random Ticket PNR
     const ticketpnr = generateUniqueId({
         length: 10,
@@ -30,8 +30,9 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, tripId: tripId, bookedby: userdetails._id,
-            expireAt: Date.now() + 2 * 60 * 1000, // Lock for 15 minutes
+            expireAt: Date.now() + 15 * 60 * 1000, // Lock for 15 minutes
             pnr: ticketpnr,
+            platform:platform,
             details: {
                 fname: toProperCase(passengerdetails[index].fname),
                 lname: toProperCase(passengerdetails[index].lname),
@@ -137,8 +138,9 @@ SeatRouter.post("/booking/admin", async (req, res) => {
         seats.push(passengerdetails[index].seatno)
         seatdetails.push({
             seatNumber: passengerdetails[index].seatno, isLocked: true, isBooked: true, tripId: tripId, bookedby: decoded._id,
-            expireAt: null, // Lock for 15 minutes
+            expireAt: null, 
             pnr: ticketpnr,
+            platform:"Admin",
             details: {
                 fname: toProperCase(passengerdetails[index].fname),
                 lname: toProperCase(passengerdetails[index].lname),
@@ -297,7 +299,7 @@ SeatRouter.get("/list/booked/:id", async (req, res) => {
 SeatRouter.get("/list/passenger/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const seatlist = await SeatModel.find({ tripId: id })
+        const seatlist = await SeatModel.find({ tripId: id,"details.status":"Confirmed" })
         res.json({ status: "success", data: seatlist })
     } catch (error) {
         res.json({ status: "error", message: "Failed To Get Booked Ticket List" })

@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { BlogRouter } = require("../controller/blog");
 const { CounterRouter } = require("../controller/counter");
 const { FoodRouter } = require("../controller/food");
+const { FoodBookingRouter } = require("../controller/foodbooking");
 const { OtherPaymentRouter } = require("../controller/GMR/otherpayment");
 const { OtherSeatRouter } = require("../controller/GMR/otherseat");
 const { PaymentRouter } = require("../controller/payment");
@@ -33,6 +34,7 @@ router
     .use("/blog",BlogRouter)
     .use("/features",FeatureRouter)
     .use("/report",ReportRouter)
+    .use("/foodbooking",FoodBookingRouter)
 
 
 module.exports = router;

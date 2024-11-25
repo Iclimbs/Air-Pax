@@ -22,6 +22,7 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
             seatNumber: PassengerDetails[index].SeatNo, isLocked: true, tripId: TripId, bookedby: PrimaryUser.PhoneNo,
             expireAt: Date.now() + 15 * 60 * 1000, // Lock for 15 minutes
             pnr: ticketpnr,
+            platform:"others",
             details: {
                 fname: PassengerDetails[index].Fname,
                 lname: PassengerDetails[index].Lname,
