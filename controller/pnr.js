@@ -5,13 +5,13 @@ const { SeatModel } = require("../model/seat.model");
 const { VehicleModel } = require("../model/vehicle.model");
 const PnrRouter = express.Router()
 
-PnrRouter.get("/:pnr", async (req, res) => {
-    const { pnr } = req.params;
+PnrRouter.get("/", async (req, res) => {
+    const { pnr, email } = req.query
     // Creating An Object which will contain all the basic details required for the user.
     let details = {};
     details.passengerdetails = [];
     // Getting the list of Seats Booked 
-    const ticketdetails = await SeatModel.find({ pnr: pnr }, { _id: 0, CreatedAt: 0 })    
+    const ticketdetails = await SeatModel.find({ pnr: pnr, "details.email": email }, { _id: 0, CreatedAt: 0 })
 
     // Sending No Ticket Detail's Found Message To User
     if (ticketdetails.length == 0) {
@@ -25,8 +25,8 @@ PnrRouter.get("/:pnr", async (req, res) => {
 
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
 
-    const vehicledetails = await VehicleModel.find({name:tripdetails[0].busid})    
-    
+    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
+
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
     }
@@ -55,7 +55,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     details.bookedticket = ticketdetails[0].passengerdetails;
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
 
-    const vehicledetails = await VehicleModel.find({name:tripdetails[0].busid})        
+    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
 
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
@@ -69,7 +69,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     details.starttime = tripdetails[0].starttime;
     details.endtime = tripdetails[0].endtime;
     details.totaltime = tripdetails[0].totaltime;
-    details.distance = tripdetails[0].distance;    
+    details.distance = tripdetails[0].distance;
     res.json({ status: "success", message: "Pnr Detail's", details: details })
 })
 
