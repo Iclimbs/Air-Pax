@@ -418,5 +418,71 @@ ReportRouter.post("/group/age/custom", async (req, res) => {
 
 })
 
+ReportRouter.post("/group/day/custom", async (req, res) => {
+
+    const { from, to, status, monthname } = req.body;
+
+    const now = new Date();
+
+    let start;
+    let end;
+
+    if (monthname) {
+        const monthindex = month.indexOf(monthname)
+        start = new Date(now.getFullYear(), monthindex, 1);
+        end = new Date(now.getFullYear(), monthindex + 1, 0);
+    }
+
+    if (from && to) {
+        end = new Date(to);
+        end.setHours(23, 59, 59, 999); // End of today
+        start = new Date(from);
+        start.setHours(0, 0, 0, 0); // Start of the day
+    }
+
+    const result = await SeatModel.aggregate([
+        {
+            $match: {
+                CreatedAt: { $gte: start, $lte: end },
+                "details.status": status
+            }
+        },
+        {
+        $addFields: {
+            dayName: {
+                $switch: {
+                    branches: [
+                        { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 1] }, then: "Sunday" },
+                        { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 2] }, then: "Monday" },
+                        { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 3] }, then: "Tuesday" },
+                        { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 4] }, then: "Wednesday" },
+                        { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 5] }, then: "Thursday" },
+                        { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 6] }, then: "Friday" },
+                        { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 7] }, then: "Saturday" }
+                    ],
+                    default: "Unknown"
+                }
+            }
+        }
+    },
+    // Step 2: Group by day name and count the total bookings for each day
+    {
+        $group: {
+            _id: "$dayName",
+            count: { $sum: 1 } // Count total bookings
+        }
+    },
+    // Step 3: Sort by day name in ascending order (or by count if desired)
+    {
+        $sort: { _id: 1 } // Alphabetical order of days
+    }
+    ])
+
+    if (result.length > 0) {
+        res.json({ status: "success", data: result })
+    } else {
+        res.json({ status: "error", message: "No Data Found For Following Month" })
+    }
+})
 
 module.exports = { ReportRouter }
