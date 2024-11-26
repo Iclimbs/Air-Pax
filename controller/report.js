@@ -295,9 +295,11 @@ ReportRouter.get("/sales/weekly", async (req, res) => {
     }
 })
 
-ReportRouter.get("/sales/custom", async (req, res) => {
-    // Url :- http://localhost:4500/api/v1/report/sales/monthly?month=January
-    // http://localhost:4500/api/v1/report/sales/custom?from=2024-10-13&to=2024-11-13&status=Refunded
+ReportRouter.post("/sales/custom", async (req, res) => {
+    // Link :-  http://localhost:4500/api/v1/report/sales/custom?from=2024-10-13&to=2024-11-13&status=Confirmed
+    // Link :-  http://localhost:4500/api/v1/report/sales/custom?status=Confirmed&month=November
+    const { from, to, status, monthname } = req.body;
+
     const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     const now = new Date();
@@ -305,16 +307,16 @@ ReportRouter.get("/sales/custom", async (req, res) => {
     let start;
     let end;
 
-    if (req.query.month) {
-        const monthindex = month.indexOf(req.query.month)
+    if (monthname) {
+        const monthindex = month.indexOf(monthname)
         start = new Date(now.getFullYear(), monthindex, 1);
         end = new Date(now.getFullYear(), monthindex + 1, 0);
     }
 
-    if (req.query.from && req.query.to) {
-        end = new Date(req.query.to);
+    if (from && to) {
+        end = new Date(to);
         end.setHours(23, 59, 59, 999); // End of today
-        start = new Date(req.query.from);
+        start = new Date(from);
         start.setHours(0, 0, 0, 0); // Start of the day
     }
 
@@ -322,7 +324,7 @@ ReportRouter.get("/sales/custom", async (req, res) => {
         {
             $match: {
                 CreatedAt: { $gte: start, $lte: end },
-                "details.status": req.query?.status
+                "details.status": status
             },
         },
         {
@@ -352,9 +354,11 @@ ReportRouter.get("/sales/custom", async (req, res) => {
     }
 })
 
-ReportRouter.get("/group/age/custom", async (req, res) => {
+ReportRouter.post("/group/age/custom", async (req, res) => {
+    // Link :- http://localhost:4500/api/v1/report/group/age/custom?from=2024-10-13&to=2024-11-13&status=Confirmed
     // Link :- http://localhost:4500/api/v1/report/group/age/custom?status=Confirmed&month=November
-    // Link :- 
+
+    const { from, to, status, monthname } = req.body;
 
     const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -363,16 +367,16 @@ ReportRouter.get("/group/age/custom", async (req, res) => {
     let start;
     let end;
 
-    if (req.query.month) {
-        const monthindex = month.indexOf(req.query.month)
+    if (monthname) {
+        const monthindex = month.indexOf(monthname)
         start = new Date(now.getFullYear(), monthindex, 1);
         end = new Date(now.getFullYear(), monthindex + 1, 0);
     }
 
-    if (req.query.from && req.query.to) {
-        end = new Date(req.query.to);
+    if (from && to) {
+        end = new Date(to);
         end.setHours(23, 59, 59, 999); // End of today
-        start = new Date(req.query.from);
+        start = new Date(from);
         start.setHours(0, 0, 0, 0); // Start of the day
     }
 
@@ -380,7 +384,7 @@ ReportRouter.get("/group/age/custom", async (req, res) => {
         {
             $match: {
                 CreatedAt: { $gte: start, $lte: end },
-                "details.status": req.query?.status
+                "details.status": status
             }
         },
         {

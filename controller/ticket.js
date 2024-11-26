@@ -129,7 +129,7 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
 
 // Get the List of Upcoming Tickets For the User
 
-TicketRouter.get("/history", async (req, res) => {
+TicketRouter.get("/history",UserAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     try {
         if (!token) {
@@ -157,7 +157,7 @@ TicketRouter.get("/history", async (req, res) => {
     }
 })
 
-TicketRouter.get("/upcoming", async (req, res) => {
+TicketRouter.get("/upcoming",UserAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     try {
         if (!token) {
