@@ -28,7 +28,7 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
                 lname: PassengerDetails[index].Lname,
                 age: PassengerDetails[index].Age,
                 gender: PassengerDetails[index].Gender,
-                phoneno: PassengerDetails[index].PhoneNo,
+                mobileno: PassengerDetails[index].PhoneNo,
                 email: PassengerDetails[index].Email,
                 country: PassengerDetails[index].Country,
                 seatno: PassengerDetails[index].SeatNo,

@@ -27,8 +27,8 @@ OtherPaymentRouter.get("/success/", async (req, res) => {
     // Updating Detail's in Payment Model Data
     const paymentdetails = await PaymentModel.find({ pnr: pnr });
     paymentdetails[0].refno = ref,
-    paymentdetails[0].method = method,
-    paymentdetails[0].paymentstatus.pending = false
+        paymentdetails[0].method = method,
+        paymentdetails[0].paymentstatus.pending = false
     paymentdetails[0].paymentstatus = "Confirmed"
     try {
         await paymentdetails[0].save()
@@ -64,8 +64,6 @@ OtherPaymentRouter.get("/success/", async (req, res) => {
         res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
     }
 
-
-
     // Updating Detail's in GMR Model Data
 
     try {
@@ -76,35 +74,6 @@ OtherPaymentRouter.get("/success/", async (req, res) => {
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
     }
-
-
-    // const BookingDetails = new BookingModel({
-    //     name: tripdata[0].name,
-    //     from: tripdata[0].from,
-    //     to: tripdata[0].to,
-    //     journeystartdate: tripdata[0].journeystartdate,
-    //     journeyenddate: tripdata[0].journeyenddate,
-    //     busid: tripdata[0].busid,
-    //     starttime: tripdata[0].starttime,
-    //     endtime: tripdata[0].endtime,
-    //     totaltime: tripdata[0].totaltime,
-    //     distance: tripdata[0].distance,
-    //     pnr,
-    //     seats: bookedseats,
-    //     userid: userdetails[0]._id,
-    //     tripId: tripdata[0]._id
-    // })
-    // const bookingExists = await BookingModel.find({ pnr: pnr, userid: userdetails[0]._id, tripId: tripdetails[0]._id })
-    // if (bookingExists.length === 0) {
-    //     try {
-    //         await BookingDetails.save()
-    //     } catch (error) {
-    //         res.json({ status: "error", message: `Failed To Save Booking Detail's ${error.message}` })
-    //     }
-    // }
-
-
-
 
     const userdetails = await OtherUserModel.find({ pnr: pnr })
     const tripdetails = await TripModel.find({ _id: userdetails[0].tripId })

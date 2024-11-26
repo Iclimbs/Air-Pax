@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const SubuserSchema = new Schema({
-  Fname: { type: String }, Lname: { type: String }, Age: { type: Number }, Gender: { type: String }, Phoneno: { type: Number }, Email: { type: String }, Country: { type: String }, SeatNo: { type: String }, status: { type: String, default: "Pending" }
+  Fname: { type: String }, Lname: { type: String }, Age: { type: Number }, Gender: { type: String }, PhoneNo: { type: Number }, Email: { type: String }, Country: { type: String }, SeatNo: { type: String }, status: { type: String, default: "Pending" }
 })
 
 const otheruserschema = mongoose.Schema({
