@@ -3,6 +3,7 @@ const express = require("express")
 const { SeatModel } = require('../model/seat.model')
 const { UserModel } = require('../model/user.model')
 const { FoodBookingModel } = require('../model/foodbooking.model')
+const { TripModel } = require('../model/trip.model')
 const ReportRouter = express.Router()
 
 // Getting Sale's Report
@@ -481,15 +482,12 @@ ReportRouter.post("/group/day/custom", async (req, res) => {
             $sort: { _id: 1 } // Alphabetical order of days
         }
     ])
-
     if (result.length > 0) {
         res.json({ status: "success", data: result })
     } else {
         res.json({ status: "error", message: "No Data Found For Following Month" })
     }
 })
-
-
 
 ReportRouter.post("/group/platform/custom", async (req, res) => {
     const { from, to, status, monthname } = req.body;
@@ -511,7 +509,6 @@ ReportRouter.post("/group/platform/custom", async (req, res) => {
         start = new Date(from);
         start.setHours(0, 0, 0, 0); // Start of the day
     }
-
 
     const result = await SeatModel.aggregate([
         // Step 1: Match by Ticket Status & Start & End Time 
@@ -562,5 +559,34 @@ ReportRouter.post("/group/platform/custom", async (req, res) => {
     }
 })
 
+
+ReportRouter.get("/group/utilisation/trip",async(req,res)=>{
+    const result = await TripModel.aggregate([
+        // Step 1: Project relevant fields and calculate capacity utilization
+        {
+          $project: {
+            tripId: 1, // Assuming each trip has a unique identifier field
+            totalseats: 1, // Total seats available for the trip
+            bookedseats: 1, // Number of seats booked for the trip
+            capacityUtilization: {
+              $cond: {
+                if: { $gt: ["$totalseats", 0] }, // Ensure totalSeats > 0 to avoid division by zero
+                then: { $multiply: [{ $divide: ["$bookedseats", "$totalseats"] }, 100] }, // Calculate utilization as a percentage
+                else: 0
+              }
+            }
+          }
+        },
+        // Step 2: Sort trips by capacity utilization in descending order (optional)
+        {
+          $sort: { capacityUtilization: -1 }
+        }
+      ]);
+         
+      console.log(result);
+      res.json("testing")
+      
+      
+})
 
 module.exports = { ReportRouter }

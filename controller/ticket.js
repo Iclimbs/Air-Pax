@@ -102,27 +102,26 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
         let seat = ticketdetails[0].passengerdetails;
 
         let ticketcanceltemplate = path.join(__dirname, "../emailtemplate/gmrticketcancel.ejs")
-        // ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, pnr: pnr, seat: seat, trip: tripdetails[0], payment: paymentdetails[0], amount: refundamount }, function (err, template) {
-        //     if (err) {
-        //         res.json({ status: "error", message: err.message })
-        //     } else {
-        //         const mailOptions = {
-        //             from: process.env.emailuser,
-        //             to: `${user.email}`,
-        //             subject: `Booking Cancellation, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
-        //             html: template
-        //         }
-        //         transporter.sendMail(mailOptions, (error, info) => {
-        //             if (error) {
-        //                 console.log(error);
-        //                 return res.json({ status: "error", message: 'Failed to send email', redirect: "/" });
-        //             } else {
-        //                 return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
-        //             }
-        //         })
-        //     }
-        // })
-        res.json("testing")
+        ejs.renderFile(ticketcanceltemplate, { user: ticketdetails[0].primaryuser, pnr: pnr, seat: seat, trip: tripdetails[0], payment: paymentdetails[0], amount: refundamount }, function (err, template) {
+            if (err) {
+                res.json({ status: "error", message: err.message })
+            } else {
+                const mailOptions = {
+                    from: process.env.emailuser,
+                    to: `${user.email}`,
+                    subject: `Booking Cancellation, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+                    html: template
+                }
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        return res.json({ status: "error", message: 'Failed to send email', redirect: "/" });
+                    } else {
+                        return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+                    }
+                })
+            }
+        })
     }
 })
 
