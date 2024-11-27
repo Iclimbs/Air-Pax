@@ -425,6 +425,7 @@ ReportRouter.post("/group/day/custom", async (req, res) => {
 
     let start;
     let end;
+
     const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
@@ -552,9 +553,11 @@ ReportRouter.post("/group/platform/custom", async (req, res) => {
             $sort: { totalBookings: -1 }
         }
     ]);
-    console.log(result);
-    res.json("testing")
-
+    if (result.length > 0) {
+        res.json({ status: "success", data: result })
+    } else {
+        res.json({ status: "error", message: "No Data Found For Following Month" })
+    }
 })
 
 
