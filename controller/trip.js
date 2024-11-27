@@ -16,7 +16,7 @@ function timeToMinutes(timeStr) {
 tripRouter.post("/add", async (req, res) => {
     const { name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, distance, price, totalseats, totaltime, conductor, driver, foodavailability } = req.body;
     try {
-        const newtrip = new TripModel({ name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, totaltime, price, distance, totalseats, bookedseats: 0, availableseats: totalseats, conductor, driver, foodavailability })
+        const newtrip = new TripModel({ name, from, to, busid, journeystartdate, journeyenddate, starttime, endtime, totaltime, price, distance, totalseats, bookedseats: 0, availableseats: totalseats, conductor, driver, foodavailability, "driverdetails.LogIn": "00:00", "driverdetails.LogOut": "00:00", "driverdetails.fuel": 0, "driverdetails.maintenance": 0, "conductordetails.LogIn": "00:00", "conductordetails.LogOut": "00:00", "conductordetails.fuel": 0, "conductordetails.fuelCost": 0 })
         await newtrip.save()
         res.json({ status: "success", message: "Successfully Addeded A New Trip" })
     } catch (error) {
@@ -164,7 +164,7 @@ tripRouter.get("/assigned/conductor", AdminAuthentication, async (req, res) => {
         if (trip.length > 0) {
             res.json({ status: "success", data: trip })
         } else {
-            res.json({ status: "error", message:'No Upcoming Trip Assigned To This Conductor' })
+            res.json({ status: "error", message: 'No Upcoming Trip Assigned To This Conductor' })
 
         }
     } catch (error) {
@@ -187,11 +187,47 @@ tripRouter.get("/assigned/driver", AdminAuthentication, async (req, res) => {
         if (trip.length > 0) {
             res.json({ status: "success", data: trip })
         } else {
-            res.json({ status: "error", message:'No Upcoming Trip Assigned To This Driver' })
+            res.json({ status: "error", message: 'No Upcoming Trip Assigned To This Driver' })
 
         }
     } catch (error) {
         res.json({ status: "error", message: `Failed To Get List ${error.message}` })
+    }
+})
+
+tripRouter.patch("/update/driver/details", AdminAuthentication, async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    const decoded = jwt.verify(token, 'Authorization')
+    const { id, LogIn, LogOut, fuel, maintenance } = req.body
+
+    try {
+        const trip = await TripModel.find({ _id: id, driver: decoded._id })
+        trip[0].driverdetails.LogIn = LogIn;
+        trip[0].driverdetails.LogOut = LogOut;
+        trip[0].driverdetails.fuel = fuel;
+        trip[0].driverdetails.maintenance = maintenance;
+        await trip[0].save()
+        res.json({ status: "success", message: " Trip Details Successfully Updated !!" })
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update  Trip  Details ${error.message}` })
+    }
+})
+
+tripRouter.patch("/update/conductor/details", async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1]
+    const decoded = jwt.verify(token, 'Authorization')
+    const { id, LogIn, LogOut, fuel, fuelCost } = req.body
+
+    try {
+        const trip = await TripModel.find({ _id: id, conductor: decoded._id })
+        trip[0].conductordetails.LogIn = LogIn;
+        trip[0].conductordetails.LogOut = LogOut;
+        trip[0].conductordetails.fuel = fuel;
+        trip[0].conductordetails.fuelCost = fuelCost;
+        await trip[0].save()
+        res.json({ status: "success", message: " Trip Details Successfully Updated !!" })
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update  Trip  Details ${error.message}` })
     }
 })
 

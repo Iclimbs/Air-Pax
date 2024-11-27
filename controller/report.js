@@ -319,39 +319,43 @@ ReportRouter.post("/sales/custom", async (req, res) => {
         start = new Date(from);
         start.setHours(0, 0, 0, 0); // Start of the day
     }
-
-    const result = await SeatModel.aggregate([
-        {
-            $match: {
-                CreatedAt: { $gte: start, $lte: end },
-                "details.status": status
+    try {
+        const result = await SeatModel.aggregate([
+            {
+                $match: {
+                    CreatedAt: { $gte: start, $lte: end },
+                    "details.status": status
+                },
             },
-        },
-        {
-            $group: {
-                _id: { $dateToString: { format: "%Y-%m-%d", date: "$CreatedAt" } }, // Group by day
-                totalSum: { $sum: "$details.amount" }, // Calculate the sum of the 'price' field
-                records: {
-                    $push: {
-                        name: { $concat: ["$details.fname", " ", "$details.lname"] }, // Combine first and last name
-                        age: "$details.age", // Include age
-                        email: "$details.email", // Assuming "bookedby" is used as email (modify if needed)
-                        gender: "$details.gender", // Include gender
-                        amount: "$details.amount", // Include amount
-                        mobileno: "$details.mobileno"
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$CreatedAt" } }, // Group by day
+                    totalSum: { $sum: "$details.amount" }, // Calculate the sum of the 'price' field
+                    records: {
+                        $push: {
+                            name: { $concat: ["$details.fname", " ", "$details.lname"] }, // Combine first and last name
+                            age: "$details.age", // Include age
+                            email: "$details.email", // Assuming "bookedby" is used as email (modify if needed)
+                            gender: "$details.gender", // Include gender
+                            amount: "$details.amount", // Include amount
+                            mobileno: "$details.mobileno"
+                        }
                     }
-                }
 
+                },
             },
-        },
-        { $sort: { _id: 1 } }, // Sort by date in ascending order
+            { $sort: { _id: 1 } }, // Sort by date in ascending order
 
-    ]);
-    if (result.length > 0) {
-        res.json({ status: "success", data: result })
-    } else {
-        res.json({ status: "error", message: "No Data Found For Following Month" })
+        ]);
+        if (result.length > 0) {
+            res.json({ status: "success", data: result })
+        } else {
+            res.json({ status: "error", message: "No Data Found For Following Month" })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found ${error.message}` })
     }
+
 })
 
 ReportRouter.post("/group/age/custom", async (req, res) => {
@@ -379,43 +383,46 @@ ReportRouter.post("/group/age/custom", async (req, res) => {
         start = new Date(from);
         start.setHours(0, 0, 0, 0); // Start of the day
     }
+    try {
 
-    const result = await SeatModel.aggregate([
-        {
-            $match: {
-                CreatedAt: { $gte: start, $lte: end },
-                "details.status": status
-            }
-        },
-        {
-            $bucket: {
-                groupBy: "$details.age", // Field to group by
-                boundaries: [0, 18, 60, 100], // Define age groups: 0-17, 18-29, 30-49, 50+
-                default: "Other", // Catch-all for out-of-bound ages
-                output: {
-                    ticketsCount: { $sum: 1 }, // Count tickets in each group
-                    totalAmount: { $sum: "$details.amount" }, // Sum the ticket prices for each group
-                    records: {
-                        $push: {
-                            name: { $concat: ["$details.fname", " ", "$details.lname"] }, // Combine first and last name
-                            age: "$details.age", // Include age
-                            email: "$details.email", // Assuming "bookedby" is used as email (modify if needed)
-                            gender: "$details.gender", // Include gender
-                            amount: "$details.amount", // Include amount
-                            mobileno: "$details.mobileno"
-                        }
-                    }
-
-                },
+        const result = await SeatModel.aggregate([
+            {
+                $match: {
+                    CreatedAt: { $gte: start, $lte: end },
+                    "details.status": status
+                }
             },
-        }
-    ]);
-    if (result.length > 0) {
-        res.json({ status: "success", data: result })
-    } else {
-        res.json({ status: "error", message: "No Data Found For Following Month" })
-    }
+            {
+                $bucket: {
+                    groupBy: "$details.age", // Field to group by
+                    boundaries: [0, 18, 60, 100], // Define age groups: 0-17, 18-29, 30-49, 50+
+                    default: "Other", // Catch-all for out-of-bound ages
+                    output: {
+                        ticketsCount: { $sum: 1 }, // Count tickets in each group
+                        totalAmount: { $sum: "$details.amount" }, // Sum the ticket prices for each group
+                        records: {
+                            $push: {
+                                name: { $concat: ["$details.fname", " ", "$details.lname"] }, // Combine first and last name
+                                age: "$details.age", // Include age
+                                email: "$details.email", // Assuming "bookedby" is used as email (modify if needed)
+                                gender: "$details.gender", // Include gender
+                                amount: "$details.amount", // Include amount
+                                mobileno: "$details.mobileno"
+                            }
+                        }
 
+                    },
+                },
+            }
+        ]);
+        if (result.length > 0) {
+            res.json({ status: "success", data: result })
+        } else {
+            res.json({ status: "error", message: "No Data Found For Following Month" })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found ${error.message}` })
+    }
 })
 
 ReportRouter.post("/group/day/custom", async (req, res) => {
@@ -442,50 +449,54 @@ ReportRouter.post("/group/day/custom", async (req, res) => {
         start = new Date(from);
         start.setHours(0, 0, 0, 0); // Start of the day
     }
-
-    const result = await SeatModel.aggregate([
-        {
-            $match: {
-                CreatedAt: { $gte: start, $lte: end },
-                "details.status": status
-            }
-        },
-        {
-            $addFields: {
-                dayName: {
-                    $switch: {
-                        branches: [
-                            { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 1] }, then: "Sunday" },
-                            { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 2] }, then: "Monday" },
-                            { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 3] }, then: "Tuesday" },
-                            { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 4] }, then: "Wednesday" },
-                            { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 5] }, then: "Thursday" },
-                            { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 6] }, then: "Friday" },
-                            { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 7] }, then: "Saturday" }
-                        ],
-                        default: "Unknown"
+    try {
+        const result = await SeatModel.aggregate([
+            {
+                $match: {
+                    CreatedAt: { $gte: start, $lte: end },
+                    "details.status": status
+                }
+            },
+            {
+                $addFields: {
+                    dayName: {
+                        $switch: {
+                            branches: [
+                                { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 1] }, then: "Sunday" },
+                                { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 2] }, then: "Monday" },
+                                { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 3] }, then: "Tuesday" },
+                                { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 4] }, then: "Wednesday" },
+                                { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 5] }, then: "Thursday" },
+                                { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 6] }, then: "Friday" },
+                                { case: { $eq: [{ $dayOfWeek: "$CreatedAt" }, 7] }, then: "Saturday" }
+                            ],
+                            default: "Unknown"
+                        }
                     }
                 }
-            }
-        },
-        // Step 2: Group by day name and count the total bookings for each day
-        {
-            $group: {
-                _id: "$dayName",
-                count: { $sum: 1 }, // Count total bookings
-                totalAmount: { $sum: "$details.amount" } // Sum the ticket amounts
+            },
+            // Step 2: Group by day name and count the total bookings for each day
+            {
+                $group: {
+                    _id: "$dayName",
+                    count: { $sum: 1 }, // Count total bookings
+                    totalAmount: { $sum: "$details.amount" } // Sum the ticket amounts
 
+                }
+            },
+            // Step 3: Sort by day name in ascending order (or by count if desired)
+            {
+                $sort: { _id: 1 } // Alphabetical order of days
             }
-        },
-        // Step 3: Sort by day name in ascending order (or by count if desired)
-        {
-            $sort: { _id: 1 } // Alphabetical order of days
+        ])
+        if (result.length > 0) {
+            res.json({ status: "success", data: result })
+        } else {
+            res.json({ status: "error", message: "No Data Found For Following Month" })
         }
-    ])
-    if (result.length > 0) {
-        res.json({ status: "success", data: result })
-    } else {
-        res.json({ status: "error", message: "No Data Found For Following Month" })
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found ${error.message}` })
+
     }
 })
 
@@ -513,62 +524,65 @@ ReportRouter.post("/group/platform/custom", async (req, res) => {
         start.setHours(0, 0, 0, 0); // Start of the day
     }
 
-    const result = await SeatModel.aggregate([
-        // Step 1: Match by Ticket Status & Start & End Time 
-        {
-            $match: {
-                CreatedAt: { $gte: start, $lte: end },
-                "details.status": status
-            }
-        },
-
-        // Step 1: Group by platform and count the bookings
-        {
-            $group: {
-                _id: "$platform",
-                totalBookings: { $sum: 1 }
-            }
-        },
-        // Step 2: Calculate the total number of bookings across all platforms
-        {
-            $group: {
-                _id: null,
-                platforms: { $push: { platform: "$_id", totalBookings: "$totalBookings" } },
-                totalSales: { $sum: "$totalBookings" }
-            }
-        },
-        // Step 3: Calculate the percentage contribution for each platform
-        {
-            $unwind: "$platforms"
-        },
-        {
-            $project: {
-                _id: "$platforms.platform",
-                totalBookings: "$platforms.totalBookings",
-                percentage: {
-                    $multiply: [{ $divide: ["$platforms.totalBookings", "$totalSales"] }, 100]
+    try {
+        const result = await SeatModel.aggregate([
+            // Step 1: Match by Ticket Status & Start & End Time 
+            {
+                $match: {
+                    CreatedAt: { $gte: start, $lte: end },
+                    "details.status": status
                 }
+            },
+
+            // Step 1: Group by platform and count the bookings
+            {
+                $group: {
+                    _id: "$platform",
+                    totalBookings: { $sum: 1 }
+                }
+            },
+            // Step 2: Calculate the total number of bookings across all platforms
+            {
+                $group: {
+                    _id: null,
+                    platforms: { $push: { platform: "$_id", totalBookings: "$totalBookings" } },
+                    totalSales: { $sum: "$totalBookings" }
+                }
+            },
+            // Step 3: Calculate the percentage contribution for each platform
+            {
+                $unwind: "$platforms"
+            },
+            {
+                $project: {
+                    _id: "$platforms.platform",
+                    totalBookings: "$platforms.totalBookings",
+                    percentage: {
+                        $multiply: [{ $divide: ["$platforms.totalBookings", "$totalSales"] }, 100]
+                    }
+                }
+            },
+            // Step 4: Sort by total bookings
+            {
+                $sort: { totalBookings: -1 }
             }
-        },
-        // Step 4: Sort by total bookings
-        {
-            $sort: { totalBookings: -1 }
+        ]);
+        if (result.length > 0) {
+            res.json({ status: "success", data: result })
+        } else {
+            res.json({ status: "error", message: "No Data Found For Following Month" })
         }
-    ]);
-    if (result.length > 0) {
-        res.json({ status: "success", data: result })
-    } else {
-        res.json({ status: "error", message: "No Data Found For Following Month" })
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found ${error.message}` })
+
     }
+
 })
 
 
 ReportRouter.post("/group/utilisation/trip", async (req, res) => {
 
     const { from, to, monthname, startdate, enddate } = req.body;
-    console.log(req.body);
-
-
     const now = new Date();
 
     let start;
@@ -585,49 +599,51 @@ ReportRouter.post("/group/utilisation/trip", async (req, res) => {
 
     if (startdate && enddate) {
         end = new Date(enddate);
-        end.setHours(23, 59, 59, 999); // End of today
         start = new Date(startdate);
-        start.setHours(0, 0, 0, 0); // Start of the day
     }
-    const result = await TripModel.aggregate([
-        {
-            $addFields: {
-                parsedDate: { $toDate: "$journeystartdate" } // Convert string to Date
-            }
-        },
-        {
-            $match: {
-                parsedDate: {
-                    $gte: new Date(startdate), // Start of range
-                    $lte: new Date(enddate)  // End of range
-                },
-                from: from,
-                to: to
-            }
-        },
-        // Step 1: Project relevant fields and calculate capacity utilization
-        {
-            $project: {
-                name:1,
-                journeystartdate:1,
-                tripId: 1, // Assuming each trip has a unique identifier field
-                totalseats: 1, // Total seats available for the trip
-                bookedseats: 1, // Number of seats booked for the trip
-                capacityUtilization: {
-                    $cond: {
-                        if: { $gt: ["$totalseats", 0] }, // Ensure totalSeats > 0 to avoid division by zero
-                        then: { $multiply: [{ $divide: ["$bookedseats", "$totalseats"] }, 100] }, // Calculate utilization as a percentage
-                        else: 0
+    try {
+        const result = await TripModel.aggregate([
+            {
+                $addFields: {
+                    parsedDate: { $toDate: "$journeystartdate" } // Convert string to Date
+                }
+            },
+            {
+                $match: {
+                    parsedDate: {
+                        $gte: new Date(start), // Start of range
+                        $lte: new Date(end)  // End of range
+                    },
+                    from: from,
+                    to: to
+                }
+            },
+            // Step 1: Project relevant fields and calculate capacity utilization
+            {
+                $project: {
+                    name: 1,
+                    journeystartdate: 1,
+                    tripId: 1, // Assuming each trip has a unique identifier field
+                    totalseats: 1, // Total seats available for the trip
+                    bookedseats: 1, // Number of seats booked for the trip
+                    capacityUtilization: {
+                        $cond: {
+                            if: { $gt: ["$totalseats", 0] }, // Ensure totalSeats > 0 to avoid division by zero
+                            then: { $multiply: [{ $divide: ["$bookedseats", "$totalseats"] }, 100] }, // Calculate utilization as a percentage
+                            else: 0
+                        }
                     }
                 }
-            }
-        },
-        // Step 2: Sort trips by capacity utilization in descending order (optional)
-        // {
-        //     $sort: { capacityUtilization: -1 }
-        // }
-    ])
-    res.json(result)
+            },
+        ])
+        if (result.length > 0) {
+            res.json({ status: "success", data: result })
+        } else {
+            res.json({ status: "error", message: "No Data Found For Following Parameters" })
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Error Found ${error.message}` })
+    }
 })
 
 module.exports = { ReportRouter }

@@ -2,16 +2,17 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const ConductorSchema = new Schema({
-    LogIn: { type: Date },
-    LogOut: { type: Date },
-    fuel: { type: Number },
-    fuelCost: { type: Number }
+    LogIn: { type: String, default: "00:00" },
+    LogOut: { type: String, default: "00:00" },
+    fuel: { type: Number, default: 0 },
+    fuelCost: { type: Number, default: 0 }
 })
 
 const DriverSchema = new Schema({
-    LogIn: { type: Date },
-    LogOut: { type: Date },
-    maintenance: { type: Number },
+    LogIn: { type: String, default: "00:00" },
+    LogOut: { type: String, default: "00:00" },
+    fuel: { type: Number, default: 0 },
+    maintenance: { type: Number,default:0 }
 })
 
 
