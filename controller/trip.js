@@ -117,10 +117,10 @@ tripRouter.get("/detailone/:id", async (req, res) => {
 
         // Seat's Which are already booked & Payment is completed
         let bookedseats = trips[0].seatsbooked;
-        
+
         // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
         let lockedseats = [];
-        
+
         for (let index = 0; index < seats.length; index++) {
             if (seats[index].details.status == "Pending") {
                 lockedseats.push(seats[index].seatNumber)
@@ -128,7 +128,7 @@ tripRouter.get("/detailone/:id", async (req, res) => {
         }
 
         let currentseat = bookedseats.concat(lockedseats)
-    
+
         trips[0].facilities = vehicle[0].facilities
 
         trips[0].seatsbooked = currentseat
@@ -159,26 +159,39 @@ tripRouter.get("/assigned/conductor", AdminAuthentication, async (req, res) => {
     const year = dateObj.getUTCFullYear();
     const newDate = year + "-" + month + "-" + day;
 
-
-
     try {
         const trip = await TripModel.find({ journeystartdate: { $gte: newDate }, conductor: decoded._id })
-        res.json({ status: "success", data: trip })
+        if (trip.length > 0) {
+            res.json({ status: "success", data: trip })
+        } else {
+            res.json({ status: "error", message:'No Upcoming Trip Assigned To This Conductor' })
+
+        }
     } catch (error) {
-        res.json({ status: "error", message: "Failed To Get User List" })
+        res.json({ status: "error", message: `Failed To Get List ${error.message}` })
     }
 })
 
 tripRouter.get("/assigned/driver", AdminAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = jwt.verify(token, 'Authorization')
-    try {
-        const trip = await TripModel.find({ driver: decoded._id })
-        res.json({ status: "success", data: trip })
-    } catch (error) {
-        console.log(error.message);
+    const dateObj = new Date();
+    // Creating Date
+    const month = (dateObj.getUTCMonth() + 1) < 10 ? String(dateObj.getUTCMonth() + 1).padStart(2, '0') : dateObj.getUTCMonth() + 1 // months from 1-12
+    const day = dateObj.getUTCDate() < 10 ? String(dateObj.getUTCDate()).padStart(2, '0') : dateObj.getUTCDate()
+    const year = dateObj.getUTCFullYear();
+    const newDate = year + "-" + month + "-" + day;
 
-        res.json({ status: "error", message: "Failed To Get User List" })
+    try {
+        const trip = await TripModel.find({ journeystartdate: { $gte: newDate }, driver: decoded._id })
+        if (trip.length > 0) {
+            res.json({ status: "success", data: trip })
+        } else {
+            res.json({ status: "error", message:'No Upcoming Trip Assigned To This Driver' })
+
+        }
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Get List ${error.message}` })
     }
 })
 
