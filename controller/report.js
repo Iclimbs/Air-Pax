@@ -497,6 +497,9 @@ ReportRouter.post("/group/platform/custom", async (req, res) => {
     let start;
     let end;
 
+    const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+
     if (monthname) {
         const monthindex = month.indexOf(monthname)
         start = new Date(now.getFullYear(), monthindex, 1);
@@ -560,33 +563,71 @@ ReportRouter.post("/group/platform/custom", async (req, res) => {
 })
 
 
-ReportRouter.get("/group/utilisation/trip",async(req,res)=>{
+ReportRouter.post("/group/utilisation/trip", async (req, res) => {
+
+    const { from, to, monthname, startdate, enddate } = req.body;
+    console.log(req.body);
+
+
+    const now = new Date();
+
+    let start;
+    let end;
+
+    const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+
+    if (monthname) {
+        const monthindex = month.indexOf(monthname)
+        start = new Date(now.getFullYear(), monthindex, 1);
+        end = new Date(now.getFullYear(), monthindex + 1, 0);
+    }
+
+    if (startdate && enddate) {
+        end = new Date(enddate);
+        end.setHours(23, 59, 59, 999); // End of today
+        start = new Date(startdate);
+        start.setHours(0, 0, 0, 0); // Start of the day
+    }
     const result = await TripModel.aggregate([
+        {
+            $addFields: {
+                parsedDate: { $toDate: "$journeystartdate" } // Convert string to Date
+            }
+        },
+        {
+            $match: {
+                parsedDate: {
+                    $gte: new Date(startdate), // Start of range
+                    $lte: new Date(enddate)  // End of range
+                },
+                from: from,
+                to: to
+            }
+        },
         // Step 1: Project relevant fields and calculate capacity utilization
         {
-          $project: {
-            tripId: 1, // Assuming each trip has a unique identifier field
-            totalseats: 1, // Total seats available for the trip
-            bookedseats: 1, // Number of seats booked for the trip
-            capacityUtilization: {
-              $cond: {
-                if: { $gt: ["$totalseats", 0] }, // Ensure totalSeats > 0 to avoid division by zero
-                then: { $multiply: [{ $divide: ["$bookedseats", "$totalseats"] }, 100] }, // Calculate utilization as a percentage
-                else: 0
-              }
+            $project: {
+                name:1,
+                journeystartdate:1,
+                tripId: 1, // Assuming each trip has a unique identifier field
+                totalseats: 1, // Total seats available for the trip
+                bookedseats: 1, // Number of seats booked for the trip
+                capacityUtilization: {
+                    $cond: {
+                        if: { $gt: ["$totalseats", 0] }, // Ensure totalSeats > 0 to avoid division by zero
+                        then: { $multiply: [{ $divide: ["$bookedseats", "$totalseats"] }, 100] }, // Calculate utilization as a percentage
+                        else: 0
+                    }
+                }
             }
-          }
         },
         // Step 2: Sort trips by capacity utilization in descending order (optional)
-        {
-          $sort: { capacityUtilization: -1 }
-        }
-      ]);
-         
-      console.log(result);
-      res.json(result)
-      
-      
+        // {
+        //     $sort: { capacityUtilization: -1 }
+        // }
+    ])
+    res.json(result)
 })
 
 module.exports = { ReportRouter }
