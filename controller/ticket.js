@@ -69,6 +69,9 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
     let newseats = bookedseats.filter(seat => !cancelticket.includes(seat));
 
     tripdetails[0].seatsbooked = newseats;
+    tripdetails[0].bookedseats = newseats.length;
+    tripdetails[0].availableseats = tripdetails[0].totalseats - newseats.length
+
     try {
         await tripdetails[0].save()
     } catch (error) {
