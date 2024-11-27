@@ -584,7 +584,7 @@ ReportRouter.get("/group/utilisation/trip",async(req,res)=>{
       ]);
          
       console.log(result);
-      res.json("testing")
+      res.json(result)
       
       
 })
