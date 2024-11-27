@@ -202,6 +202,9 @@ tripRouter.patch("/update/driver/details", AdminAuthentication, async (req, res)
 
     try {
         const trip = await TripModel.find({ _id: id, driver: decoded._id })
+        if (trip.length === 0) {
+            res.json({ status: "error", message: "No Trip Found With This ID !!" })
+        }
         trip[0].driverdetails.LogIn = LogIn;
         trip[0].driverdetails.LogOut = LogOut;
         trip[0].driverdetails.fuel = fuel;
@@ -220,6 +223,9 @@ tripRouter.patch("/update/conductor/details", async (req, res) => {
 
     try {
         const trip = await TripModel.find({ _id: id, conductor: decoded._id })
+        if (trip.length === 0) {
+            res.json({ status: "error", message: "No Trip Found With This ID !!" })
+        }
         trip[0].conductordetails.LogIn = LogIn;
         trip[0].conductordetails.LogOut = LogOut;
         trip[0].conductordetails.fuel = fuel;
