@@ -471,7 +471,9 @@ ReportRouter.post("/group/day/custom", async (req, res) => {
         {
             $group: {
                 _id: "$dayName",
-                count: { $sum: 1 } // Count total bookings
+                count: { $sum: 1 }, // Count total bookings
+                totalAmount: { $sum: "$details.amount" } // Sum the ticket amounts
+
             }
         },
         // Step 3: Sort by day name in ascending order (or by count if desired)
