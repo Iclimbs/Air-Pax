@@ -503,69 +503,60 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
     tripdetails[0].bookedseats = newseats.length;
     tripdetails[0].availableseats = tripdetails[0].totalseats - newseats.length
     tripdetails[0].seatsbooked = newseats;
-
-    console.log("trip details ",tripdetails[0]);
     
-    
-    // try {
-    //     await tripdetails[0].save()
-    // } catch (error) {
-    //     return res.json({ status: "error", message: "Ticket Cancellation Process Failed " })
-    // }
+    try {
+        await tripdetails[0].save()
+    } catch (error) {
+        return res.json({ status: "error", message: "Ticket Cancellation Process Failed " })
+    }
 
-    // // Getting Payment Details of the Pnr To Change detail's like staus & refund amount 
-    // const paymentdetails = await PaymentModel.find({ pnr: pnr })
-    // if (paymentdetails[0].paymentstatus === "Failed") {
-    //     return res.json({ status: "error", message: "Ticket Cancellation Process Failed !! Payment is Not Confirmed For This Pnr" })
-    // } else {
-    //     let refundamount = 0;
-    //     // let ticketcost = 0;
-    //     const timeDifferenceMs = journeytime - currentDateTime
-    //     const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+    // Getting Payment Details of the Pnr To Change detail's like staus & refund amount 
+    const paymentdetails = await PaymentModel.find({ pnr: pnr })
+    if (paymentdetails[0].paymentstatus === "Failed") {
+        return res.json({ status: "error", message: "Ticket Cancellation Process Failed !! Payment is Not Confirmed For This Pnr" })
+    } else {
+        let refundamount = 0;
+        // let ticketcost = 0;
+        const timeDifferenceMs = journeytime - currentDateTime
+        const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
 
-    //     if (timeDifferenceHours > 48) {
-    //         refundamount = Math.floor((totalamount) * 0.9)
+        if (timeDifferenceHours > 48) {
+            refundamount = Math.floor((totalamount) * 0.9)
 
-    //     } else if (timeDifferenceHours > 24) {
-    //         refundamount = Math.floor((totalamount) * 0.5)
-    //     }
-    //     try {
-    //         paymentdetails[0].refundamount = refundamount;
-    //         paymentdetails[0].paymentstatus = "Refunded";
-    //         paymentdetails[0].refundreason = reasonForCancellation
-    //         await paymentdetails[0].save()
-    //     } catch (error) {
-    //         return res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
-    //     }
-    // }
-
-    // const userdetails = await UserModel.find({ _id: bookingdetails[0].userid })
-
-    res.json("testing")
-    // let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
-    // ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
-    //     if (err) {
-    //         res.json({ status: "error", message: err.message })
-    //     } else {
-    //         const mailOptions = {
-    //             from: process.env.emailuser,
-    //             to: `${userdetails[0].email}`,
-    //             subject: `Booking Cancellation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
-    //             html: template
-    //         }
-    //         transporter.sendMail(mailOptions, (error, info) => {
-    //             if (error) {
-    //                 console.log("Error in Sending Mail ", error.message);
-    //                 return res.json({ status: "error", message: 'Failed to send email' });
-    //             } else {
-    //                 console.log("Email Sent ", info);
-    //                 return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
-    //             }
-    //         })
-    //     }
-    // })
-
-
+        } else if (timeDifferenceHours > 24) {
+            refundamount = Math.floor((totalamount) * 0.5)
+        }
+        try {
+            paymentdetails[0].refundamount = refundamount;
+            paymentdetails[0].paymentstatus = "Refunded";
+            paymentdetails[0].refundreason = reasonForCancellation
+            await paymentdetails[0].save()
+        } catch (error) {
+            return res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
+        }
+    }
+    let cancelTicket = path.join(__dirname, "../emailtemplate/guestcancelTicket.ejs")
+    ejs.renderFile(cancelTicket, { user:"Sir/Madam", seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
+        if (err) {
+            res.json({ status: "error", message: err.message })
+        } else {
+            const mailOptions = {
+                from: process.env.emailuser,
+                to: `${emails}`,
+                subject: `Booking Cancellation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+                html: template
+            }
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log("Error in Sending Mail ", error.message);
+                    return res.json({ status: "error", message: 'Failed to send email' });
+                } else {
+                    console.log("Email Sent ", info);
+                    return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+                }
+            })
+        }
+    })
 })
 
 
