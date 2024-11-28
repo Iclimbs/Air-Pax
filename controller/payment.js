@@ -25,7 +25,7 @@ PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
     }
     // Get All Emails 
 
-    const bookedSeats = await SeatModel.find({ pnr: pnr })
+    const bookedSeats = await SeatModel.find({ pnr: pnr, "details.status": "Confirmed" })
 
     for (let index = 0; index < bookedSeats.length; index++) {
         if (emails.includes(bookedSeats[index].details?.email) === false) {
@@ -126,18 +126,33 @@ PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
 
 
 PaymentRouter.get("/failure/:pnr/:ref_no/:mode", async (req, res) => {
-    const { pnr, ref_no, mode } = req.params
+    const { pnr, ref_no, mode } = req.params;
     const filter = { pnr: pnr };
     const update = {
         $set: { isBooked: true, expireAt: null, "details.status": "Failed" }
     }
-    // set status field
     // Step 1 Getting The list of all the seat's with this PNR & Updating their status
     try {
         const seat = await SeatModel.updateMany(filter, update);
     } catch (error) {
-        res.json({ status: "error", message: `Failed To Update Seat Status ${error.message}` })
+        return res.json({ status: "error", message: `Failed To Update Seat Status ${error.message}` })
     }
+
+    let emails = [];
+    let tripId;
+
+    const bookedSeats = await SeatModel.find({ pnr: pnr, "details.status": "Failed" })
+    if (bookedSeats.length !== 0) {
+        tripId = bookedSeats[0].tripId;
+    }
+    for (let index = 0; index < bookedSeats.length; index++) {
+        if (emails.includes(bookedSeats[index].details?.email) === false) {
+            emails.push(bookedSeats[index].details.email)
+        }
+    }
+
+    const tripdetails = await TripModel.find({ _id: tripId })
+
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
     paymentdetails[0].paymentstatus = "Failed";
@@ -146,9 +161,30 @@ PaymentRouter.get("/failure/:pnr/:ref_no/:mode", async (req, res) => {
     try {
         await paymentdetails[0].save()
     } catch (error) {
-        res.json({ status: "error", message: `Failed To Update Payment  Status ${error.message}` })
+        return res.json({ status: "error", message: `Failed To Update Payment  Status ${error.message}` })
     }
-    res.json({ status: "success", message: "Ticket Booking Failed !!" })
+    let failedpayment = path.join(__dirname, "../emailtemplate/failedpayment.ejs")
+    ejs.renderFile(failedpayment, { user: "Sir/Madam", seat: bookedSeats, trip: tripdetails[0], payment: paymentdetails[0] }, function (err, template) {
+        if (err) {
+            res.json({ status: "error", message: err.message })
+        } else {
+            const mailOptions = {
+                from: process.env.emailuser,
+                to: `${emails}`,
+                subject: `Booking Failed on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+                html: template
+            }
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log("Error in Sending Mail ", error.message);
+                    return res.json({ status: "error", message: 'Failed to send email' });
+                } else {
+                    console.log("Email Sent ", info);
+                    return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+                }
+            })
+        }
+    })
 })
 
 
