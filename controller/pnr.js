@@ -62,13 +62,12 @@ PnrRouter.get("/guest", async (req, res) => {
     }
 
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
-
     const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
 
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
     }
-    details.tripId = tripdetails[0].tripId
+    details.tripId = tripdetails[0]._id
     details.from = tripdetails[0].from;
     details.to = tripdetails[0].to;
     details.journeystartdate = tripdetails[0].journeystartdate;

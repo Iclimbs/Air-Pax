@@ -11,6 +11,9 @@ const { BookingModel } = require("../model/booking.model");
 const { UserAuthentication } = require("../middleware/Authentication");
 const { UserModel } = require("../model/user.model");
 const { transporter } = require('../service/transporter');
+const { OtpModel } = require("../model/otp.model");
+const otpGenerator = require('otp-generator')
+
 
 
 TicketRouter.post("/gmr/cancel", async (req, res) => {
@@ -41,7 +44,7 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
     }
 
     // Changing Seat Status in Seat Model     
-    const seatdetails = await SeatModel.find({ pnr: pnr, tripId: tripId })    
+    const seatdetails = await SeatModel.find({ pnr: pnr, tripId: tripId })
 
     let bulkwriteseat = []
     for (let index = 0; index < seatdetails.length; index++) {
@@ -131,7 +134,7 @@ TicketRouter.post("/gmr/cancel", async (req, res) => {
 
 // Get the List of Upcoming Tickets For the User
 
-TicketRouter.get("/history",UserAuthentication, async (req, res) => {
+TicketRouter.get("/history", UserAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     try {
         if (!token) {
@@ -159,7 +162,7 @@ TicketRouter.get("/history",UserAuthentication, async (req, res) => {
     }
 })
 
-TicketRouter.get("/upcoming",UserAuthentication, async (req, res) => {
+TicketRouter.get("/upcoming", UserAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     try {
         if (!token) {
@@ -321,5 +324,58 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     })
 })
 
+
+TicketRouter.post("/otp/generate", async (req, res) => {
+    const { pnr, tripId, seatNumbers } = req.body
+
+    let alreadyCreatedOtp = false;
+    let allconfirmed = true;
+    let seats = []
+    const otpExists = await OtpModel.find({ pnr: pnr, tripId: tripId })
+
+
+    if (otpExists) {
+        for (let index = 0; index < otpExists.length; index++) {
+            seats.push(...otpExists[index].seatNumbers)
+        }
+    }
+
+    const hasCommonValues = seatNumbers.some(value => seats.includes(value));
+    if (hasCommonValues) {
+        res.json({ status: "error", message: `Otp Already Generated For Following Seat which Assigned To Following PNR. Please Try After Some Time !!` })
+    }
+    try {
+        const newOtp = new OtpModel({
+            pnr, tripId, seatNumbers, otp: otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false }),
+            expireAt: Date.now() + 5 * 60 * 1000, // Lock for 5 minutes
+        })
+        await newOtp.save()
+    } catch (error) {
+        res.json({ status: "error", message: `Unable To Generate New OTP For Ticket Management of Guest ${error.message}` })
+    }
+
+    // let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
+    // ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
+    //     if (err) {
+    //         res.json({ status: "error", message: err.message })
+    //     } else {
+    //         const mailOptions = {
+    //             from: process.env.emailuser,
+    //             to: `${userdetails[0].email}`,
+    //             subject: `Booking Cancellation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+    //             html: template
+    //         }
+    //         transporter.sendMail(mailOptions, (error, info) => {
+    //             if (error) {
+    //                 console.log("Error in Sending Mail ", error.message);
+    //                 return res.json({ status: "error", message: 'Failed to send email' });
+    //             } else {
+    //                 console.log("Email Sent ", info);
+    //                 return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+    //             }
+    //         })
+    //     }
+    // })
+})
 
 module.exports = { TicketRouter } 
