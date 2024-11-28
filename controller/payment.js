@@ -12,6 +12,7 @@ const PaymentRouter = express.Router()
 
 PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
     const { pnr, ref_no, mode } = req.params
+    let emails = [];
     const filter = { pnr: pnr };
     const update = {
         $set: { isBooked: true, expireAt: null, "details.status": "Confirmed" }
@@ -22,6 +23,16 @@ PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update Seat Status ${error.message}` })
     }
+    // Get All Emails 
+
+    const bookedSeats = await SeatModel.find({ pnr: pnr })
+
+    for (let index = 0; index < bookedSeats.length; index++) {
+        if (emails.includes(bookedSeats[index].details?.email) === false) {
+            emails.push(bookedSeats[index].details.email)
+        }
+    }
+
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
 
@@ -96,6 +107,7 @@ PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
             const mailOptions = {
                 from: process.env.emailuser,
                 to: `${userdetails[0].email}`,
+                cc: `${emails}`,
                 subject: `Booking Confirmation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
                 html: template
             }
