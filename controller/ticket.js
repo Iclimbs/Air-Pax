@@ -420,7 +420,7 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
     const bookedSeats = await SeatModel.find({ pnr: pnr, tripId: tripId, seatNumber: { $in: seatNumbers }, "details.status": "Confirmed" })
 
     if (bookedSeats.length === 0) {
-        res.json({ status: "error", message: `NO Confirmed Seat Found Which Is Assigned To Following PNR OR TRIPID !!` })
+        return res.json({ status: "error", message: `NO Confirmed Seat Found Which Is Assigned To Following PNR OR TRIPID !!` })
     }
 
 
@@ -446,7 +446,7 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
         bookingdetails[0].status = bookingstatus
         await bookingdetails[0].save()
     } catch (error) {
-        res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
+        return    res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
     }
 
     // Update Payment Details 
@@ -461,17 +461,17 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
     let seatstoberemoved = [];
     let cancelledSeats = [];
 
-    
-    
-    
+
+
+
     for (let index = 0; index < seatdetails.length; index++) {
         for (let i = 0; i < seatNumbers.length; i++) {
             console.log(seatNumbers[i]);
             if ((seatdetails[index].seatNumber == seatNumbers[i])) {
-                console.log("reached here ",seatdetails[index].seatNumber);
+                console.log("reached here ", seatdetails[index].seatNumber);
                 console.log(seatNumbers[i]);
 
-                
+
                 totalamount += seatdetails[index].details.amount;
                 seatstoberemoved.push(seatNumbers[i])
                 cancelledSeats.push(seatdetails[index])
@@ -503,7 +503,7 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
     tripdetails[0].bookedseats = newseats.length;
     tripdetails[0].availableseats = tripdetails[0].totalseats - newseats.length
     tripdetails[0].seatsbooked = newseats;
-    
+
     try {
         await tripdetails[0].save()
     } catch (error) {
@@ -536,7 +536,7 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
         }
     }
     let cancelTicket = path.join(__dirname, "../emailtemplate/guestcancelTicket.ejs")
-    ejs.renderFile(cancelTicket, { user:"Sir/Madam", seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
+    ejs.renderFile(cancelTicket, { user: "Sir/Madam", seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
         if (err) {
             res.json({ status: "error", message: err.message })
         } else {
