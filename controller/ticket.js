@@ -325,9 +325,6 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
 
 TicketRouter.post("/otp/generate", async (req, res) => {
     const { pnr, tripId, seatNumbers } = req.body
-
-    // let alreadyCreatedOtp = false;
-    // let allconfirmed = true;
     let seats = [];
     let emails = [];
     const otpExists = await OtpModel.find({ pnr: pnr, tripId: tripId })
@@ -343,14 +340,14 @@ TicketRouter.post("/otp/generate", async (req, res) => {
     const hasCommonValues = seatNumbers.some(value => seats.includes(value));
 
     if (hasCommonValues) {
-        res.json({ status: "error", message: `Otp Already Generated For Following Seat which Assigned To Following PNR. Please Try After Some Time !!` })
+        return res.json({ status: "error", message: `Otp Already Generated For Following Seat which Assigned To Following PNR. Please Try After Some Time !!` })
     }
 
 
     const bookedSeats = await SeatModel.find({ pnr: pnr, tripId: tripId, seatNumber: { $in: seatNumbers }, "details.status": "Confirmed" })
 
     if (bookedSeats.length === 0) {
-        res.json({ status: "error", message: `NO Confirmed Seat Found Which Is Assigned To Following PNR OR TRIPID !!` })
+        return res.json({ status: "error", message: `NO Confirmed Seat Found Which Is Assigned To Following PNR OR TRIPID !!` })
     }
 
 
@@ -363,11 +360,11 @@ TicketRouter.post("/otp/generate", async (req, res) => {
     try {
         const newOtp = new OtpModel({
             pnr, tripId, seatNumbers, otp: randomOtp,
-            expireAt: Date.now() + 5 * 60 * 1000, // Lock for 5 minutes
+            expireAt: Date.now() + 15 * 60 * 1000, // Lock for 5 minutes
         })
         await newOtp.save()
     } catch (error) {
-        res.json({ status: "error", message: `Unable To Generate New OTP For Ticket Management of Guest ${error.message}` })
+        return res.json({ status: "error", message: `Unable To Generate New OTP For Ticket Management of Guest ${error.message}` })
     }
 
     let guestmanagebookingoptverification = path.join(__dirname, "../emailtemplate/guestmanagebookingoptverification.ejs")
@@ -395,28 +392,30 @@ TicketRouter.post("/otp/generate", async (req, res) => {
 })
 
 TicketRouter.post("/cancel/guest", async (req, res) => {
-    const { pnr, tripId, seatNumbers } = req.body
-
-    // let alreadyCreatedOtp = false;
-    // let allconfirmed = true;
-    let seats = [];
+    const { pnr, tripId, seatNumbers, bookingId, reasonForCancellation, otp } = req.body
+    let seatsbooked = [];
     let emails = [];
-    const otpExists = await OtpModel.find({ pnr: pnr, tripId: tripId })
-    const randomOtp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false })
+    let hasAllSeats = true;
+    const otpExists = await OtpModel.find({ pnr: pnr, tripId: tripId, otp: otp })
 
-
-    if (otpExists) {
+    if (otpExists.length !== 0) {
         for (let index = 0; index < otpExists.length; index++) {
-            seats.push(...otpExists[index].seatNumbers)
+            seatsbooked.push(...otpExists[index].seatNumbers)
         }
+    } else {
+        return res.json({ status: "error", message: "OTP Not Verified" })
     }
+    for (let index = 0; index < seatsbooked.length; index++) {
+        if (seatNumbers.includes(seatsbooked[index]) === false) {
+            hasAllSeats = false
+        }
 
-    const hasCommonValues = seatNumbers.some(value => seats.includes(value));
-
-    if (hasCommonValues) {
-        res.json({ status: "error", message: `Otp Already Generated For Following Seat which Assigned To Following PNR. Please Try After Some Time !!` })
     }
+    const hasCommonValues = seatNumbers.some(value => seatsbooked.includes(value));
 
+    if (hasCommonValues === false) {
+        return res.json({ status: "error", message: `Please Check Seat Number's For Which You are making a request for ticket cancellation. !!` })
+    }
 
     const bookedSeats = await SeatModel.find({ pnr: pnr, tripId: tripId, seatNumber: { $in: seatNumbers }, "details.status": "Confirmed" })
 
@@ -430,39 +429,143 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
             emails.push(bookedSeats[index].details.email)
         }
     }
-    
-    try {
-        const newOtp = new OtpModel({
-            pnr, tripId, seatNumbers, otp: randomOtp,
-            expireAt: Date.now() + 5 * 60 * 1000, // Lock for 5 minutes
-        })
-        await newOtp.save()
-    } catch (error) {
-        res.json({ status: "error", message: `Unable To Generate New OTP For Ticket Management of Guest ${error.message}` })
+
+    const bookingdetails = await BookingModel.find({ _id: bookingId, pnr: pnr })
+
+    // Update Booking Details
+    if (!bookingdetails) {
+        return res.json({ status: "error", message: "No Booking Detail's Found" })
+    }
+    let bookingstatus = "Cancelled"
+
+    if (bookingdetails[0].seats.length !== seatNumbers.length) {
+        bookingstatus = "Confirmed"
     }
 
-    let guestmanagebookingoptverification = path.join(__dirname, "../emailtemplate/guestmanagebookingoptverification.ejs")
-    ejs.renderFile(guestmanagebookingoptverification, { otp: randomOtp }, function (err, template) {
-        if (err) {
-            res.json({ status: "error", message: err.message })
-        } else {
-            const mailOptions = {
-                from: process.env.emailuser,
-                to: `${emails}`,
-                subject: `OTP Verification For, Booking Cancellation on AIRPAX`,
-                html: template
+    try {
+        bookingdetails[0].status = bookingstatus
+        await bookingdetails[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
+    }
+
+    // Update Payment Details 
+
+
+    // Update Seat Details 
+    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Confirmed", tripId: tripId })
+
+    // Getting Total Amount Paid By the User For Booking Tickets Which he want to cancel right now 
+    let totalamount = 0;
+    let bulkwriteseat = [];
+    let seatstoberemoved = [];
+    let cancelledSeats = [];
+
+    
+    
+    
+    for (let index = 0; index < seatdetails.length; index++) {
+        for (let i = 0; i < seatNumbers.length; i++) {
+            console.log(seatNumbers[i]);
+            if ((seatdetails[index].seatNumber == seatNumbers[i])) {
+                console.log("reached here ",seatdetails[index].seatNumber);
+                console.log(seatNumbers[i]);
+
+                
+                totalamount += seatdetails[index].details.amount;
+                seatstoberemoved.push(seatNumbers[i])
+                cancelledSeats.push(seatdetails[index])
+                bulkwriteseat.push({
+                    updateOne: {
+                        filter: { pnr: pnr, seatNumber: seatNumbers[i], tripId: tripId },         // condition to match first document
+                        update: { $set: { "details.status": "Refunded" } }
+                    }
+                })
             }
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.log("Error in Sending Mail ", error.message);
-                    return res.json({ status: "error", message: 'Failed to send email' });
-                } else {
-                    console.log("Email Sent ", info);
-                    return res.json({ status: "success", message: 'Please Check Your Email & Verifiy OTP Within 5 Minutes', redirect: "/" });
-                }
-            })
+
         }
-    })
+    }
+
+    try {
+        await SeatModel.bulkWrite(bulkwriteseat)
+    } catch (error) {
+        return res.json({ status: "error", message: "Bulk Update Seat Process Failed " })
+    }
+
+    // Generating Refund Amount Based on The Time Of Cancellation
+
+
+    const tripdetails = await TripModel.find({ _id: bookingdetails[0].tripId })
+    const currentDateTime = new Date();
+    const journeytime = new Date(`${tripdetails[0].journeystartdate}T${tripdetails[0].starttime}:00`)
+    let bookedseats = tripdetails[0].seatsbooked;
+    let newseats = bookedseats.filter(seat => !seatstoberemoved.includes(seat));
+    tripdetails[0].bookedseats = newseats.length;
+    tripdetails[0].availableseats = tripdetails[0].totalseats - newseats.length
+    tripdetails[0].seatsbooked = newseats;
+
+    console.log("trip details ",tripdetails[0]);
+    
+    
+    // try {
+    //     await tripdetails[0].save()
+    // } catch (error) {
+    //     return res.json({ status: "error", message: "Ticket Cancellation Process Failed " })
+    // }
+
+    // // Getting Payment Details of the Pnr To Change detail's like staus & refund amount 
+    // const paymentdetails = await PaymentModel.find({ pnr: pnr })
+    // if (paymentdetails[0].paymentstatus === "Failed") {
+    //     return res.json({ status: "error", message: "Ticket Cancellation Process Failed !! Payment is Not Confirmed For This Pnr" })
+    // } else {
+    //     let refundamount = 0;
+    //     // let ticketcost = 0;
+    //     const timeDifferenceMs = journeytime - currentDateTime
+    //     const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+
+    //     if (timeDifferenceHours > 48) {
+    //         refundamount = Math.floor((totalamount) * 0.9)
+
+    //     } else if (timeDifferenceHours > 24) {
+    //         refundamount = Math.floor((totalamount) * 0.5)
+    //     }
+    //     try {
+    //         paymentdetails[0].refundamount = refundamount;
+    //         paymentdetails[0].paymentstatus = "Refunded";
+    //         paymentdetails[0].refundreason = reasonForCancellation
+    //         await paymentdetails[0].save()
+    //     } catch (error) {
+    //         return res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
+    //     }
+    // }
+
+    // const userdetails = await UserModel.find({ _id: bookingdetails[0].userid })
+
+    res.json("testing")
+    // let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
+    // ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
+    //     if (err) {
+    //         res.json({ status: "error", message: err.message })
+    //     } else {
+    //         const mailOptions = {
+    //             from: process.env.emailuser,
+    //             to: `${userdetails[0].email}`,
+    //             subject: `Booking Cancellation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+    //             html: template
+    //         }
+    //         transporter.sendMail(mailOptions, (error, info) => {
+    //             if (error) {
+    //                 console.log("Error in Sending Mail ", error.message);
+    //                 return res.json({ status: "error", message: 'Failed to send email' });
+    //             } else {
+    //                 console.log("Email Sent ", info);
+    //                 return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+    //             }
+    //         })
+    //     }
+    // })
+
+
 })
 
 
