@@ -148,6 +148,47 @@ tripRouter.get("/detailone/:id", async (req, res) => {
     }
 })
 
+tripRouter.get("/booking/:id", async (req, res) => {
+    try {
+        const trips = await TripModel.find({ _id: req.params.id })
+        if (trips.length === 0) {
+            return res.json({ status: "error", message: "No Trip Found With This ID" })
+        }
+        const seats = await SeatModel.find({ tripId: req.params.id })
+
+        const vehicle = await VehicleModel.find({ name: trips[0].busid })
+
+        // Seat's Which are already booked & Payment is completed
+        let bookedseats = trips[0].seatsbooked;
+
+        // check the list of Seat's whose seats are already booked. So that we can inform the user to change his seat's
+        let lockedseats = [];
+        let bookings = []
+        for (let index = 0; index < seats.length; index++) {
+            if (seats[index].details.status == "Pending") {
+                lockedseats.push(seats[index].seatNumber)
+            } else {
+                bookings.push(seats[index])
+            }
+        }
+        let currentseat = bookedseats.concat(lockedseats)
+        trips[0].facilities = vehicle[0].facilities
+        trips[0].seatsbooked = currentseat
+        trips[0].bookedseats = currentseat.length;
+        trips[0].availableseats = trips[0].totalseats - currentseat.length
+        if (trips.length !== 0) {
+            res.json({ status: "success", data: trips, bookings: bookings })
+        } else {
+            res.json({ status: "error", message: "No Trip Found With This ID" })
+        }
+
+    } catch (error) {
+        res.json({ status: "error", message: `Get List Failed ${error.message}` })
+    }
+})
+
+
+
 tripRouter.get("/assigned/conductor", AdminAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = jwt.verify(token, 'Authorization')
@@ -216,7 +257,7 @@ tripRouter.patch("/update/driver/details", AdminAuthentication, async (req, res)
     }
 })
 
-tripRouter.patch("/update/conductor/details", async (req, res) => {
+tripRouter.patch("/update/conductor/details", AdminAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = jwt.verify(token, 'Authorization')
     const { id, LogIn, LogOut, fuel, fuelCost } = req.body
