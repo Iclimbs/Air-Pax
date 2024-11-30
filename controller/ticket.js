@@ -352,8 +352,8 @@ TicketRouter.post("/otp/generate", async (req, res) => {
 
 
     for (let index = 0; index < bookedSeats.length; index++) {
-        if (emails.includes(bookedSeats[index].details.email) === false) {
-            emails.push(bookedSeats[index].details.email)
+        if (emails.includes(bookedSeats[index].details.email.toLowerCase()) === false) {
+            emails.push(bookedSeats[index].details.email.toLowerCase())
         }
     }
 
@@ -425,8 +425,8 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
 
 
     for (let index = 0; index < bookedSeats.length; index++) {
-        if (emails.includes(bookedSeats[index].details.email) === false) {
-            emails.push(bookedSeats[index].details.email)
+        if (emails.includes(bookedSeats[index].details.email.toLowerCase()) === false) {
+            emails.push(bookedSeats[index].details.email.toLowerCase())
         }
     }
 

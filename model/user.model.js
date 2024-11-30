@@ -46,7 +46,7 @@ const userschema = mongoose.Schema({
   },
   accounttype: {
     type: String,
-    enum: ["user", "admin", "conductor", "driver"], // Replace with your allowed values
+    enum: ["user", "admin", "conductor", "driver","hr"], // Replace with your allowed values
     default: "user"
   },
   disabled: {

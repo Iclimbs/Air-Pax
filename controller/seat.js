@@ -7,6 +7,12 @@ const SeatRouter = express.Router();
 const ccav = require("../payment/ccavutil")
 const crypto = require('node:crypto');
 const jwt = require('jsonwebtoken');
+const path = require('node:path');
+const ejs = require("ejs")
+const { transporter } = require('../service/transporter');
+
+
+
 const { BookingModel } = require('../model/booking.model');
 const { TripModel } = require('../model/trip.model');
 
@@ -42,7 +48,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
                 amount: passengerdetails[index].amount,
                 food: passengerdetails[index].food,
                 mobileno: passengerdetails[index].mobileno,
-                email: passengerdetails[index].email
+                email: passengerdetails[index].email.toLowerCase()
             }
         })
     }
@@ -131,8 +137,9 @@ SeatRouter.post("/booking/admin", async (req, res) => {
         useLetters: true,
         useNumbers: true
     }).toUpperCase()
-    let seats = [] // All the Seat Number's for which the using is trying to book ticket. 
-    let seatdetails = [] // All the Details of the Passenger's for which seat's are going to be booked.
+    let seats = []; // All the Seat Number's for which the using is trying to book ticket. 
+    let seatdetails = []; // All the Details of the Passenger's for which seat's are going to be booked.
+    let emails = [];
     // For Loop To Add All the Passenger Detail's in the Seatdetail's Array which can be Added in the Seat Model || Seats Collection 
     for (let index = 0; index < passengerdetails.length; index++) {
         seats.push(passengerdetails[index].seatno)
@@ -150,10 +157,14 @@ SeatRouter.post("/booking/admin", async (req, res) => {
                 amount: passengerdetails[index].amount,
                 food: passengerdetails[index].food,
                 mobileno: passengerdetails[index].mobileno,
-                email: passengerdetails[index].email,
+                email: passengerdetails[index].email.toLowerCase(),
                 status: "Confirmed"
             }
         })
+        if (emails.includes(passengerdetails[index].email.toLowerCase()) == false) {
+            emails.push(passengerdetails[index].email.toLowerCase())
+        }
+
     }
 
     // Getting List of All The Seat's which are locked (Seat's Can Be Temporary locked for that person untill the payment is complete or the condition which seat is permanently locked after the payment is completed) 
@@ -244,7 +255,29 @@ SeatRouter.post("/booking/admin", async (req, res) => {
         } catch (error) {
             res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
         }
-        return res.json({ status: "success", message: "Ticket Booking Successful" })
+        let confirmpayment = path.join(__dirname, "../emailtemplate/confirmpaymentAdmin.ejs")
+        ejs.renderFile(confirmpayment, { user: "Sir/Madam", seat: seatdetails, trip: tripdetails[0], pnr: ticketpnr, amount: amount }, function (err, template) {
+            if (err) {
+                res.json({ status: "error", message: err.message })
+            } else {
+                const mailOptions = {
+                    from: process.env.emailuser,
+                    to: `${decoded.email}`,
+                    cc: `${emails}`,
+                    subject: `Booking Confirmation on AIRPAX, Bus: ${tripdetails[0].busid}, ${tripdetails[0].journeystartdate}, ${tripdetails[0].from} - ${tripdetails[0].to}`,
+                    html: template
+                }
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log("Error in Sending Mail ", error.message);
+                        return res.json({ status: "error", message: 'Failed to send email' });
+                    } else {
+                        console.log("Email Sent ", info);
+                        return res.json({ status: "success", message: 'Please Check Your Email', redirect: "/" });
+                    }
+                })
+            }
+        })
     }
 })
 

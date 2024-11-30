@@ -28,8 +28,8 @@ PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
     const bookedSeats = await SeatModel.find({ pnr: pnr, "details.status": "Confirmed" })
 
     for (let index = 0; index < bookedSeats.length; index++) {
-        if (emails.includes(bookedSeats[index].details?.email) === false) {
-            emails.push(bookedSeats[index].details.email)
+        if (emails.includes(bookedSeats[index].details?.email.toLowerCase()) === false) {
+            emails.push(bookedSeats[index].details.email.toLowerCase())
         }
     }
 
@@ -146,8 +146,8 @@ PaymentRouter.get("/failure/:pnr/:ref_no/:mode", async (req, res) => {
         tripId = bookedSeats[0].tripId;
     }
     for (let index = 0; index < bookedSeats.length; index++) {
-        if (emails.includes(bookedSeats[index].details?.email) === false) {
-            emails.push(bookedSeats[index].details.email)
+        if (emails.includes(bookedSeats[index].details?.email.toLowerCase()) === false) {
+            emails.push(bookedSeats[index].details.email.toLowerCase())
         }
     }
 

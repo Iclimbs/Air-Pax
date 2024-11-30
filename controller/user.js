@@ -43,7 +43,7 @@ userRouter.post("/login", async (req, res) => {
                 let token = jwt.sign({
                     _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60)
                 }, "Authentication")
-                res.json({ status: "success", message: "Login Successful", token: token , type:"user" })
+                res.json({ status: "success", message: "Login Successful", token: token, type: "user" })
             } else if (hash.sha256(password) !== userExists[0].password) {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }
@@ -76,7 +76,7 @@ userRouter.post("/login/admin", async (req, res) => {
         if (userExists.length === 0) {
             return res.json({ status: "error", message: "No Admin User Exists Please Contact Your Developer" })
         } else {
-            if (userExists[0].accounttype !== "admin" && userExists[0].accounttype !== "conductor" && userExists[0].accounttype !== "driver") {
+            if (userExists[0].accounttype !== "admin" && userExists[0].accounttype !== "conductor" && userExists[0].accounttype !== "driver" && userExists[0].accounttype !== "hr") {
                 res.json({ status: "error", message: "Please Leave This Site You Don't Have Required Access" })
             } else if (hash.sha256(password) === userExists[0].password) {
                 let token = jwt.sign({
@@ -570,7 +570,7 @@ userRouter.post("/create/admin", AdminAuthentication, async (req, res) => {
 userRouter.get("/admin/listall", AdminAuthentication, async (req, res) => {
     try {
         const user = await UserModel.find({
-            accounttype: { $in: ["conductor", "driver"] }
+            accounttype: { $in: ["conductor", "driver", "hr"] }
         })
         res.json({ status: "success", data: user })
     } catch (error) {
@@ -611,6 +611,21 @@ userRouter.patch("/admin/update/:id", AdminAuthentication, async (req, res) => {
     }
 })
 
+userRouter.post("/admin/update/password/:id", AdminAuthentication, async (req, res) => {
+    const { id } = req.params
+    const { password, cnfpassword } = req.body
+    if (password !== cnfpassword) {
+        return res.json({ status: "error", message: `Password & Confirm Password Must Be Equal` })
+    }
+    try {
+        const updatedUser = await UserModel.find({ _id: id })
+        updatedUser[0].password = hash.sha256(password)
+        await updatedUser[0].save()
+        return res.json({ status: "success", message: "User Details Updated" })
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update User Detail's  ${error.message}` })
+    }
+})
 
 
 

@@ -12,7 +12,7 @@ PnrRouter.get("/", async (req, res) => {
     let details = {};
     details.passengerdetails = [];
     // Getting the list of Seats Booked 
-    const ticketdetails = await SeatModel.find({ pnr: pnr}, { _id: 0, CreatedAt: 0 })
+    const ticketdetails = await SeatModel.find({ pnr: pnr }, { _id: 0, CreatedAt: 0 })
 
     // Sending No Ticket Detail's Found Message To User
     if (ticketdetails.length == 0) {
@@ -26,11 +26,17 @@ PnrRouter.get("/", async (req, res) => {
 
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
 
-    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
-
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
     }
+
+    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
+
+    if (vehicledetails.length == 0) {
+        return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
+    }
+
+
     details.tripId = tripdetails[0]._id;
     details.from = tripdetails[0].from;
     details.to = tripdetails[0].to;
@@ -52,8 +58,8 @@ PnrRouter.get("/guest", async (req, res) => {
     // Getting the list of Seats Booked 
     const ticketdetails = await SeatModel.find({ pnr: pnr, "details.email": email }, { _id: 0, CreatedAt: 0 })
 
-    const bookingdetails = await BookingModel.find({pnr:pnr,status:"Confirmed"})
-    if (bookingdetails.length==0) {
+    const bookingdetails = await BookingModel.find({ pnr: pnr, status: "Confirmed" })
+    if (bookingdetails.length == 0) {
         return res.json({ status: "error", message: "No Confirmed Booking Detail's Found Related to this Pnr" })
     }
 
@@ -68,12 +74,17 @@ PnrRouter.get("/guest", async (req, res) => {
     }
 
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
-    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
 
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
     }
-    details.bookingId=bookingdetails[0]._id
+    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
+
+    if (vehicledetails.length == 0) {
+        return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
+    }
+
+    details.bookingId = bookingdetails[0]._id
     details.tripId = tripdetails[0]._id;
     details.from = tripdetails[0].from;
     details.to = tripdetails[0].to;
@@ -98,11 +109,17 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
     details.bookedticket = ticketdetails[0].passengerdetails;
     const tripdetails = await TripModel.find({ _id: ticketdetails[0].tripId })
 
-    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
-
+    
     if (tripdetails.length == 0) {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
     }
+    const vehicledetails = await VehicleModel.find({ name: tripdetails[0].busid })
+
+    if (vehicledetails.length == 0) {
+        return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
+    }
+
+
     details.tripId = ticketdetails[0]._id;
     details.from = tripdetails[0].from;
     details.to = tripdetails[0].to;
