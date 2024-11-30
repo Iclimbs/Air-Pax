@@ -296,8 +296,6 @@ ReportRouter.get("/sales/weekly", async (req, res) => {
 })
 
 ReportRouter.post("/sales/custom", async (req, res) => {
-    // Link :-  http://localhost:4500/api/v1/report/sales/custom?from=2024-10-13&to=2024-11-13&status=Confirmed
-    // Link :-  http://localhost:4500/api/v1/report/sales/custom?status=Confirmed&month=November
     const { from, to, status, monthname } = req.body;
 
     const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

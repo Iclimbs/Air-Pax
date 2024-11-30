@@ -129,7 +129,7 @@ PaymentRouter.get("/failure/:pnr/:ref_no/:mode", async (req, res) => {
     const { pnr, ref_no, mode } = req.params;
     const filter = { pnr: pnr };
     const update = {
-        $set: { isBooked: true, expireAt: null, "details.status": "Failed" }
+        $set: { isBooked: false, isLocked: false, expireAt: null, "details.status": "Failed" }
     }
     // Step 1 Getting The list of all the seat's with this PNR & Updating their status
     try {

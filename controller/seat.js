@@ -15,6 +15,7 @@ const { transporter } = require('../service/transporter');
 
 const { BookingModel } = require('../model/booking.model');
 const { TripModel } = require('../model/trip.model');
+const { AdminAuthentication } = require('../middleware/Authorization');
 
 const toProperCase = (word) => {
     if (!word) return ''; // Return empty string if input is falsy
@@ -127,7 +128,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
     }
 })
 
-SeatRouter.post("/booking/admin", async (req, res) => {
+SeatRouter.post("/booking/admin", AdminAuthentication, async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     const decoded = jwt.verify(token, 'Authorization')
     const { passengerdetails, tripId, amount } = req.body

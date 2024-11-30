@@ -239,7 +239,7 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
                 cancelledSeats.push(seatdetails[index])
                 bulkwriteseat.push({
                     updateOne: {
-                        filter: { pnr: pnr, _id: seats[i].id },         // condition to match first document
+                        filter: { pnr: pnr, _id: seats[i].id }, // condition to match first document
                         update: { $set: { "details.status": "Refunded" } }
                     }
                 })
