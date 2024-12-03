@@ -49,7 +49,9 @@ SeatRouter.post("/selectedseats", async (req, res) => {
                 amount: passengerdetails[index].amount,
                 food: passengerdetails[index].food,
                 mobileno: passengerdetails[index].mobileno,
-                email: passengerdetails[index].email.toLowerCase()
+                email: passengerdetails[index].email.toLowerCase(),
+                refundAmount: 0,
+                cancellationReason: "Not Cancelled"
             }
         })
     }
@@ -84,7 +86,7 @@ SeatRouter.post("/selectedseats", async (req, res) => {
         return res.json({ status: "error", message: "Some Seat's Are Already Booked Please Select Any Other Seat", seats: alreadyexistseats })
     } else {
         try {
-            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: totalamount })
+            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: userdetails._id, amount: totalamount, refundamount: 0, })
             await paymentdetails.save()
         } catch (error) {
             return res.json({ status: "error", message: `Failed To Added Payment Details ${error.message}` })
@@ -159,7 +161,10 @@ SeatRouter.post("/booking/admin", AdminAuthentication, async (req, res) => {
                 food: passengerdetails[index].food,
                 mobileno: passengerdetails[index].mobileno,
                 email: passengerdetails[index].email.toLowerCase(),
-                status: "Confirmed"
+                status: "Confirmed",
+                refundAmount: 0,
+                cancellationReason: "Not Cancelled"
+
             }
         })
         if (emails.includes(passengerdetails[index].email.toLowerCase()) == false) {
@@ -233,7 +238,7 @@ SeatRouter.post("/booking/admin", AdminAuthentication, async (req, res) => {
         }
         // Saving Payment Detail's In Payment Model
         try {
-            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: decoded._id, amount: amount, paymentstatus: "Confirmed", method: "Cash" })
+            const paymentdetails = new PaymentModel({ pnr: ticketpnr, userid: decoded._id, amount: amount, paymentstatus: "Confirmed", method: "Cash",refundamount: 0 })
             await paymentdetails.save()
         } catch (error) {
             return res.json({ status: "error", message: `Failed To Added Payment Details ${error.message}` })

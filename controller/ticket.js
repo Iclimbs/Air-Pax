@@ -14,6 +14,23 @@ const { UserModel } = require("../model/user.model");
 const { OtpModel } = require("../model/otp.model");
 const otpGenerator = require('otp-generator')
 
+
+const RefundAmountCalculator = (props) => {
+    let refundamount = 0;
+    const timeDifferenceMs = props.journeytime - props.currentDateTime
+    const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
+
+    if (timeDifferenceHours > 48) {
+        refundamount = Math.floor((props.amount) * 0.9)
+
+    } else if (timeDifferenceHours > 24) {
+        refundamount = Math.floor((props.amount) * 0.5)
+    }
+    return refundamount
+}
+
+
+
 TicketRouter.post("/gmr/cancel", async (req, res) => {
     const { tripId, bookingRefId, pnr, cancelticket } = req.body;
     // Basic Detail's Requirements
@@ -201,30 +218,56 @@ TicketRouter.get("/detailone/:id", UserAuthentication, async (req, res) => {
 
 TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
     const { pnr, bookingId, seats, reasonForCancellation } = req.body
+
+    // Getting Booking Details 
     const bookingdetails = await BookingModel.find({ _id: bookingId, pnr: pnr })
 
-    // Update Booking Details
-    if (!bookingdetails) {
+    // Checking If Booking Details Exists Or Not 
+    if (bookingdetails.length === 0) {
         return res.json({ status: "error", message: "No Booking Detail's Found" })
     }
-    let bookingstatus = "Cancelled"
 
-    if (bookingdetails[0].seats.length !== seats.length) {
-        bookingstatus = "Confirmed"
+
+    // Getting Seat Details
+    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Confirmed" })
+
+    // Checking If Seats Exists Or Not 
+    if (seatdetails.length === 0) {
+        return res.json({ status: "error", message: "Plese Check Your PNR OR Ticket Has Already Been Cancelled" })
     }
 
-    try {
-        bookingdetails[0].status = bookingstatus
-        await bookingdetails[0].save()
-    } catch (error) {
-        res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
+    // Getting Trip Details
+    const tripdetails = await TripModel.find({ _id: bookingdetails[0].tripId })
+
+    // Checking If Trip Exists Or Not 
+    if (tripdetails.length === 0) {
+        return res.json({ status: "error", message: "No Trip Found" })
     }
 
-    // Update Payment Details 
 
+    // Getting Payment Details
+    const paymentdetails = await PaymentModel.find({ pnr: pnr })
+
+    // Checking If Payment Exists Or Not 
+    if (paymentdetails.length === 0) {
+        return res.json({ status: "error", message: "No Payment Found With This PNR ID" })
+    }
+
+
+    // Getting Basic User Details 
+    const userdetails = await UserModel.find({ _id: bookingdetails[0].userid })
+
+    // Checking If Payment Exists Or Not 
+    if (userdetails.length === 0) {
+        return res.json({ status: "error", message: "No User Found With Which is link to this Booking Record" })
+    }
+
+
+    // Getting Current Time & Journey Time To Calculate Refund Amount
+    const currentDateTime = new Date();
+    const journeytime = new Date(`${tripdetails[0].journeystartdate}T${tripdetails[0].starttime}:00`)
 
     // Update Seat Details 
-    const seatdetails = await SeatModel.find({ pnr: pnr, "details.status": "Confirmed" })
 
     // Getting Total Amount Paid By the User For Booking Tickets Which he want to cancel right now 
     let totalamount = 0;
@@ -240,7 +283,13 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
                 bulkwriteseat.push({
                     updateOne: {
                         filter: { pnr: pnr, _id: seats[i].id }, // condition to match first document
-                        update: { $set: { "details.status": "Refunded" } }
+                        update: {
+                            $set: {
+                                "details.status": "Refunded",
+                                "details.refundAmount": RefundAmountCalculator({ amount: seatdetails[index].details.amount, currentDateTime, journeytime }),
+                                "details.cancellationReason": reasonForCancellation
+                            }
+                        }
                     }
                 })
             }
@@ -253,12 +302,8 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
         res.json({ status: "error", message: "Bulk Update Seat Process Failed " })
     }
 
-    // Generating Refund Amount Based on The Time Of Cancellation
 
-
-    const tripdetails = await TripModel.find({ _id: bookingdetails[0].tripId })
-    const currentDateTime = new Date();
-    const journeytime = new Date(`${tripdetails[0].journeystartdate}T${tripdetails[0].starttime}:00`)
+    // Updaing Seat Details In Trips Adjusting Booked Seats, Available Seats & Seats Booked 
     let bookedseats = tripdetails[0].seatsbooked;
     let newseats = bookedseats.filter(seat => !seatstoberemoved.includes(seat));
     tripdetails[0].bookedseats = newseats.length;
@@ -270,33 +315,40 @@ TicketRouter.post("/cancel", UserAuthentication, async (req, res) => {
         res.json({ status: "error", message: "Ticket Cancellation Process Failed " })
     }
 
-    // Getting Payment Details of the Pnr To Change detail's like staus & refund amount 
-    const paymentdetails = await PaymentModel.find({ pnr: pnr })
+    // Adjusting Payment Details Of Following Ticket 
+
     if (paymentdetails[0].paymentstatus === "Failed") {
-        return res.json({ status: "error", message: "Ticket Cancellation Process Failed !! Payment is Not Confirmed For This Pnr" })
+        return res.json({ status: "error", message: "Ticket Cancellation Process Failed !! Payment Is Not Confirmed For This Pnr" })
     } else {
-        let refundamount = 0;
-        // let ticketcost = 0;
-        const timeDifferenceMs = journeytime - currentDateTime
-        const timeDifferenceHours = timeDifferenceMs / (1000 * 60 * 60);
-
-        if (timeDifferenceHours > 48) {
-            refundamount = Math.floor((totalamount) * 0.9)
-
-        } else if (timeDifferenceHours > 24) {
-            refundamount = Math.floor((totalamount) * 0.5)
-        }
+        let refundamount = RefundAmountCalculator({ amount: totalamount, currentDateTime, journeytime })
+        let cancellationReason = paymentdetails[0]?.refundreason;
+        cancellationReason.push(reasonForCancellation)
+        
         try {
-            paymentdetails[0].refundamount = refundamount;
+            paymentdetails[0].refundamount = paymentdetails[0]?.refundamount + refundamount;
             paymentdetails[0].paymentstatus = "Refunded";
-            paymentdetails[0].refundreason = reasonForCancellation
+            paymentdetails[0].refundreason = cancellationReason
             await paymentdetails[0].save()
         } catch (error) {
-            res.json({ status: "error", message: "Failed To Save Refund Amount For this Pnr " })
+            res.json({ status: "error", message: `Failed To Save Refund Amount For this Pnr ${error.message} ` })
         }
     }
 
-    const userdetails = await UserModel.find({ _id: bookingdetails[0].userid })
+    const cancelledSeatsLength = await SeatModel.find({ pnr: pnr, "details.status": "Refunded" })
+
+
+    let bookingstatus = "Cancelled"
+
+    if (bookingdetails[0].seats.length !== cancelledSeatsLength.length) {
+        bookingstatus = "Confirmed"
+    }
+
+    try {
+        bookingdetails[0].status = bookingstatus
+        await bookingdetails[0].save()
+    } catch (error) {
+        res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
+    }
 
     let cancelTicket = path.join(__dirname, "../emailtemplate/cancelTicket.ejs")
     ejs.renderFile(cancelTicket, { user: userdetails[0], seat: cancelledSeats, trip: tripdetails[0], amount: paymentdetails[0].refundamount, pnr: pnr, reason: reasonForCancellation }, function (err, template) {
@@ -446,7 +498,7 @@ TicketRouter.post("/cancel/guest", async (req, res) => {
         bookingdetails[0].status = bookingstatus
         await bookingdetails[0].save()
     } catch (error) {
-        return    res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
+        return res.json({ status: "error", message: `Failed To Update Booking Status ${error.message}` })
     }
 
     // Update Payment Details 

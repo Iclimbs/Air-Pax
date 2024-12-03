@@ -29,10 +29,13 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
                 age: PassengerDetails[index].Age,
                 gender: PassengerDetails[index].Gender,
                 mobileno: PassengerDetails[index].PhoneNo,
-                email: PassengerDetails[index].Email,
+                email: PassengerDetails[index].Email.toLowerCase(),
                 country: PassengerDetails[index].Country,
                 seatno: PassengerDetails[index].SeatNo,
-                amount: Math.floor(Amount / PassengerDetails.length)
+                amount: Math.floor(Amount / PassengerDetails.length),
+                refundAmount: 0,
+                cancellationReason: "Not Cancelled"
+
             }
         })
     }
@@ -81,6 +84,7 @@ OtherSeatRouter.post("/selectedseats", async (req, res) => {
             pnr: ticketpnr,
             userid: PrimaryUser.PhoneNo,
             amount: Amount,
+            refundamount: 0
         })
 
         try {

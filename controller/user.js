@@ -40,10 +40,14 @@ userRouter.post("/login", async (req, res) => {
             if (userExists[0].verified.phone === false) {
                 res.json({ status: "error", message: "Please Verify Your Phone No First", token: userExists[0].signuptoken, redirect: "/user/otp-verification" })
             } else if (hash.sha256(password) === userExists[0].password) {
-                let token = jwt.sign({
-                    _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60)
-                }, "Authentication")
-                res.json({ status: "success", message: "Login Successful", token: token, type: "user" })
+                if (userExists[0].accounttype === "guest" || userExists[0].accounttype === "user") {
+                    let token = jwt.sign({
+                        _id: userExists[0]._id, name: userExists[0].name, email: userExists[0].email, phoneno: userExists[0].phoneno, exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60)
+                    }, "Authentication")
+                    res.json({ status: "success", message: "Login Successful", token: token, type: "user" })
+                } else {
+                    res.json({ status: "error", message: "You cannot login using Admin Credentials !!"})
+                }
             } else if (hash.sha256(password) !== userExists[0].password) {
                 res.json({ status: "error", message: "Wrong Password Please Try Again" })
             }

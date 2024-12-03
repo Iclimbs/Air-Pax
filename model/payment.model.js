@@ -4,13 +4,13 @@ const PaymentSchema = mongoose.Schema({
     userid: String,
     amount: Number,
     paymentstatus: {
-        type:String,
-        default:"Pending"
+        type: String,
+        default: "Pending"
     },
-    refundamount:Number,
-    refundreason:String,
-    refno:String,
-    method:String,
+    refundamount: Number,
+    refundreason: Array,
+    refno: String,
+    method: String,
     CreatedAt: { type: Date, default: Date.now },
 });
 const PaymentModel = mongoose.model("Payment", PaymentSchema)

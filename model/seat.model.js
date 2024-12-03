@@ -12,6 +12,8 @@ const SubseatSchema = new Schema({
     amount: { type: Number },
     mobileno: { type: Number },
     email: { type: String },
+    refundAmount: { type: Number },
+    cancellationReason: { type: String },
     food: [
         {
             name: {

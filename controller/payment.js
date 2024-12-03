@@ -35,10 +35,9 @@ PaymentRouter.get("/success/:pnr/:ref_no/:mode", async (req, res) => {
 
     // Step 2 Finding the payment status of the PNR & Updating their Status
     const paymentdetails = await PaymentModel.find({ pnr: pnr })
-
     paymentdetails[0].paymentstatus = "Confirmed";
     paymentdetails[0].refno = ref_no;
-    paymentdetails[0].method = mode
+    paymentdetails[0].method = mode;
     try {
         await paymentdetails[0].save()
     } catch (error) {
