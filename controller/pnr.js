@@ -119,8 +119,7 @@ PnrRouter.get("/gmr/:pnr", async (req, res) => {
         return res.json({ status: "error", message: "No Trip Detail's Found Related to this Pnr" })
     }
 
-
-    details.tripId = ticketdetails[0]._id;
+    details.tripId = tripdetails[0]._id;
     details.from = tripdetails[0].from;
     details.to = tripdetails[0].to;
     details.journeystartdate = tripdetails[0].journeystartdate;

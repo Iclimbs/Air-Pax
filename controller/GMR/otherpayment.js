@@ -27,14 +27,12 @@ OtherPaymentRouter.get("/success/", async (req, res) => {
     // Updating Detail's in Payment Model Data
     const paymentdetails = await PaymentModel.find({ pnr: pnr });
     paymentdetails[0].refno = ref,
-    paymentdetails[0].method = method,
-    // paymentdetails[0].paymentstatus.pending = false
-    paymentdetails[0].paymentstatus = "Confirmed"
+        paymentdetails[0].method = method,
+        paymentdetails[0].paymentstatus = "Confirmed"
     try {
         await paymentdetails[0].save()
     } catch (error) {
         res.json({ status: "error", message: `Failed To Update Trip Booked Seat Details ${error.message}` })
-
     }
 
     // Updating Detail's in Trip Model Data
